@@ -2,7 +2,9 @@
 
 import { Box } from "@mui/material";
 import React, { useState } from "react";
-import Image from "next/image";
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import MailIcon from '@mui/icons-material/Mail';
 
 export default function AboutSection() {
     const [clicked, setClicked] = useState(false);
@@ -36,26 +38,58 @@ export default function AboutSection() {
             >
                 About Paul
             </div>
-            <div className={`logo-carousel ${clicked ? "visible" : ""}`}>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: '0.2em',
+                    marginTop: '0.5em',
+                }}
+            >
                 <a
                     href="https://www.linkedin.com/in/paulsumido/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        fontSize: '1rem',
+                        gap: '0.5em'
+                    }}
                 >
-                    <Image
-                        src="https://img.icons8.com/?size=100&id=xuvGCOXi8Wyg&format=png&color=000000"
-                        alt="linkedIn"
-                        width={30}
-                        height={30}
-                    />
+                    <LinkedInIcon />
+                    @paulsumido
                 </a>
-                <a href="/email">
-                    <Image
-                        src="https://img.icons8.com/?size=100&id=OumT4lIcOllS&format=png&color=000000"
-                        alt="email"
-                        width={30}
-                        height={30}
-                    />
+                <a
+                    href="https://github.com/gpbsumido"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        fontSize: '1rem',
+                        gap: '0.5em'
+                    }}
+                >
+                    <GitHubIcon />
+                    @gpbsumido
                 </a>
-            </div>
+                <a
+                    href="mailto:psumido@gmail.com"
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        fontSize: '1rem',
+                        gap: '0.5em'
+                    }}
+                >
+                    <MailIcon />
+                    psumido@gmail.com
+                </a>
+            </Box>
         </Box>
     );
 }

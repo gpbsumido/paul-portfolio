@@ -1,7 +1,8 @@
 'use client';
 
 import EmailForm from "@/components/EmailForm";
-import { useRouter } from "next/navigation"; // Updated import
+import { useRouter } from "next/navigation";
+import HomeIcon from "@mui/icons-material/Home";
 
 export default function EmailPage() {
     const router = useRouter();
@@ -19,32 +20,36 @@ export default function EmailPage() {
             }}
         >
             <button
-                onClick={() => router.push("/")} // Ensure this is executed on the client
+                onClick={() => router.push("/")} // Updated router.push call
                 style={{
                     position: "absolute", // Make the button float
                     top: "20px",
                     left: "20px",
-                    padding: "10px 16px",
-                    borderRadius: "50px",
-                    border: "1px solid black",
-                    background: "transparent",
-                    color: "black",
-                    fontSize: "1rem",
-                    fontWeight: "bold",
+                    padding: "10px",
+                    width: "50px", // Set width for a perfect circle
+                    height: "50px", // Set height for a perfect circle
+                    borderRadius: "50%", // Make it a perfect circle
+                    border: "1px solid",
+                    background: "white", // Always contrast the background
+                    color: "black", // Always contrast the background
                     cursor: "pointer",
                     transition: "all 0.3s ease",
-                    whiteSpace: "nowrap", // Prevent text from wrapping
-                }}
-                onMouseOver={(e) => {
-                    e.currentTarget.style.background = "black";
-                    e.currentTarget.style.color = "white";
-                }}
-                onMouseOut={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = "black";
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderColor: "black"
                 }}
             >
-                Back to Home
+                <span
+                    className="material-symbols-outlined"
+                    style={{
+                        fontSize: "24px",
+                        height: '24px',
+                        width: '24px',
+                    }}
+                >
+                    <HomeIcon />
+                </span>
             </button>
             <h1 style={{ textAlign: "center", fontSize: '2rem' }}>Send Me an Email!</h1>
             <EmailForm />
