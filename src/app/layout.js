@@ -1,7 +1,7 @@
 export const metadata = {
-    title: "My Next.js App",
-    description: "Awesome app description",
-    icons: "/favicon.ico",
+    title: "Paul's Portfolio",
+    description: "Glenn Paul Sumido's Portfolio",
+    keywords: "Glenn Paul Sumido, Portfolio, Software Engineer, Web Developer, React, Next.js",
 };
 
 export default function RootLayout({ children }) {
