@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; // Updated import
 import { useEffect, useState } from "react";
+import HomeIcon from "@mui/icons-material/Home";
 
 export default function Designs() {
     const router = useRouter(); // Updated usage
@@ -107,7 +108,9 @@ export default function Designs() {
                             top: "20px",
                             left: "20px",
                             padding: "10px",
-                            borderRadius: "50px",
+                            width: "50px", // Set width for a perfect circle
+                            height: "50px", // Set height for a perfect circle
+                            borderRadius: "50%", // Make it a perfect circle
                             border: "1px solid",
                             background: getTextColor(), // Always contrast the background
                             color: getBackgroundColor(), // Always contrast the background
@@ -123,10 +126,12 @@ export default function Designs() {
                             className="material-symbols-outlined"
                             style={{
                                 fontSize: "24px",
+                                height: '24px',
+                                width: '24px',
                                 color: getBackgroundColor(), // Ensure icon contrasts the background
                             }}
                         >
-                            home
+                            <HomeIcon />
                         </span>
                     </button>
                 </Box>

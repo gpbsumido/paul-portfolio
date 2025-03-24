@@ -32,11 +32,7 @@ export default function Home() {
           fontSize: '2rem',
         }}
       >
-        <Link href="/designs"
-          style={{
-            paddingBottom: '1.5em'
-          }}
-        >Designs</Link>
+        <Link href="/designs" >Designs</Link>
       </Box>
     </Box>
   );
