@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation"; // Updated import
 import { useEffect, useState } from "react";
 import HomeIcon from "@mui/icons-material/Home";
+import Footer from "../../components/Footer"; // Import Footer component
 
 export default function Designs() {
     const router = useRouter(); // Updated usage
@@ -76,121 +77,124 @@ export default function Designs() {
     };
 
     return (
-        <Box
-            sx={{
-                height: `calc(${sections * 125}vh - 25vh)`, // Total height adjusted for gaps
-                width: '100vw',
-                background: getBackgroundColor(),
-                color: getTextColor(),
-                display: 'flex',
-                flexDirection: 'column',
-                scrollSnapType: 'y mandatory',
-                overflowY: 'scroll',
-            }}
-        >
-            {/* Floating button with glowing effect */}
-            <Link href="/">
-                <Box
-                    sx={{
-                        position: 'fixed',
-                        top: '16px',
-                        left: '16px',
-                        zIndex: 999,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <button
-                        onClick={() => router.push("/")} // Updated router.push call
-                        style={{
-                            position: "absolute", // Make the button float
-                            top: "20px",
-                            left: "20px",
-                            padding: "10px",
-                            width: "50px", // Set width for a perfect circle
-                            height: "50px", // Set height for a perfect circle
-                            borderRadius: "50%", // Make it a perfect circle
-                            border: "1px solid",
-                            background: getTextColor(), // Always contrast the background
-                            color: getBackgroundColor(), // Always contrast the background
-                            cursor: "pointer",
-                            transition: "all 0.3s ease",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            borderColor: getBackgroundColor(), // Ensure border contrasts the background
-                        }}
-                    >
-                        <span
-                            className="material-symbols-outlined"
-                            style={{
-                                fontSize: "24px",
-                                height: '24px',
-                                width: '24px',
-                                color: getBackgroundColor(), // Ensure icon contrasts the background
-                            }}
-                        >
-                            <HomeIcon />
-                        </span>
-                    </button>
-                </Box>
-            </Link>
-            {[...Array(sections)].map((_, index) => (
-                <Box
-                    key={index}
-                    sx={{
-                        height: `calc(100vh + ${index === sections - 1 ? '0' : 'min(25vh, 25vw)'})`, // Remove gap for the last section
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        scrollSnapAlign: 'start',
-                        color: getTextColor(),
-                    }}
-                >
+        <>
+            <Box
+                sx={{
+                    height: `calc(${sections * 125}vh - 25vh)`, // Total height adjusted for gaps
+                    width: '100vw',
+                    background: getBackgroundColor(),
+                    color: getTextColor(),
+                    display: 'flex',
+                    flexDirection: 'column',
+                    scrollSnapType: 'y mandatory',
+                    overflowY: 'scroll',
+                }}
+            >
+                {/* Floating button with glowing effect */}
+                <Link href="/">
                     <Box
                         sx={{
-                            height: '100vh', // Actual content area
-                            width: '100%',
+                            position: 'fixed',
+                            top: '16px',
+                            left: '16px',
+                            zIndex: 999,
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}
                     >
-                        {activeIframes[index] ? (
-                            <iframe
-                                src={iframeLinks[index]}
-                                style={{
-                                    width: '90%',
-                                    height: '90%',
-                                    border: 'none',
-                                }}
-                            />
-                        ) : (
+                        <button
+                            onClick={() => router.push("/")} // Updated router.push call
+                            style={{
+                                position: "absolute", // Make the button float
+                                top: "20px",
+                                left: "20px",
+                                padding: "10px",
+                                width: "50px", // Set width for a perfect circle
+                                height: "50px", // Set height for a perfect circle
+                                borderRadius: "50%", // Make it a perfect circle
+                                border: "1px solid",
+                                background: getTextColor(), // Always contrast the background
+                                color: getBackgroundColor(), // Always contrast the background
+                                cursor: "pointer",
+                                transition: "all 0.3s ease",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                borderColor: getBackgroundColor(), // Ensure border contrasts the background
+                            }}
+                        >
                             <span
+                                className="material-symbols-outlined"
                                 style={{
-                                    cursor: 'pointer',
-                                    textDecoration: 'underline',
-                                    fontSize: '1.5rem', // Larger font size
-                                    fontWeight: 'bold', // Bold text
+                                    fontSize: "24px",
+                                    height: '24px',
+                                    width: '24px',
+                                    color: getBackgroundColor(), // Ensure icon contrasts the background
                                 }}
-                                onClick={() => handleTextClick(index)}
                             >
-                                View {designNames[index]} Design
+                                <HomeIcon />
                             </span>
-                        )}
+                        </button>
                     </Box>
-                    {index !== sections - 1 && (
+                </Link>
+                {[...Array(sections)].map((_, index) => (
+                    <Box
+                        key={index}
+                        sx={{
+                            height: `calc(100vh + ${index === sections - 1 ? '0' : 'min(25vh, 25vw)'})`, // Remove gap for the last section
+                            width: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            scrollSnapAlign: 'start',
+                            color: getTextColor(),
+                        }}
+                    >
                         <Box
                             sx={{
-                                height: 'min(25vh, 25vw)', // Gap area
+                                height: '100vh', // Actual content area
                                 width: '100%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
                             }}
-                        />
-                    )}
-                </Box>
-            ))}
-        </Box>
+                        >
+                            {activeIframes[index] ? (
+                                <iframe
+                                    src={iframeLinks[index]}
+                                    style={{
+                                        width: '90%',
+                                        height: '90%',
+                                        border: 'none',
+                                    }}
+                                />
+                            ) : (
+                                <span
+                                    style={{
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                        fontSize: '1.5rem', // Larger font size
+                                        fontWeight: 'bold', // Bold text
+                                    }}
+                                    onClick={() => handleTextClick(index)}
+                                >
+                                    View {designNames[index]} Design
+                                </span>
+                            )}
+                        </Box>
+                        {index !== sections - 1 && (
+                            <Box
+                                sx={{
+                                    height: 'min(25vh, 25vw)', // Gap area
+                                    width: '100%',
+                                }}
+                            />
+                        )}
+                    </Box>
+                ))}
+            </Box>
+            <Footer /> {/* Add Footer component */}
+        </>
     );
 }
