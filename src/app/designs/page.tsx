@@ -1,22 +1,26 @@
 'use client'
 
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; // Updated import
 import { useEffect, useState } from "react";
 import HomeIcon from "@mui/icons-material/Home";
 import Footer from "../../components/Footer"; // Import Footer component
+import Image from "next/image";
+
+import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
+import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
+import { figmaDesigns, figmaImages, HELIKA_PORTAL_IMAGES } from "@/constants/constants";
 
 export default function Designs() {
     const router = useRouter(); // Updated usage
     const [scrollPosition, setScrollPosition] = useState(0);
     const [activeIframes, setActiveIframes] = useState([false, false, false]); // Track iframe visibility
-    const sections = 3; // Number of sections (scalable)
-    const iframeLinks = [
-        "https://embed.figma.com/design/CSlimnvD8zLPOzzF7d97Hu/Sunbow?node-id=0-1&embed-host=share",
-        "https://embed.figma.com/design/sQzKGPpOZpdgvwCGxlSEkQ/RoyaltiesFi-Wireframes?embed-host=share",
-        "https://embed.figma.com/design/qeHrTLQ05l2BzksQHJBv3o/CoinFX-Entity-Application?embed-host=share",
-    ]; // Array of iframe links
+    const sections = 4; // Number of sections (scalable)
+    const [currentPortalImage, setCurrentPortalImage] = useState(0);
+    const [carouselIndex, setCarouselIndex] = useState(0);
+    const [currentInterval, setCurrentInterval] = useState<NodeJS.Timeout | undefined>(undefined);
+
 
     const designNames = [
         'Sunbow',
@@ -37,19 +41,16 @@ export default function Designs() {
         setActiveIframes(updatedIframes);
     };
 
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
     const getBackgroundColor = () => {
-        const sectionHeight = 1.25; // Each section is 1.25 times the viewport height (100vh content + 25vh/25vw gap)
-        const sectionIndex = Math.floor(scrollPosition / sectionHeight); // Current section index
-        const transition = (scrollPosition / sectionHeight) - sectionIndex; // Transition progress within the section
-        const isEvenSection = sectionIndex % 2 === 0;
+        const sectionHeight = 1; // Each section is 1 times the viewport height (100vh content)
+        const gapHeight = 0.25; // Gap of 0.25vh where the color should not change
+        const totalHeight = sectionHeight + gapHeight; // Total height of a section including the gap
+        const sectionIndex = Math.floor(scrollPosition / totalHeight); // Current section index
+        const positionInSection = (scrollPosition % totalHeight) / sectionHeight; // Position within the section
 
-        // Adjust transition to occur only during the content area (100vh of the section)
-        const adjustedTransition = Math.max(0, Math.min((transition - 0.2) * 1.25, 1));
+        // Only change color within the content area (100vh of the section)
+        const adjustedTransition = Math.max(0, Math.min(positionInSection, 1));
+        const isEvenSection = sectionIndex % 2 === 0;
 
         // Flip colors: even sections transition from black to white, odd sections from white to black
         const colorValue = isEvenSection
@@ -76,11 +77,31 @@ export default function Designs() {
         return `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
     };
 
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentPortalImage(prevState => {
+                setCarouselIndex((prevIndex) => {
+                    const newIndex = HELIKA_PORTAL_IMAGES.findIndex((_, idx) => idx === (prevState + 1) % HELIKA_PORTAL_IMAGES.length);
+                    return (newIndex !== -1 && (newIndex < HELIKA_PORTAL_IMAGES.length - 2)) ? newIndex : prevIndex;
+                });
+                return (prevState + 1) % HELIKA_PORTAL_IMAGES.length
+            }); // Cycle through images
+        }, 5000); // Switch every 15 seconds
+        setCurrentInterval(interval)
+
+        return () => clearInterval(interval); // Cleanup on component unmount
+    }, [currentPortalImage]);
+
     return (
         <>
             <Box
                 sx={{
-                    height: `calc(${sections * 125}vh - 25vh)`, // Total height adjusted for gaps
+                    height: 'fit-content',
                     width: '100vw',
                     background: getBackgroundColor(),
                     color: getTextColor(),
@@ -138,11 +159,196 @@ export default function Designs() {
                         </button>
                     </Box>
                 </Link>
-                {[...Array(sections)].map((_, index) => (
+                <Box
+                    sx={{
+                        height: '100vh',
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        scrollSnapAlign: 'start',
+                        color: getTextColor(),
+                    }}
+                >
+                    <Box
+                        sx={{
+                            height: `calc(100vh + min(25vh, 25vw))`, // Remove gap for the last section
+                            width: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            scrollSnapAlign: 'start',
+                            color: getTextColor(),
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <Typography variant="h3" sx={{ color: getTextColor(), fontFamily: 'inherit', paddingBottom: '0.5em' }}>
+                            Helika Portal
+                        </Typography>
+                        <Box
+                            sx={{
+                                height: '60vh',
+                                aspectRatio: '3593/2090',
+                                position: 'relative',
+                                boxShadow: '10px 0 10px -4px gray, -10px 0 10px -4px gray', // Box shadow only on left and right with equal strength
+                                cursor: 'pointer', // Add pointer cursor to indicate clickability
+                            }}
+                            onClick={() => {
+                                const fullscreenElement = document.getElementById('portal-display-image');
+                                if (fullscreenElement?.requestFullscreen) {
+                                    fullscreenElement.requestFullscreen();
+                                }
+                            }} // Handle fullscreen on click
+                        >
+                            <Image
+                                src={HELIKA_PORTAL_IMAGES[currentPortalImage]} // Default to the first image
+                                alt="Picture of the author"
+                                style={{
+                                    objectFit: "cover",
+                                    zIndex: 100,
+                                    marginBottom: '2em',
+                                }}
+                                fill={true}
+                                id='portal-display-image'
+                            />
+                            {/* Progress bar overlay */}
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '5px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Background for the progress bar
+                                    zIndex: 200,
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        height: '100%',
+                                        backgroundColor: 'white', // Progress bar color
+                                        animation: 'fillProgress 5s linear infinite', // Smooth animation for 15 seconds
+                                        width: '100%', // Full width
+                                        zIndex: 201,
+                                    }}
+                                    key={currentPortalImage} // Reset animation on image change
+                                />
+                                <style jsx>{`
+                                    @keyframes fillProgress {
+                                        from {
+                                            width: 0;
+                                        }
+                                        to {
+                                            width: 100%;
+                                        }
+                                    }
+                                `}</style>
+                            </Box>
+                        </Box>
+                        <Box
+                            sx={{
+                                height: '20vh',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginTop: '16px',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                gap: '1em',
+                                position: 'relative',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <button
+                                onClick={() => setCarouselIndex((prev) => Math.max(prev - 1, 0))}
+                                style={{
+                                    position: 'absolute',
+                                    left: '0',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    zIndex: 10,
+                                    background: 'rgba(0, 0, 0, 0.5)',
+                                    color: 'white',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '0.5em',
+                                    borderRadius: '50%',
+                                }}
+                            >
+                                <ArrowCircleLeftIcon sx={{ fontSize: '3em' }} />
+                            </button>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    gap: '1em',
+                                    transform: `translateX(-${carouselIndex * 33.33}%)`,
+                                    transition: 'transform 0.3s ease',
+                                    width: `${HELIKA_PORTAL_IMAGES.length * 33.33}%`,
+                                }}
+                            >
+                                {HELIKA_PORTAL_IMAGES.map((image, idx) => (
+                                    <Box
+                                        key={idx}
+                                        sx={{
+                                            height: '100%',
+                                            aspectRatio: '3593/2090',
+                                            backgroundColor: 'white',
+                                            overflow: 'hidden',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            flex: '0 0 calc(33.33% - 1em)', // Ensure 3 items fit in the visible area
+                                        }}
+                                        onMouseEnter={() => {
+                                            setCurrentPortalImage(idx)
+                                            clearInterval(currentInterval)
+                                        }} // Set current portal image on hover
+                                    >
+                                        <Image
+                                            src={image} // Use the HELIKA_PORTAL_IMAGES for thumbnails
+                                            alt={`Thumbnail ${idx + 1}`}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                            }}
+                                        />
+                                    </Box>
+                                ))}
+                            </Box>
+                            <button
+                                onClick={() =>
+                                    setCarouselIndex((prev) =>
+                                        Math.min(prev + 1, Math.max(0, HELIKA_PORTAL_IMAGES.length - 3))
+                                    )
+                                }
+                                style={{
+                                    position: 'absolute',
+                                    right: '0',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    zIndex: 10,
+                                    background: 'rgba(0, 0, 0, 0.5)',
+                                    color: 'white',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '0.5em',
+                                    borderRadius: '50%',
+                                }}
+                            >
+                                <ArrowCircleRightIcon sx={{ fontSize: '3em' }} />
+                            </button>
+                        </Box>
+                    </Box>
+                </Box>
+                {[...Array(sections - 1)].map((_, index) => (
                     <Box
                         key={index}
                         sx={{
-                            height: `calc(100vh + ${index === sections - 1 ? '0' : 'min(25vh, 25vw)'})`, // Remove gap for the last section
+                            height: `calc(100vh + ${index === sections - 2 ? '0' : 'min(25vh, 25vw)'})`, // Remove gap for the last section
                             width: '100%',
                             display: 'flex',
                             flexDirection: 'column',
@@ -156,13 +362,15 @@ export default function Designs() {
                                 height: '100vh', // Actual content area
                                 width: '100%',
                                 display: 'flex',
+                                flexDirection: 'column',
                                 justifyContent: 'center',
                                 alignItems: 'center',
+                                gap: '1em',
                             }}
                         >
                             {activeIframes[index] ? (
                                 <iframe
-                                    src={iframeLinks[index]}
+                                    src={figmaDesigns[index]}
                                     style={{
                                         width: '90%',
                                         height: '90%',
@@ -170,30 +378,36 @@ export default function Designs() {
                                     }}
                                 />
                             ) : (
-                                <span
-                                    style={{
+                                <Box
+                                    sx={{
                                         cursor: 'pointer',
                                         textDecoration: 'underline',
                                         fontSize: '1.5rem', // Larger font size
                                         fontWeight: 'bold', // Bold text
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center', // Center align items
+                                        justifyContent: 'center', // Center justify items
+                                        gap: '0.5em',
                                     }}
                                     onClick={() => handleTextClick(index)}
                                 >
+                                    <Image
+                                        src={figmaImages[index]} // Add project image
+                                        alt={`Project ${designNames[index]}`}
+                                        style={{
+                                            width: '50%',
+                                            height: 'auto',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
                                     View {designNames[index]} Design
-                                </span>
+                                </Box>
                             )}
                         </Box>
-                        {index !== sections - 1 && (
-                            <Box
-                                sx={{
-                                    height: 'min(25vh, 25vw)', // Gap area
-                                    width: '100%',
-                                }}
-                            />
-                        )}
                     </Box>
                 ))}
-            </Box>
+            </Box >
             <Footer /> {/* Add Footer component */}
         </>
     );
