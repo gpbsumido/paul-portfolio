@@ -11,20 +11,20 @@ export default function Home() {
         height: '100vh',
         width: '100vw',
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: { xs: 'column', md: 'row' }, // Vertical on small screens
       }}
     >
       <AboutSection />
       <Box
         sx={{
-          width: '50vw',
-          height: '100%',
+          width: { xs: '100vw', md: '50vw' }, // Full width on small screens
+          height: { xs: '50vh', md: '100%' }, // Half height on small screens
           background: 'white',
           color: 'black',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          transition: 'all 0.6s ease',
+          transition: 'background 0.6s ease',
           '&:hover': {
             background: 'black',
             color: 'white',
@@ -32,7 +32,14 @@ export default function Home() {
           fontSize: '2rem',
         }}
       >
-        <Link href="/designs" >Designs</Link>
+        <Link
+          href="/designs"
+          style={{ fontWeight: 'normal', transition: 'font-weight 0.6s ease' }}
+          onMouseEnter={(e) => e.currentTarget.style.fontWeight = 'bold'}
+          onMouseLeave={(e) => e.currentTarget.style.fontWeight = 'normal'}
+        >
+          Designs
+        </Link>
       </Box>
     </Box>
   );
