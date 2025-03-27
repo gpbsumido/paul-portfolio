@@ -3,56 +3,49 @@
 import EmailForm from "@/components/EmailForm";
 import { useRouter } from "next/navigation";
 import HomeIcon from "@mui/icons-material/Home";
+import { Box, IconButton, Typography } from "@mui/material";
 
 export default function EmailPage() {
     const router = useRouter();
 
     return (
-        <div
-            style={{
+        <Box
+            sx={{
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                height: "100vh", // Full viewport height
+                height: "100vh",
                 padding: "20px",
-                position: "relative", // Added for positioning the floating button
+                position: "relative",
             }}
         >
-            <button
-                onClick={() => router.push("/")} // Updated router.push call
-                style={{
-                    position: "absolute", // Make the button float
+            <IconButton
+                onClick={() => router.push("/")}
+                sx={{
+                    position: "absolute",
                     top: "20px",
                     left: "20px",
-                    padding: "10px",
-                    width: "50px", // Set width for a perfect circle
-                    height: "50px", // Set height for a perfect circle
-                    borderRadius: "50%", // Make it a perfect circle
-                    border: "1px solid",
-                    background: "white", // Always contrast the background
-                    color: "black", // Always contrast the background
-                    cursor: "pointer",
+                    width: "50px",
+                    height: "50px",
+                    border: "1px solid black",
+                    bgcolor: "white",
+                    color: "black",
                     transition: "all 0.3s ease",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderColor: "black"
+                    "&:hover": {
+                        bgcolor: "black",
+                        color: "white"
+                    }
                 }}
             >
-                <span
-                    className="material-symbols-outlined"
-                    style={{
-                        fontSize: "24px",
-                        height: '24px',
-                        width: '24px',
-                    }}
-                >
-                    <HomeIcon />
-                </span>
-            </button>
-            <h1 style={{ textAlign: "center", fontSize: '2rem' }}>Send Me an Email!</h1>
+                <HomeIcon />
+            </IconButton>
+
+            <Typography variant="h4" sx={{ textAlign: "center", mb: 3 }}>
+                Send Me an Email!
+            </Typography>
+
             <EmailForm />
-        </div>
+        </Box>
     );
 }
