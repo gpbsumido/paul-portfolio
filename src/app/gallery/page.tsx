@@ -1,20 +1,13 @@
 "use client";
 
-import { HELIKA_PORTAL_IMAGES } from "@/constants/constants";
 import { Box } from "@mui/material";
-import Image from "next/image";
-import { useState, useEffect } from "react";
+import Image, { StaticImageData } from "next/image";
+import { useEffect, useState } from "react";
 import React from "react";
+import { HELIKA_PORTAL_IMAGES } from "@/constants/constants";
 
-/**
- * Interface for image data
- * @interface ImageData
- * @property {string} src - Image source URL
- * @property {number} width - Original image width
- * @property {number} height - Original image height
- */
 interface ImageData {
-    src: string;
+    src: string | StaticImageData;
     width: number;
     height: number;
 }

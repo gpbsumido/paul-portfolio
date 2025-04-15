@@ -8,48 +8,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import MailIcon from "@mui/icons-material/Mail";
 import PaulImg from "@/assets/paul.jpeg";
 import "@/app/globals.css";
-
-interface SocialLinkProps {
-    href: string;
-    icon: React.ElementType;
-    text: string;
-}
-
-/**
- * SocialLink component for displaying social media links
- * @component
- * @param {Object} props - Component props
- * @param {string} props.href - URL for the social link
- * @param {React.ElementType} props.icon - Icon component to display
- * @param {string} props.text - Text to display next to the icon
- * @returns {JSX.Element} Social link with icon and text
- */
-const SocialLink = ({
-    href,
-    icon: Icon,
-    text,
-}: SocialLinkProps): React.ReactElement => (
-    <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            fontSize: "1rem",
-            gap: "0.5em",
-            textDecoration: "none",
-            color: "inherit",
-            transition: "font-weight 0.3s ease",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.fontWeight = "bold")}
-        onMouseLeave={(e) => (e.currentTarget.style.fontWeight = "normal")}
-    >
-        <Icon />
-        {text}
-    </a>
-);
+import SocialLink from "@/components/common/SocialLink";
 
 /**
  * AboutSection component displaying personal information and social links
@@ -127,6 +86,7 @@ export default function AboutSection() {
                     flexDirection: "column",
                     gap: "0.2em",
                     marginTop: "0.5em",
+                    width: "5em"
                 }}
             >
                 {socialLinks.map((link, index) => (
