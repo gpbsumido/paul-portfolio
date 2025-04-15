@@ -22,22 +22,19 @@ export default function HomeButton({
         <button
             onClick={onClick}
             style={{
-                position: "absolute",
-                top: "20px",
-                left: "20px",
                 padding: "10px",
-                width: "50px",
-                height: "50px",
+                width: "48px",
+                height: "48px",
                 borderRadius: "50%",
                 border: "1px solid",
-                background: textColor,
-                color: bgColor,
+                background: "black",
+                color: "white",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                borderColor: bgColor,
+                borderColor: "white",
             }}
         >
             <HomeIcon
@@ -45,7 +42,7 @@ export default function HomeButton({
                     fontSize: "24px",
                     height: "24px",
                     width: "24px",
-                    color: bgColor,
+                    color: "white",
                 }}
             />
         </button>
