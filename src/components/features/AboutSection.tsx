@@ -6,8 +6,8 @@ import Image from "next/image";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MailIcon from "@mui/icons-material/Mail";
-import PaulImg from "../assets/paul.jpeg";
-import "../app/globals.css";
+import PaulImg from "@/assets/paul.jpeg";
+import "@/app/globals.css";
 
 interface SocialLinkProps {
     href: string;

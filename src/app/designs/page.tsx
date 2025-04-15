@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import HomeIcon from "@mui/icons-material/Home";
-import Footer from "../../components/Footer";
+import Footer from "../../components/layout/Footer";
 import Image, { StaticImageData } from "next/image";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
