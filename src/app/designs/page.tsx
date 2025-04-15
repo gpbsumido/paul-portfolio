@@ -246,22 +246,31 @@ const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor
             {title}
         </Typography>
         <Box
+            id="designsbox"
             sx={{
                 height: { xs: "40vh", sm: "60vh" },
                 width: { xs: "90%", sm: "auto" },
+                maxWidth: { xs: "100%", sm: "90vw" },
                 aspectRatio: "3593/2090",
                 position: "relative",
                 boxShadow: "10px 0 10px -4px gray, -10px 0 10px -4px gray",
                 cursor: "pointer",
+                margin: "0 auto",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                overflow: "hidden",
             }}
         >
             <Image
                 src={images[currentIndex]}
                 alt={`${title} image ${currentIndex + 1}`}
                 style={{
-                    objectFit: "cover",
+                    objectFit: "contain",
                     zIndex: 100,
                     marginBottom: "1em",
+                    width: "100%",
+                    height: "100%",
                 }}
                 fill={true}
                 priority={currentIndex === 0}
