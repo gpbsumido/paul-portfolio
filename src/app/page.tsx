@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import AboutSection from "@/components/AboutSection";
-import { Box } from "@mui/material";
-import Link from "next/link";
+import AboutSection from '@/components/AboutSection';
+import { Box } from '@mui/material';
+import Link from 'next/link';
 import BrushIcon from '@mui/icons-material/Brush';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import PreviewIcon from '@mui/icons-material/Preview';
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const icons = [BrushIcon, TerminalIcon, PreviewIcon];
@@ -18,7 +18,7 @@ export default function Home() {
     }, 1000); // Change icon every 2 seconds
 
     return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
+  }, [icons.length]);
 
   const CurrentIcon = icons[currentIconIndex];
 
@@ -33,7 +33,7 @@ export default function Home() {
     >
       <AboutSection />
       <Box
-        id='designsbox'
+        id="designsbox"
         sx={{
           width: { xs: '100vw', md: '50vw' }, // Full width on small screens
           height: { xs: '50vh', md: '100%' }, // Half height on small screens
@@ -60,7 +60,7 @@ export default function Home() {
             transition: 'font-weight 0.6s ease',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
           <CurrentIcon

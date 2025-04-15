@@ -210,7 +210,9 @@ a.secondary {
   transform: translateY(-50%);
   pointer-events: none;
   /* Prevent interaction when hidden */
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .logo-carousel.visible {
