@@ -112,7 +112,7 @@ export default function Designs(): React.ReactElement {
                         height: "48px",
                     }}
                 >
-                    <HomeButton component={Link} />
+                    <HomeButton component={Link} href="/" />
                 </Box>
 
                 <CarouselSection

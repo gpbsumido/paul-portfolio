@@ -1,7 +1,8 @@
 "use client";
 
 import React, { JSX } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HomeButtonProps } from "@/types/common";
 
@@ -13,10 +14,12 @@ import { HomeButtonProps } from "@/types/common";
  * @param {string} props.textColor - Text color
  * @param {string} props.bgColor - Background color
  * @param {React.ElementType} props.component - Custom component to wrap the button
+ * @param {string} props.href - URL for the link
  * @returns {JSX.Element} Home button with icon
  */
 export const HomeButton = ({
     component: Component = "div",
+    href = "/",
 }: HomeButtonProps): JSX.Element => {
     const { t } = useLanguage();
 
@@ -24,33 +27,40 @@ export const HomeButton = ({
         <Box
             sx={{
                 position: "fixed",
-                top: "16px",
-                left: "16px",
+                top: { xs: "8px", sm: "16px" },
+                left: { xs: "8px", sm: "16px" },
                 zIndex: 9999,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "48px",
             }}
         >
-            <Component>
+            <Component href={href}>
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     sx={{
-                        backgroundColor: "rgba(0, 0, 0, 0.7)",
                         color: "white",
-                        backdropFilter: "blur(8px)",
+                        backgroundColor: "black",
+                        borderColor: "white",
+                        "&:hover": {
+                            backgroundColor: "black",
+                            borderColor: "white",
+                        },
+                        backdropFilter: "blur(4px)",
+                        minWidth: "48px",
+                        width: "48px",
+                        height: "48px",
                         borderRadius: "50%",
-                        width: "40px",
-                        height: "40px",
-                        minWidth: "40px",
-                        padding: 0,
+                        padding: "0",
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        "&:hover": {
-                            backgroundColor: "rgba(0, 0, 0, 0.9)",
-                        },
+                        margin: 0,
                     }}
                     aria-label={t("navigation.home")}
                 >
-                    <Typography variant="h6">P</Typography>
+                    <HomeIcon sx={{ fontSize: "1.5rem" }} />
                 </Button>
             </Component>
         </Box>
