@@ -122,13 +122,13 @@ const ImageCarousel = ({ images, currentIndex, onIndexChange }: ImageCarouselPro
     return (
         <Box
             sx={{
-                height: "20vh",
+                height: { xs: "15vh", sm: "20vh" },
                 justifyContent: "center",
                 alignItems: "center",
-                marginTop: "16px",
+                marginTop: { xs: "8px", sm: "16px" },
                 display: "flex",
                 flexDirection: "row",
-                gap: "1em",
+                gap: { xs: "0.5em", sm: "1em" },
                 position: "relative",
                 overflow: "hidden",
             }}
@@ -137,26 +137,30 @@ const ImageCarousel = ({ images, currentIndex, onIndexChange }: ImageCarouselPro
                 onClick={() => onIndexChange(Math.max(currentIndex - 1, 0))}
                 sx={{
                     position: "absolute",
-                    left: "0",
+                    left: { xs: "4px", sm: "0" },
                     top: "50%",
                     transform: "translateY(-50%)",
                     zIndex: 10,
                     background: "rgba(0, 0, 0, 0.5)",
                     color: "white",
                     "&:hover": { background: "rgba(0, 0, 0, 0.7)" },
+                    padding: { xs: "4px", sm: "8px" },
+                    minWidth: { xs: "32px", sm: "48px" },
+                    minHeight: { xs: "32px", sm: "48px" },
                 }}
             >
-                <ArrowCircleLeftIcon sx={{ fontSize: "3em" }} />
+                <ArrowCircleLeftIcon sx={{ fontSize: { xs: "1.5em", sm: "3em" } }} />
             </IconButton>
             <Box
                 sx={{
                     display: "flex",
                     flexDirection: "row",
-                    gap: "1em",
+                    gap: { xs: "0.5em", sm: "1em" },
                     transform: `translateX(-${carouselIndex * 33.33}%)`,
                     transition: "transform 0.3s ease",
                     width: `${images.length * 33.33}%`,
-                    paddingLeft: "1em",
+                    paddingLeft: { xs: "2em", sm: "1em" },
+                    paddingRight: { xs: "2em", sm: "1em" },
                 }}
             >
                 {images.map((image, idx) => (
@@ -171,7 +175,7 @@ const ImageCarousel = ({ images, currentIndex, onIndexChange }: ImageCarouselPro
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
-                            flex: "0 0 calc(33.33% - 1em)",
+                            flex: "0 0 calc(33.33% - 0.5em)",
                         }}
                         onMouseEnter={() => onIndexChange(idx)}
                     >
@@ -196,16 +200,19 @@ const ImageCarousel = ({ images, currentIndex, onIndexChange }: ImageCarouselPro
                 }
                 sx={{
                     position: "absolute",
-                    right: "0",
+                    right: { xs: "4px", sm: "0" },
                     top: "50%",
                     transform: "translateY(-50%)",
                     zIndex: 10,
                     background: "rgba(0, 0, 0, 0.5)",
                     color: "white",
                     "&:hover": { background: "rgba(0, 0, 0, 0.7)" },
+                    padding: { xs: "4px", sm: "8px" },
+                    minWidth: { xs: "32px", sm: "48px" },
+                    minHeight: { xs: "32px", sm: "48px" },
                 }}
             >
-                <ArrowCircleRightIcon sx={{ fontSize: "3em" }} />
+                <ArrowCircleRightIcon sx={{ fontSize: { xs: "1.5em", sm: "3em" } }} />
             </IconButton>
         </Box>
     );
@@ -214,7 +221,7 @@ const ImageCarousel = ({ images, currentIndex, onIndexChange }: ImageCarouselPro
 const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor }: CarouselProps): React.ReactElement => (
     <Box
         sx={{
-            height: `calc(100vh + min(25vh, 25vw))`,
+            height: { xs: "auto", sm: `calc(100vh + min(25vh, 25vw))` },
             width: "100%",
             display: "flex",
             flexDirection: "column",
@@ -222,7 +229,8 @@ const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor
             scrollSnapAlign: "start",
             color: textColor,
             justifyContent: "start",
-            paddingTop: "5em",
+            paddingTop: { xs: "2em", sm: "5em" },
+            paddingBottom: { xs: "2em", sm: "0" },
         }}
     >
         <Typography
@@ -230,14 +238,17 @@ const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor
             sx={{
                 color: textColor,
                 fontFamily: "inherit",
-                paddingBottom: "0.5em",
+                paddingBottom: { xs: "0.25em", sm: "0.5em" },
+                fontSize: { xs: "1.5rem", sm: "2.5rem" },
+                textAlign: "center",
             }}
         >
             {title}
         </Typography>
         <Box
             sx={{
-                height: "60vh",
+                height: { xs: "40vh", sm: "60vh" },
+                width: { xs: "90%", sm: "auto" },
                 aspectRatio: "3593/2090",
                 position: "relative",
                 boxShadow: "10px 0 10px -4px gray, -10px 0 10px -4px gray",
@@ -250,7 +261,7 @@ const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor
                 style={{
                     objectFit: "cover",
                     zIndex: 100,
-                    marginBottom: "2em",
+                    marginBottom: "1em",
                 }}
                 fill={true}
                 priority={currentIndex === 0}
@@ -349,7 +360,7 @@ export default function Designs(): React.ReactElement {
                     color: textColor,
                     display: "flex",
                     flexDirection: "column",
-                    scrollSnapType: "y mandatory",
+                    scrollSnapType: { xs: "none", sm: "y mandatory" },
                     overflowY: "scroll",
                 }}
             >
@@ -357,8 +368,8 @@ export default function Designs(): React.ReactElement {
                     <Box
                         sx={{
                             position: "fixed",
-                            top: "16px",
-                            left: "16px",
+                            top: { xs: "8px", sm: "16px" },
+                            left: { xs: "8px", sm: "16px" },
                             zIndex: 999,
                             display: "flex",
                             justifyContent: "center",
@@ -393,24 +404,26 @@ export default function Designs(): React.ReactElement {
                     <Box
                         key={index}
                         sx={{
-                            height: `calc(100vh + ${index === sections - 3 ? "0" : "min(25vh, 25vw)"})`,
+                            height: { xs: "auto", sm: `calc(100vh + ${index === sections - 3 ? "0" : "min(25vh, 25vw)"})` },
                             width: "100%",
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            scrollSnapAlign: "start",
+                            scrollSnapAlign: { xs: "none", sm: "start" },
                             color: textColor,
+                            padding: { xs: "2em 0", sm: "0" },
                         }}
                     >
                         <Box
                             sx={{
-                                height: "100vh",
+                                height: { xs: "auto", sm: "100vh" },
                                 width: "100%",
                                 display: "flex",
                                 flexDirection: "column",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                gap: "1em",
+                                gap: { xs: "0.5em", sm: "1em" },
+                                padding: { xs: "1em", sm: "0" },
                             }}
                         >
                             {activeIframes[index] ? (
@@ -427,13 +440,13 @@ export default function Designs(): React.ReactElement {
                                     sx={{
                                         cursor: "pointer",
                                         textDecoration: "underline",
-                                        fontSize: "1.5rem",
+                                        fontSize: { xs: "1rem", sm: "1.5rem" },
                                         fontWeight: "bold",
                                         display: "flex",
                                         flexDirection: "column",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        gap: "0.5em",
+                                        gap: { xs: "0.25em", sm: "0.5em" },
                                     }}
                                     onClick={() => handleTextClick(index)}
                                 >
@@ -441,7 +454,7 @@ export default function Designs(): React.ReactElement {
                                         src={figmaImages[index]}
                                         alt={`Project ${designNames[index]}`}
                                         style={{
-                                            width: "50%",
+                                            width: "80%",
                                             height: "auto",
                                             objectFit: "contain",
                                         }}
