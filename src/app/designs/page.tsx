@@ -2,7 +2,6 @@
 
 import { Box } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Footer from "../../components/layout/Footer";
 import {
@@ -12,14 +11,13 @@ import {
     HELIKA_UA_IMAGES,
 } from "@/constants/constants";
 import React from "react";
-import HomeButton from "@/components/common/HomeButton";
+import { HomeButton } from "/Users/paulsumido/paul-portfolio/src/components/common/HomeButton"
 import CarouselSection from "@/components/common/CarouselSection";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export default function Designs(): React.ReactElement {
-    const router = useRouter();
     const { t } = useLanguage();
     const [activeIframes, setActiveIframes] = useState([false, false, false]);
     const [currentPortalImage, setCurrentPortalImage] = useState(0);
@@ -115,11 +113,7 @@ export default function Designs(): React.ReactElement {
                             height: "48px",
                         }}
                     >
-                        <HomeButton
-                            onClick={() => router.push("/")}
-                            textColor="var(--foreground)"
-                            bgColor="var(--background)"
-                        />
+                        <HomeButton />
                     </Box>
                 </Link>
 

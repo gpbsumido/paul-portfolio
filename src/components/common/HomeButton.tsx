@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import HomeIcon from "@mui/icons-material/Home";
-import { HomeButtonProps } from "@/types/designs";
+import { Box, Button, Typography } from "@mui/material";
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /**
  * HomeButton component for navigation
@@ -13,38 +14,42 @@ import { HomeButtonProps } from "@/types/designs";
  * @param {string} props.bgColor - Background color
  * @returns {JSX.Element} Home button with icon
  */
-export default function HomeButton({
-    onClick,
-    textColor,
-    bgColor,
-}: HomeButtonProps): React.ReactElement {
+export const HomeButton = () => {
+    const { t } = useLanguage();
+
     return (
-        <button
-            onClick={onClick}
-            style={{
-                padding: "10px",
-                width: "48px",
-                height: "48px",
-                borderRadius: "50%",
-                border: "1px solid",
-                background: "black",
-                color: "white",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderColor: "white",
+        <Box
+            sx={{
+                position: "fixed",
+                top: "16px",
+                left: "16px",
+                zIndex: 9999,
             }}
         >
-            <HomeIcon
-                style={{
-                    fontSize: "24px",
-                    height: "24px",
-                    width: "24px",
-                    color: "white",
-                }}
-            />
-        </button>
+            <Link href="/" passHref>
+                <Button
+                    variant="contained"
+                    sx={{
+                        backgroundColor: "rgba(0, 0, 0, 0.7)",
+                        color: "white",
+                        backdropFilter: "blur(8px)",
+                        borderRadius: "50%",
+                        width: "40px",
+                        height: "40px",
+                        minWidth: "40px",
+                        padding: 0,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        "&:hover": {
+                            backgroundColor: "rgba(0, 0, 0, 0.9)",
+                        },
+                    }}
+                    aria-label={t("navigation.home")}
+                >
+                    <Typography variant="h6">P</Typography>
+                </Button>
+            </Link>
+        </Box>
     );
-}
+};
