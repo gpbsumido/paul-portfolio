@@ -100,22 +100,20 @@ export default function Designs(): React.ReactElement {
                 >
                     <LanguageSwitcher />
                 </Box>
-                <Link href="/">
-                    <Box
-                        sx={{
-                            position: "fixed",
-                            top: { xs: "8px", sm: "16px" },
-                            left: { xs: "8px", sm: "16px" },
-                            zIndex: 9999,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "48px",
-                        }}
-                    >
-                        <HomeButton />
-                    </Box>
-                </Link>
+                <Box
+                    sx={{
+                        position: "fixed",
+                        top: { xs: "8px", sm: "16px" },
+                        left: { xs: "8px", sm: "16px" },
+                        zIndex: 9999,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "48px",
+                    }}
+                >
+                    <HomeButton component={Link} href="/" />
+                </Box>
 
                 <CarouselSection
                     images={HELIKA_PORTAL_IMAGES}

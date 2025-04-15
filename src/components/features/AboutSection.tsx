@@ -41,7 +41,6 @@ export const AboutSection = (): React.ReactElement => {
         preloadImage();
     }, []);
 
-    // Base container styles that are shared between loading and loaded states
     const containerStyles = {
         width: { xs: "100%", md: "50%" },
         minHeight: { xs: "50vh", md: "100vh" },
@@ -51,7 +50,7 @@ export const AboutSection = (): React.ReactElement => {
         alignItems: "center",
         gap: 4,
         p: 3,
-        bgcolor: "background.default",
+        bgcolor: "var(--background)",
         color: "var(--foreground)",
     };
 
@@ -181,8 +180,9 @@ export const AboutSection = (): React.ReactElement => {
                         sx={{
                             color: "var(--foreground)",
                             "&:hover": {
-                                color: "primary.main",
-                                transition: "color 0.3s ease",
+                                color: "var(--foreground)",
+                                opacity: 0.8,
+                                transition: "opacity 0.3s ease",
                             },
                             "&:focus": {
                                 outline: "2px solid var(--foreground)",
