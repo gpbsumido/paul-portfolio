@@ -24,7 +24,9 @@ interface RootLayoutProps {
  * @description The root layout component that wraps the entire application and provides the font configuration
  * @returns {JSX.Element} Root layout with font configuration
  */
-export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
+export default function RootLayout({
+    children,
+}: RootLayoutProps): React.ReactElement {
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={inter.className}>

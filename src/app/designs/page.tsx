@@ -204,7 +204,9 @@ export default function Designs(): React.ReactElement {
                                         }}
                                         loading="lazy"
                                     />
-                                    {t("designs.viewDesign", { name: designNames[index] })}
+                                    {t("designs.viewDesign", {
+                                        name: designNames[index],
+                                    })}
                                 </Box>
                             )}
                         </Box>
