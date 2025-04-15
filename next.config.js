@@ -4,10 +4,11 @@ const nextConfig = {
         domains: ["img.icons8.com"], // Keep existing external domains
         deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048], // Responsive image sizes
         imageSizes: [16, 32, 48, 64, 96, 128, 256], // Image sizes for smaller images
-        formats: ['image/webp', 'image/avif'], // Modern image formats
+        formats: ["image/webp", "image/avif"], // Modern image formats
         minimumCacheTTL: 60, // Cache images for at least 60 seconds
         dangerouslyAllowSVG: true, // Allow SVG images
-        contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+        contentSecurityPolicy:
+            "default-src 'self'; script-src 'none'; sandbox;",
     },
     // Enable image compression
     webpack: (config, { dev, isServer }) => {
@@ -20,17 +21,17 @@ const nextConfig = {
     // Enable experimental features for better performance
     experimental: {
         optimizeCss: true,
-        optimizePackageImports: ['@mui/icons-material'],
+        optimizePackageImports: ["@mui/icons-material"],
     },
     // Configure headers for caching
     async headers() {
         return [
             {
-                source: '/images/:path*',
+                source: "/images/:path*",
                 headers: [
                     {
-                        key: 'Cache-Control',
-                        value: 'public, max-age=31536000, immutable',
+                        key: "Cache-Control",
+                        value: "public, max-age=31536000, immutable",
                     },
                 ],
             },

@@ -24,7 +24,9 @@ export default function Home(): React.ReactElement {
     useEffect(() => {
         const interval = setInterval(() => {
             if (!isHovered) {
-                setCurrentIconIndex((prevIndex) => (prevIndex + 1) % icons.length);
+                setCurrentIconIndex(
+                    (prevIndex) => (prevIndex + 1) % icons.length
+                );
             }
         }, 1000);
 
@@ -159,7 +161,8 @@ export default function Home(): React.ReactElement {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+                    transition:
+                        "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
                     cursor: "pointer",
                     "&:hover": {
                         background: "black",
@@ -171,7 +174,8 @@ export default function Home(): React.ReactElement {
                     href="/designs"
                     style={{
                         fontWeight: "normal",
-                        transition: "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
+                        transition:
+                            "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
@@ -190,10 +194,13 @@ export default function Home(): React.ReactElement {
                             marginBottom: "0.5em",
                             opacity: isHovered ? 1 : 0.7,
                             transform: isHovered ? "scale(1.1)" : "scale(1)",
-                            transition: "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
+                            transition:
+                                "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
                             color: "inherit",
                             display: "block",
-                            animation: !isHovered ? "float 2s ease-in-out infinite" : "none",
+                            animation: !isHovered
+                                ? "float 2s ease-in-out infinite"
+                                : "none",
                             "@keyframes float": {
                                 "0%, 100%": {
                                     transform: "translateY(0)",
@@ -206,7 +213,8 @@ export default function Home(): React.ReactElement {
                     />
                     <span
                         style={{
-                            transition: "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
+                            transition:
+                                "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
                             transform: isHovered ? "scale(1.1)" : "scale(1)",
                             fontWeight: isHovered ? "bold" : "normal",
                         }}

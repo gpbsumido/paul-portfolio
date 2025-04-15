@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { Box, Skeleton } from '@mui/material';
+import React from "react";
+import { Box, Skeleton } from "@mui/material";
 
 interface ImageLoaderProps {
     width: string | number;
@@ -14,8 +14,8 @@ export default function ImageLoader({ width, height }: ImageLoaderProps) {
             sx={{
                 width,
                 height,
-                position: 'relative',
-                overflow: 'hidden',
+                position: "relative",
+                overflow: "hidden",
             }}
         >
             <Skeleton
@@ -24,10 +24,10 @@ export default function ImageLoader({ width, height }: ImageLoaderProps) {
                 height="100%"
                 animation="wave"
                 sx={{
-                    bgcolor: 'grey.800',
+                    bgcolor: "grey.800",
                     borderRadius: 1,
                 }}
             />
         </Box>
     );
-} 
+}
