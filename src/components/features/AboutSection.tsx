@@ -85,14 +85,14 @@ export const AboutSection = (): React.ReactElement => {
                 justifyContent: "center",
                 "&:hover": {
                     color: "primary.main",
-                    transition: "color 0.3s ease"
+                    transition: "color 0.3s ease",
                 },
-                margin: "auto auto"
+                margin: "auto auto",
             }}
         >
             <Box
                 sx={{
-                    position: "relative",        
+                    position: "relative",
                     height: { xs: "10em", md: "20em" },
                     aspectRatio: "9/13",
                     overflow: "hidden",
@@ -125,31 +125,31 @@ export const AboutSection = (): React.ReactElement => {
             <Typography
                 variant="h4"
                 component="h1"
-                sx={{ 
-                    color: "white", 
+                sx={{
+                    color: "white",
                     textAlign: "center",
                     "&:hover": {
                         color: "primary.main",
-                        transition: "color 0.3s ease"
-                    }
+                        transition: "color 0.3s ease",
+                    },
                 }}
             >
                 About Paul
             </Typography>
             <Typography
                 variant="body1"
-                sx={{ 
-                    color: "white", 
-                    textAlign: "center", 
+                sx={{
+                    color: "white",
+                    textAlign: "center",
                     maxWidth: "600px",
                     "&:hover": {
                         color: "primary.main",
-                        transition: "color 0.3s ease"
-                    }
+                        transition: "color 0.3s ease",
+                    },
                 }}
             >
-                I&apos;m a passionate developer and designer with a
-                love for creating beautiful, functional experiences.
+                I&apos;m a passionate developer and designer with a love for
+                creating beautiful, functional experiences.
             </Typography>
             <Box
                 sx={{
@@ -168,9 +168,9 @@ export const AboutSection = (): React.ReactElement => {
                         rel="noopener noreferrer"
                         sx={{
                             color: "white",
-                            "&:hover": { 
+                            "&:hover": {
                                 color: "primary.main",
-                                transition: "color 0.3s ease"
+                                transition: "color 0.3s ease",
                             },
                             "&:focus": {
                                 outline: "2px solid #fff",

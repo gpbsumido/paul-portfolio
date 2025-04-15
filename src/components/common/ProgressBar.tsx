@@ -11,7 +11,9 @@ import { ProgressBarProps } from "@/types/designs";
  * @param {number} props.progressKey - Key to trigger animation
  * @returns {JSX.Element} Animated progress bar
  */
-export default function ProgressBar({ progressKey }: ProgressBarProps): React.ReactElement {
+export default function ProgressBar({
+    progressKey,
+}: ProgressBarProps): React.ReactElement {
     return (
         <Box
             sx={{
@@ -47,4 +49,4 @@ export default function ProgressBar({ progressKey }: ProgressBarProps): React.Re
             `}</style>
         </Box>
     );
-} 
+}

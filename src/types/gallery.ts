@@ -3,4 +3,4 @@ export interface ImageData {
     alt: string;
     width: number;
     height: number;
-} 
+}
