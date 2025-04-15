@@ -20,26 +20,21 @@ interface SocialLink {
  * @returns {JSX.Element} About section with image, text, and social links
  */
 export const AboutSection = (): React.ReactElement => {
-    const [isLoading, setIsLoading] = useState(true);
     const [clicked, setClicked] = useState(false);
+<<<<<<< Updated upstream
+=======
+    const [isLoading, setIsLoading] = useState(true);
+    const { t } = useLanguage();
+>>>>>>> Stashed changes
 
     useEffect(() => {
-        const preloadImage = async () => {
-            try {
-                const img = new window.Image();
-                img.src = paulImage.src;
-                img.onload = () => setIsLoading(false);
-                img.onerror = () => setIsLoading(false);
-            } catch (error) {
-                console.error("Error preloading image:", error);
-                setIsLoading(false);
-            }
-        };
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 80);
 
-        preloadImage();
+        return () => clearTimeout(timer);
     }, []);
 
-    // Base container styles that are shared between loading and loaded states
     const containerStyles = {
         width: { xs: "100%", md: "50%" },
         minHeight: { xs: "50vh", md: "100vh" },
@@ -49,7 +44,7 @@ export const AboutSection = (): React.ReactElement => {
         alignItems: "center",
         gap: 4,
         p: 3,
-        bgcolor: "background.default",
+        bgcolor: "var(--background)",
         color: "var(--foreground)",
     };
 
@@ -180,8 +175,9 @@ export const AboutSection = (): React.ReactElement => {
                         sx={{
                             color: "var(--foreground)",
                             "&:hover": {
-                                color: "primary.main",
-                                transition: "color 0.3s ease",
+                                color: "var(--foreground)",
+                                opacity: 0.8,
+                                transition: "opacity 0.3s ease",
                             },
                             "&:focus": {
                                 outline: "2px solid var(--foreground)",
