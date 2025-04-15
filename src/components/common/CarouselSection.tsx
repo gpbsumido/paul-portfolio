@@ -141,8 +141,10 @@ export default function CarouselSection({
                 sx={{
                     position: "relative",
                     width: "100%",
-                    height: "400px",
-                    overflow: "hidden",
+                    minHeight: "200px",
+                    display: "flex",
+                    alignItems: "center",
+                    overflow: "visible",
                 }}
             >
                 <ImageCarousel
