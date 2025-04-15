@@ -4,13 +4,32 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Language = "en" | "es" | "fr";
 
+type TranslationKey = "navigation" | "about" | "designs";
+type TranslationPath = `${TranslationKey}.${string}`;
+
+interface Translations {
+    navigation: {
+        home: string;
+        designs: string;
+        about: string;
+    };
+    about: {
+        title: string;
+        description: string;
+    };
+    designs: {
+        title: string;
+        viewDesign: string;
+    };
+}
+
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string, params?: Record<string, string>) => string;
+    t: (key: TranslationPath) => string;
 }
 
-const translations = {
+const translations: Record<Language, Translations> = {
     en: {
         navigation: {
             home: "Home",
@@ -24,7 +43,7 @@ const translations = {
         },
         designs: {
             title: "Designs",
-            viewDesign: "View {{name}} Design",
+            viewDesign: "View {name} Design",
         },
     },
     es: {
@@ -40,7 +59,7 @@ const translations = {
         },
         designs: {
             title: "Diseños",
-            viewDesign: "Ver diseño de {{name}}",
+            viewDesign: "Ver diseño de {name}",
         },
     },
     fr: {
@@ -56,7 +75,7 @@ const translations = {
         },
         designs: {
             title: "Designs",
-            viewDesign: "Voir le design {{name}}",
+            viewDesign: "Voir le design {name}",
         },
     },
 };
@@ -65,17 +84,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
     undefined
 );
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [language, setLanguage] = useState<Language>("en");
 
     useEffect(() => {
-        const savedLanguage = localStorage.getItem("language") as Language;
-        if (
-            savedLanguage &&
-            (savedLanguage === "en" ||
-                savedLanguage === "es" ||
-                savedLanguage === "fr")
-        ) {
+        const savedLanguage = localStorage.getItem("language") as Language | null;
+        if (savedLanguage && ["en", "es", "fr"].includes(savedLanguage)) {
             setLanguage(savedLanguage);
         }
     }, []);
@@ -85,25 +99,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("language", lang);
     };
 
-    const t = (key: string, params?: Record<string, string>) => {
-        const keys = key.split(".");
-        let value = translations[language];
-
-        for (const k of keys) {
-            value = value?.[k];
-            if (!value) return key;
-        }
-
-        if (typeof value !== "string") return key;
-
-        if (params) {
-            return value.replace(
-                /\{\{(\w+)\}\}/g,
-                (_, key) => params[key] || ""
-            );
-        }
-
-        return value;
+    const t = (key: TranslationPath): string => {
+        const [section, subKey] = key.split(".");
+        const translation = translations[language][section as TranslationKey][subKey as keyof Translations[TranslationKey]];
+        return translation || key;
     };
 
     return (
@@ -113,12 +112,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             {children}
         </LanguageContext.Provider>
     );
-}
+};
 
-export function useLanguage() {
+export const useLanguage = (): LanguageContextType => {
     const context = useContext(LanguageContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error("useLanguage must be used within a LanguageProvider");
     }
     return context;
-}
+};
