@@ -7,8 +7,15 @@ import BrushIcon from "@mui/icons-material/Brush";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import PreviewIcon from "@mui/icons-material/Preview";
 import { useState, useEffect } from "react";
+import React from "react";
 
-export default function Home() {
+/**
+ * Home component - Main landing page
+ * @component
+ * @description The main landing page component that displays the about section and designs link
+ * @returns {JSX.Element} Home page with about section and designs link
+ */
+export default function Home(): React.ReactElement {
     const icons = [BrushIcon, TerminalIcon, PreviewIcon];
     const [currentIconIndex, setCurrentIconIndex] = useState(0);
 

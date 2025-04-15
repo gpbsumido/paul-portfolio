@@ -15,6 +15,7 @@ import {
     HELIKA_PORTAL_IMAGES,
     HELIKA_UA_IMAGES,
 } from "@/constants/constants";
+import React from "react";
 
 // Types
 interface CarouselProps {
@@ -31,16 +32,18 @@ interface ImageCarouselProps {
     onIndexChange: (index: number) => void;
 }
 
-// Reusable components
-const HomeButton = ({
-    onClick,
-    textColor,
-    bgColor,
-}: {
+interface HomeButtonProps {
     onClick: () => void;
     textColor: string;
     bgColor: string;
-}) => (
+}
+
+interface ProgressBarProps {
+    progressKey: number;
+}
+
+// Reusable components
+const HomeButton = ({ onClick, textColor, bgColor }: HomeButtonProps): React.ReactElement => (
     <button
         onClick={onClick}
         style={{
@@ -73,7 +76,7 @@ const HomeButton = ({
     </button>
 );
 
-const ProgressBar = ({ progressBarKey }: { progressBarKey: number }) => (
+const ProgressBar = ({ progressKey }: ProgressBarProps): React.ReactElement => (
     <Box
         sx={{
             position: "absolute",
@@ -94,7 +97,7 @@ const ProgressBar = ({ progressBarKey }: { progressBarKey: number }) => (
                 width: "100%",
                 zIndex: 201,
             }}
-            key={progressBarKey}
+            key={progressKey}
         />
         <style jsx>{`
             @keyframes fillProgress {
@@ -109,11 +112,7 @@ const ProgressBar = ({ progressBarKey }: { progressBarKey: number }) => (
     </Box>
 );
 
-const ImageCarousel = ({
-    images,
-    currentIndex,
-    onIndexChange,
-}: ImageCarouselProps) => {
+const ImageCarousel = ({ images, currentIndex, onIndexChange }: ImageCarouselProps): React.ReactElement => {
     const maxVisible = 3;
     const carouselIndex = useMemo(
         () => Math.min(currentIndex, images.length - maxVisible),
@@ -212,13 +211,7 @@ const ImageCarousel = ({
     );
 };
 
-const CarouselSection = ({
-    images,
-    currentIndex,
-    onIndexChange,
-    title,
-    textColor,
-}: CarouselProps) => (
+const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor }: CarouselProps): React.ReactElement => (
     <Box
         sx={{
             height: `calc(100vh + min(25vh, 25vw))`,
@@ -262,7 +255,7 @@ const CarouselSection = ({
                 fill={true}
                 priority={currentIndex === 0}
             />
-            <ProgressBar progressBarKey={currentIndex} />
+            <ProgressBar progressKey={currentIndex} />
         </Box>
         <ImageCarousel
             images={images}
@@ -272,7 +265,7 @@ const CarouselSection = ({
     </Box>
 );
 
-export default function Designs() {
+export default function Designs(): React.ReactElement {
     const router = useRouter();
     const [scrollPosition, setScrollPosition] = useState(0);
     const [activeIframes, setActiveIframes] = useState([false, false, false]);

@@ -9,15 +9,26 @@ import MailIcon from "@mui/icons-material/Mail";
 import PaulImg from "../assets/paul.jpeg";
 import "../app/globals.css";
 
+interface SocialLinkProps {
+    href: string;
+    icon: React.ElementType;
+    text: string;
+}
+
+/**
+ * SocialLink component for displaying social media links
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.href - URL for the social link
+ * @param {React.ElementType} props.icon - Icon component to display
+ * @param {string} props.text - Text to display next to the icon
+ * @returns {JSX.Element} Social link with icon and text
+ */
 const SocialLink = ({
     href,
     icon: Icon,
     text,
-}: {
-    href: string;
-    icon: React.ElementType;
-    text: string;
-}) => (
+}: SocialLinkProps): React.ReactElement => (
     <a
         href={href}
         target="_blank"
@@ -40,6 +51,12 @@ const SocialLink = ({
     </a>
 );
 
+/**
+ * AboutSection component displaying personal information and social links
+ * @component
+ * @description A section component that displays the author's image, about text, and social media links
+ * @returns {JSX.Element} About section with image, text, and social links
+ */
 export default function AboutSection() {
     const [clicked, setClicked] = React.useState(false);
 

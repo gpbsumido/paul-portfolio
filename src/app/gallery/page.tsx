@@ -4,37 +4,59 @@ import { HELIKA_PORTAL_IMAGES } from "@/constants/constants";
 import { Box } from "@mui/material";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import React from "react";
 
+/**
+ * Interface for image data
+ * @interface ImageData
+ * @property {string} src - Image source URL
+ * @property {number} width - Original image width
+ * @property {number} height - Original image height
+ */
 interface ImageData {
     src: string;
     width: number;
     height: number;
 }
 
-export default function Gallery() {
+/**
+ * Gallery component - Image gallery with responsive layout
+ * @component
+ * @description A responsive image gallery component that automatically arranges images in optimal rows
+ * @returns {JSX.Element} Responsive image gallery with hover effects
+ */
+export default function Gallery(): React.ReactElement {
     const [images, setImages] = useState<ImageData[]>([]);
     const [containerWidth, setContainerWidth] = useState(0);
     const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+
+    /**
+     * Updates the container width based on window resize
+     * @description Updates the container width state when the window is resized
+     */
+    const updateWidth = (): void => {
+        setContainerWidth(window.innerWidth - 40); // 40px for padding
+    };
 
     useEffect(() => {
         // In a real app, this would fetch from an API or database
         // Placeholder data for demonstration
         setImages(HELIKA_PORTAL_IMAGES);
 
-        const updateWidth = () => {
-            setContainerWidth(window.innerWidth - 40); // 40px for padding
-        };
-
         updateWidth();
         window.addEventListener("resize", updateWidth);
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
 
+    /**
+     * Calculates the optimal layout for a row of images
+     * @description Arranges images in rows with optimal spacing and height
+     */
     const getOptimalRowLayout = (
         images: ImageData[],
         containerWidth: number,
         targetRowHeight: number = 300
-    ) => {
+    ): ImageData[][] => {
         const rows: ImageData[][] = [];
         let currentRow: ImageData[] = [];
         let currentRowWidth = 0;

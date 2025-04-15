@@ -2,12 +2,22 @@
 
 import React, { useState } from "react";
 
+/**
+ * EmailForm component for sending emails
+ * @component
+ * @description A form component that allows users to send emails through the default mail client
+ * @returns {JSX.Element} Email form with fields for email, subject, and body
+ */
 export default function EmailForm() {
     const [email, setEmail] = useState("");
     const [subject, setSubject] = useState("");
     const [body, setBody] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    /**
+     * Handles form submission by creating a mailto link
+     * @description Creates a mailto link with the form data and redirects to it
+     */
+    const handleSubmit = (e: React.FormEvent): void => {
         e.preventDefault();
         const mailtoLink = `mailto:psumido@gmail.com?from=${encodeURIComponent(
             email
