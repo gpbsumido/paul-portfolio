@@ -50,6 +50,7 @@ export const AboutSection = (): React.ReactElement => {
         gap: 4,
         p: 3,
         bgcolor: "background.default",
+        color: "var(--foreground)",
     };
 
     if (isLoading) {
@@ -113,7 +114,7 @@ export const AboutSection = (): React.ReactElement => {
                     cursor: "pointer",
                     borderRadius: 2,
                     "&:focus": {
-                        outline: "2px solid #fff",
+                        outline: "2px solid var(--foreground)",
                         outlineOffset: "2px",
                     },
                 }}
@@ -144,7 +145,7 @@ export const AboutSection = (): React.ReactElement => {
                 variant="h4"
                 component="h1"
                 sx={{
-                    color: "white",
+                    color: "var(--foreground)",
                     textAlign: "center",
                     "&:hover": {
                         color: "primary.main",
@@ -157,7 +158,7 @@ export const AboutSection = (): React.ReactElement => {
             <Typography
                 variant="body1"
                 sx={{
-                    color: "white",
+                    color: "var(--foreground)",
                     textAlign: "center",
                     maxWidth: "600px",
                     "&:hover": {
@@ -185,13 +186,13 @@ export const AboutSection = (): React.ReactElement => {
                         target="_blank"
                         rel="noopener noreferrer"
                         sx={{
-                            color: "white",
+                            color: "var(--foreground)",
                             "&:hover": {
                                 color: "primary.main",
                                 transition: "color 0.3s ease",
                             },
                             "&:focus": {
-                                outline: "2px solid #fff",
+                                outline: "2px solid var(--foreground)",
                                 outlineOffset: "2px",
                             },
                         }}
