@@ -10,7 +10,8 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
     title: "Paul's Portfolio",
     description: "Glenn Paul Sumido's Portfolio",
-    keywords: "Glenn Paul Sumido, Portfolio, Software Engineer, Web Developer, React, Next.js",
+    keywords:
+        "Glenn Paul Sumido, Portfolio, Software Engineer, Web Developer, React, Next.js",
 };
 
 interface RootLayoutProps {

@@ -112,7 +112,10 @@ export default function CarouselSection({
             <Box
                 id="designsbox"
                 sx={{
-                    height: { xs: "calc(50dvh - 80px)", sm: "calc(60vh - 80px)" },
+                    height: {
+                        xs: "calc(50dvh - 80px)",
+                        sm: "calc(60vh - 80px)",
+                    },
                     width: { xs: "90%", sm: "auto" },
                     maxWidth: { xs: "90vw", sm: maxWidth || "90vw" },
                     aspectRatio: "3593/2090",

@@ -120,7 +120,13 @@ export const AboutSection = (): React.ReactElement => {
                         outlineOffset: "2px",
                     },
                 }}
-                className={typeof window !== 'undefined' && window.innerWidth <= 768 && window.innerHeight < window.innerWidth ? 'mobile-landscape' : ''}
+                className={
+                    typeof window !== "undefined" &&
+                    window.innerWidth <= 768 &&
+                    window.innerHeight < window.innerWidth
+                        ? "mobile-landscape"
+                        : ""
+                }
                 tabIndex={0}
                 role="button"
                 aria-label="Click to see a fun animation"

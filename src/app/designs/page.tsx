@@ -153,16 +153,22 @@ export default function Designs(): React.ReactElement {
                             }}
                         >
                             <Box
-                                id='design-product'
+                                id="design-product"
                                 sx={{
-                                    height: { xs: "calc(100dvh - 120px)", sm: "calc(100vh - 120px)" },
+                                    height: {
+                                        xs: "calc(100dvh - 120px)",
+                                        sm: "calc(100vh - 120px)",
+                                    },
                                     width: "100%",
                                     display: "flex",
                                     flexDirection: "column",
                                     alignItems: "center",
                                     color: "var(--foreground)",
                                     padding: { xs: "2em 0", sm: "0" },
-                                    minHeight: { xs: "calc(100dvh - 120px)", sm: "calc(100vh - 120px)" },
+                                    minHeight: {
+                                        xs: "calc(100dvh - 120px)",
+                                        sm: "calc(100vh - 120px)",
+                                    },
                                 }}
                             >
                                 <Box
@@ -192,15 +198,23 @@ export default function Designs(): React.ReactElement {
                                             sx={{
                                                 cursor: "pointer",
                                                 textDecoration: "underline",
-                                                fontSize: { xs: "1rem", sm: "1.5rem" },
+                                                fontSize: {
+                                                    xs: "1rem",
+                                                    sm: "1.5rem",
+                                                },
                                                 fontWeight: "bold",
                                                 display: "flex",
                                                 flexDirection: "column",
                                                 alignItems: "center",
                                                 justifyContent: "center",
-                                                gap: { xs: "0.25em", sm: "0.5em" },
+                                                gap: {
+                                                    xs: "0.25em",
+                                                    sm: "0.5em",
+                                                },
                                             }}
-                                            onClick={() => handleTextClick(index)}
+                                            onClick={() =>
+                                                handleTextClick(index)
+                                            }
                                         >
                                             <Image
                                                 src={figmaImages[index]}
