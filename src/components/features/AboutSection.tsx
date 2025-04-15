@@ -21,16 +21,24 @@ interface SocialLink {
  * @returns {JSX.Element} About section with image, text, and social links
  */
 export const AboutSection = (): React.ReactElement => {
-    const [clicked, setClicked] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [clicked, setClicked] = useState(false);
     const { t } = useLanguage();
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 80);
+        const preloadImage = async () => {
+            try {
+                const img = new window.Image();
+                img.src = paulImage.src;
+                img.onload = () => setIsLoading(false);
+                img.onerror = () => setIsLoading(false);
+            } catch (error) {
+                console.error("Error preloading image:", error);
+                setIsLoading(false);
+            }
+        };
 
-        return () => clearTimeout(timer);
+        preloadImage();
     }, []);
 
     const containerStyles = {

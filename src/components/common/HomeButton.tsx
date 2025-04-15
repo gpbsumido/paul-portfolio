@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { JSX } from "react";
 import { Box, Button, Typography } from "@mui/material";
-import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { HomeButtonProps } from "@/types/common";
 
 /**
  * HomeButton component for navigation
@@ -12,9 +12,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * @param {() => void} props.onClick - Click handler function
  * @param {string} props.textColor - Text color
  * @param {string} props.bgColor - Background color
+ * @param {React.ElementType} props.component - Custom component to wrap the button
  * @returns {JSX.Element} Home button with icon
  */
-export const HomeButton = () => {
+export const HomeButton = ({
+    component: Component = "div",
+}: HomeButtonProps): JSX.Element => {
     const { t } = useLanguage();
 
     return (
@@ -26,7 +29,7 @@ export const HomeButton = () => {
                 zIndex: 9999,
             }}
         >
-            <Link href="/" passHref>
+            <Component>
                 <Button
                     variant="contained"
                     sx={{
@@ -49,7 +52,7 @@ export const HomeButton = () => {
                 >
                     <Typography variant="h6">P</Typography>
                 </Button>
-            </Link>
+            </Component>
         </Box>
     );
 };
