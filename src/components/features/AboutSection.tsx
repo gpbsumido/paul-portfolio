@@ -7,6 +7,7 @@ import "@/app/globals.css";
 import SocialLink from "@/components/common/SocialLink";
 import { SOCIAL_LINKS } from "@/constants/social_links";
 import paulImage from "../../assets/paul.jpeg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SocialLink {
     href: string;
@@ -21,11 +22,8 @@ interface SocialLink {
  */
 export const AboutSection = (): React.ReactElement => {
     const [clicked, setClicked] = useState(false);
-<<<<<<< Updated upstream
-=======
     const [isLoading, setIsLoading] = useState(true);
     const { t } = useLanguage();
->>>>>>> Stashed changes
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -144,7 +142,7 @@ export const AboutSection = (): React.ReactElement => {
                     textAlign: "center",
                 }}
             >
-                About Paul
+                {t("about.title")}
             </Typography>
             <Typography
                 variant="body1"
@@ -154,8 +152,7 @@ export const AboutSection = (): React.ReactElement => {
                     maxWidth: "600px",
                 }}
             >
-                I&apos;m a passionate developer and designer with a love for
-                creating beautiful, functional experiences.
+                {t("about.description")}
             </Typography>
             <Box
                 sx={{

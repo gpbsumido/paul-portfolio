@@ -8,6 +8,8 @@ import TerminalIcon from "@mui/icons-material/Terminal";
 import PreviewIcon from "@mui/icons-material/Preview";
 import { useState, useEffect } from "react";
 import React from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 /**
  * Home component - Main landing page
@@ -20,6 +22,7 @@ export default function Home(): React.ReactElement {
     const [currentIconIndex, setCurrentIconIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
+    const { t } = useLanguage();
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -45,11 +48,12 @@ export default function Home(): React.ReactElement {
 
     // Base container styles that are shared between loading and loaded states
     const containerStyles = {
-        minHeight: "100vh", // Change from height to minHeight
+        minHeight: "100vh",
         width: "100%",
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
-        overflow: "hidden", // Prevent any potential scrolling during transitions
+        overflow: "hidden",
+        position: "relative",
     };
 
     if (isLoading) {
@@ -148,6 +152,20 @@ export default function Home(): React.ReactElement {
 
     return (
         <Box sx={containerStyles}>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    right: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "48px",
+                }}
+            >
+                <LanguageSwitcher />
+            </Box>
             <AboutSection />
             <Box
                 id="designsbox"
@@ -219,7 +237,7 @@ export default function Home(): React.ReactElement {
                             fontWeight: isHovered ? "bold" : "normal",
                         }}
                     >
-                        Designs
+                        {t("navigation.designs")}
                     </span>
                 </Link>
             </Box>

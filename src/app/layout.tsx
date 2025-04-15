@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import React from "react";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
-const bodoniModa = Bodoni_Moda({
-    variable: "--font-bodoni-moda",
-    subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Paul's Portfolio",
-    description: "Glenn Paul Sumido's Portfolio",
-    keywords:
-        "Glenn Paul Sumido, Portfolio, Software Engineer, Web Developer, React, Next.js",
+    title: "Paul Sumido",
+    description: "Portfolio website of Paul Sumido",
 };
 
 interface RootLayoutProps {
@@ -31,12 +28,18 @@ export default function RootLayout({
     children,
 }: RootLayoutProps): React.ReactElement {
     return (
-        <html lang="en">
-            <body
-                className={`${bodoniModa.variable}`}
-                style={{ fontFamily: "var(--font-bodoni-moda), serif" }}
-            >
-                {children}
+        <html lang="en" suppressHydrationWarning>
+            <body className={inter.className}>
+                <LanguageProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        {children}
+                    </ThemeProvider>
+                </LanguageProvider>
             </body>
         </html>
     );
