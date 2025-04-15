@@ -147,10 +147,6 @@ export const AboutSection = (): React.ReactElement => {
                 sx={{
                     color: "var(--foreground)",
                     textAlign: "center",
-                    "&:hover": {
-                        color: "primary.main",
-                        transition: "color 0.3s ease",
-                    },
                 }}
             >
                 About Paul
@@ -161,10 +157,6 @@ export const AboutSection = (): React.ReactElement => {
                     color: "var(--foreground)",
                     textAlign: "center",
                     maxWidth: "600px",
-                    "&:hover": {
-                        color: "primary.main",
-                        transition: "color 0.3s ease",
-                    },
                 }}
             >
                 I&apos;m a passionate developer and designer with a love for
@@ -194,6 +186,10 @@ export const AboutSection = (): React.ReactElement => {
                             "&:focus": {
                                 outline: "2px solid var(--foreground)",
                                 outlineOffset: "2px",
+                            },
+                            "& svg": {
+                                width: "2.5rem",
+                                height: "2rem",
                             },
                         }}
                         aria-label={`Visit my ${link.label} profile`}

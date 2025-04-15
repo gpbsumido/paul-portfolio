@@ -19,22 +19,25 @@ export default function Home(): React.ReactElement {
     const icons = [BrushIcon, TerminalIcon, PreviewIcon];
     const [currentIconIndex, setCurrentIconIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentIconIndex((prevIndex) => (prevIndex + 1) % icons.length);
+            if (!isHovered) {
+                setCurrentIconIndex((prevIndex) => (prevIndex + 1) % icons.length);
+            }
         }, 1000);
 
-        // Simulate minimum loading time to prevent flash
+        // simulate loading time
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 500);
+        }, 80);
 
         return () => {
             clearInterval(interval);
             clearTimeout(timer);
         };
-    }, [icons.length]);
+    }, [icons.length, isHovered]);
 
     const CurrentIcon = icons[currentIconIndex];
 
@@ -146,6 +149,8 @@ export default function Home(): React.ReactElement {
             <AboutSection />
             <Box
                 id="designsbox"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 sx={{
                     width: { xs: "100%", md: "50%" },
                     minHeight: { xs: "50vh", md: "100vh" },
@@ -154,13 +159,11 @@ export default function Home(): React.ReactElement {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    transition: "all 0.6s ease",
+                    transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+                    cursor: "pointer",
                     "&:hover": {
                         background: "black",
                         color: "white",
-                        "& svg": {
-                            display: "block",
-                        },
                     },
                 }}
             >
@@ -168,25 +171,48 @@ export default function Home(): React.ReactElement {
                     href="/designs"
                     style={{
                         fontWeight: "normal",
-                        transition: "all 0.6s ease",
+                        transition: "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         fontSize: "2rem",
                         textDecoration: "none",
                         color: "inherit",
+                        padding: "2rem",
+                        width: "100%",
+                        height: "100%",
+                        justifyContent: "center",
                     }}
                 >
                     <CurrentIcon
                         sx={{
-                            margin: "auto auto 0.2em auto",
-                            display: "none",
-                            transition: "all 0.6s ease",
-                            color: "inherit",
                             fontSize: "4rem",
+                            marginBottom: "0.5em",
+                            opacity: isHovered ? 1 : 0.7,
+                            transform: isHovered ? "scale(1.1)" : "scale(1)",
+                            transition: "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
+                            color: "inherit",
+                            display: "block",
+                            animation: !isHovered ? "float 2s ease-in-out infinite" : "none",
+                            "@keyframes float": {
+                                "0%, 100%": {
+                                    transform: "translateY(0)",
+                                },
+                                "50%": {
+                                    transform: "translateY(-10px)",
+                                },
+                            },
                         }}
                     />
-                    Designs
+                    <span
+                        style={{
+                            transition: "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
+                            transform: isHovered ? "scale(1.1)" : "scale(1)",
+                            fontWeight: isHovered ? "bold" : "normal",
+                        }}
+                    >
+                        Designs
+                    </span>
                 </Link>
             </Box>
         </Box>
