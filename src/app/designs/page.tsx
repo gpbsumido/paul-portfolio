@@ -53,7 +53,7 @@ const HomeButton = ({ onClick, textColor, bgColor }: { onClick: () => void; text
     </button>
 );
 
-const ProgressBar = ({ key }: { key: number }) => (
+const ProgressBar = ({ progressBarKey }: { progressBarKey: number }) => (
     <Box
         sx={{
             position: 'absolute',
@@ -74,7 +74,7 @@ const ProgressBar = ({ key }: { key: number }) => (
                 width: '100%',
                 zIndex: 201,
             }}
-            key={key}
+            key={progressBarKey}
         />
         <style jsx>{`
             @keyframes fillProgress {
@@ -214,7 +214,7 @@ const CarouselSection = ({ images, currentIndex, onIndexChange, title, textColor
                 fill={true}
                 priority={currentIndex === 0}
             />
-            <ProgressBar key={currentIndex} />
+            <ProgressBar progressBarKey={currentIndex} />
         </Box>
         <ImageCarousel
             images={images}
