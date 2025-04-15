@@ -2,8 +2,7 @@
 
 import { Box } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Footer from "../../components/layout/Footer";
 import {
     figmaDesigns,
@@ -12,25 +11,18 @@ import {
     HELIKA_UA_IMAGES,
 } from "@/constants/constants";
 import React from "react";
-import HomeButton from "@/components/common/HomeButton";
+import { HomeButton } from "@/components/common/HomeButton";
 import CarouselSection from "@/components/common/CarouselSection";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export default function Designs(): React.ReactElement {
-    const router = useRouter();
-    const [scrollPosition, setScrollPosition] = useState(0);
+    const { t } = useLanguage();
     const [activeIframes, setActiveIframes] = useState([false, false, false]);
-    const sections = 5;
     const [currentPortalImage, setCurrentPortalImage] = useState(0);
     const [currentUAImage, setCurrentUAImage] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-
-    const handleScroll = useCallback(() => {
-        const scrollTop = window.scrollY;
-        const windowHeight = window.innerHeight;
-        const position = Math.min(scrollTop / windowHeight, sections);
-        setScrollPosition(position);
-    }, [sections]);
 
     const handleTextClick = useCallback((index: number) => {
         setActiveIframes((prev) => {
@@ -40,46 +32,9 @@ export default function Designs(): React.ReactElement {
         });
     }, []);
 
-    const getBackgroundColor = useCallback(() => {
-        const sectionHeight = 1;
-        const gapHeight = 0.25;
-        const totalHeight = sectionHeight + gapHeight;
-        const sectionIndex = Math.floor(scrollPosition / totalHeight);
-        const positionInSection =
-            (scrollPosition % totalHeight) / sectionHeight;
-        const adjustedTransition = Math.max(0, Math.min(positionInSection, 1));
-        const isEvenSection = sectionIndex % 2 === 0;
-        const colorValue = isEvenSection
-            ? Math.round(adjustedTransition * 255)
-            : Math.round((1 - adjustedTransition) * 255);
-        return `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-    }, [scrollPosition]);
-
-    const getTextColor = useCallback(() => {
-        const sectionHeight = 1.25;
-        const sectionIndex = Math.floor(scrollPosition / sectionHeight);
-        const transition = scrollPosition / sectionHeight - sectionIndex;
-        const isEvenSection = sectionIndex % 2 === 0;
-        const adjustedTransition = Math.max(
-            0,
-            Math.min((transition - 0.2) * 1.25, 1)
-        );
-        const colorValue = isEvenSection
-            ? Math.round((1 - adjustedTransition) * 255)
-            : Math.round(adjustedTransition * 255);
-        return `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-    }, [scrollPosition]);
-
     useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [handleScroll]);
-
-    useEffect(() => {
-        // Simulate loading time for images
         const loadImages = async () => {
             try {
-                // Preload images
                 const imagePromises = [
                     ...HELIKA_PORTAL_IMAGES,
                     ...HELIKA_UA_IMAGES,
@@ -97,7 +52,7 @@ export default function Designs(): React.ReactElement {
                 setIsLoading(false);
             } catch (error) {
                 console.error("Error loading images:", error);
-                setIsLoading(false); // Still set loading to false to show error state
+                setIsLoading(false);
             }
         };
 
@@ -115,9 +70,6 @@ export default function Designs(): React.ReactElement {
         return () => clearInterval(interval);
     }, []);
 
-    const bgColor = useMemo(() => getBackgroundColor(), [getBackgroundColor]);
-    const textColor = useMemo(() => getTextColor(), [getTextColor]);
-
     const designNames = ["Sunbow", "RoyaltiesFi", "CoinFX"];
 
     return (
@@ -126,31 +78,42 @@ export default function Designs(): React.ReactElement {
                 sx={{
                     height: "fit-content",
                     width: "100vw",
-                    background: bgColor,
-                    color: textColor,
+                    background: "var(--background)",
+                    color: "var(--foreground)",
                     display: "flex",
                     flexDirection: "column",
                     scrollSnapType: { xs: "none", sm: "y mandatory" },
                     overflowY: "scroll",
                 }}
             >
+                <Box
+                    sx={{
+                        position: "fixed",
+                        top: { xs: "8px", sm: "16px" },
+                        right: { xs: "8px", sm: "16px" },
+                        zIndex: 9999,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "48px",
+                    }}
+                >
+                    <LanguageSwitcher />
+                </Box>
                 <Link href="/">
                     <Box
                         sx={{
                             position: "fixed",
                             top: { xs: "8px", sm: "16px" },
                             left: { xs: "8px", sm: "16px" },
-                            zIndex: 999,
+                            zIndex: 9999,
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
+                            height: "48px",
                         }}
                     >
-                        <HomeButton
-                            onClick={() => router.push("/")}
-                            textColor={textColor}
-                            bgColor={bgColor}
-                        />
+                        <HomeButton />
                     </Box>
                 </Link>
 
@@ -159,7 +122,7 @@ export default function Designs(): React.ReactElement {
                     currentIndex={currentPortalImage}
                     onIndexChange={setCurrentPortalImage}
                     title="Helika Portal"
-                    textColor={textColor}
+                    textColor="var(--foreground)"
                     isLoading={isLoading}
                 />
 
@@ -168,24 +131,24 @@ export default function Designs(): React.ReactElement {
                     currentIndex={currentUAImage}
                     onIndexChange={setCurrentUAImage}
                     title="Helika UA"
-                    textColor={textColor}
+                    textColor="var(--foreground)"
                     isLoading={isLoading}
                 />
 
-                {[...Array(sections - 2)].map((_, index) => (
+                {[...Array(3)].map((_, index) => (
                     <Box
                         key={index}
                         sx={{
                             height: {
                                 xs: "auto",
-                                sm: `calc(100vh + ${index === sections - 3 ? "0" : "min(25vh, 25vw)"})`,
+                                sm: `calc(100vh + ${index === 2 ? "0" : "min(25vh, 25vw)"})`,
                             },
                             width: "100%",
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
                             scrollSnapAlign: { xs: "none", sm: "start" },
-                            color: textColor,
+                            color: "var(--foreground)",
                             padding: { xs: "2em 0", sm: "0" },
                         }}
                     >
@@ -235,7 +198,9 @@ export default function Designs(): React.ReactElement {
                                         }}
                                         loading="lazy"
                                     />
-                                    View {designNames[index]} Design
+                                    {t("designs.viewDesign", {
+                                        name: designNames[index],
+                                    })}
                                 </Box>
                             )}
                         </Box>
