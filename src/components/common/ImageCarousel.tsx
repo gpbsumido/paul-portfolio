@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Box, IconButton } from "@mui/material";
+import React, { JSX, useEffect, useRef } from "react";
+import { Box } from "@mui/material";
 import Image from "next/image";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import { ImageCarouselProps } from "@/types/designs";
 import ImageCarouselLoading from "./ImageCarouselLoading";
 
@@ -18,17 +16,41 @@ import ImageCarouselLoading from "./ImageCarouselLoading";
  * @param {boolean} props.isLoading - Whether the component is in loading state
  * @returns {JSX.Element} Image carousel with navigation
  */
-export default function ImageCarousel({ 
-    images, 
-    currentIndex, 
+export const ImageCarousel = ({
+    images,
+    currentIndex,
     onIndexChange,
-    isLoading = false 
-}: ImageCarouselProps & { isLoading?: boolean }): React.ReactElement {
-    const maxVisible = 3;
-    const carouselIndex = useMemo(
-        () => Math.min(currentIndex, images.length - maxVisible),
-        [currentIndex, images.length]
-    );
+    isLoading = false,
+}: ImageCarouselProps): JSX.Element => {
+    const maxVisible = 3; // Show 3 thumbnails at a time
+    const carouselRef = useRef<HTMLDivElement>(null);
+
+    // Calculate the slide position
+    const getSlidePosition = () => {
+        // If we're in the last 3 images, don't slide further
+        if (currentIndex >= images.length - maxVisible) {
+            return (images.length - maxVisible) * 33.33;
+        }
+        // Otherwise, slide normally
+        return currentIndex * 33.33;
+    };
+
+    // Handle keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "ArrowLeft") {
+                onIndexChange(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+            } else if (event.key === "ArrowRight") {
+                onIndexChange(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
+            }
+        };
+
+        const carousel = carouselRef.current;
+        if (carousel) {
+            carousel.addEventListener("keydown", handleKeyDown);
+            return () => carousel.removeEventListener("keydown", handleKeyDown);
+        }
+    }, [currentIndex, images.length, onIndexChange]);
 
     if (isLoading) {
         return <ImageCarouselLoading />;
@@ -36,6 +58,10 @@ export default function ImageCarousel({
 
     return (
         <Box
+            ref={carouselRef}
+            role="region"
+            aria-label="Image carousel thumbnails"
+            tabIndex={0}
             sx={{
                 height: { xs: "15vh", sm: "20vh" },
                 justifyContent: "center",
@@ -48,30 +74,12 @@ export default function ImageCarousel({
                 overflow: "hidden",
             }}
         >
-            <IconButton
-                onClick={() => onIndexChange(Math.max(currentIndex - 1, 0))}
-                sx={{
-                    position: "absolute",
-                    left: { xs: "4px", sm: "0" },
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    zIndex: 10,
-                    background: "rgba(0, 0, 0, 0.5)",
-                    color: "white",
-                    "&:hover": { background: "rgba(0, 0, 0, 0.7)" },
-                    padding: { xs: "4px", sm: "8px" },
-                    minWidth: { xs: "32px", sm: "48px" },
-                    minHeight: { xs: "32px", sm: "48px" },
-                }}
-            >
-                <ArrowCircleLeftIcon sx={{ fontSize: { xs: "1.5em", sm: "3em" } }} />
-            </IconButton>
             <Box
                 sx={{
                     display: "flex",
                     flexDirection: "row",
                     gap: { xs: "0.5em", sm: "1em" },
-                    transform: `translateX(-${carouselIndex * 33.33}%)`,
+                    transform: `translateX(-${getSlidePosition()}%)`,
                     transition: "transform 0.3s ease",
                     width: `${images.length * 33.33}%`,
                     paddingLeft: { xs: "2em", sm: "1em" },
@@ -91,8 +99,16 @@ export default function ImageCarousel({
                             justifyContent: "center",
                             alignItems: "center",
                             flex: "0 0 calc(33.33% - 0.5em)",
+                            opacity: currentIndex === idx ? 1 : 0.6,
+                            transition: "opacity 0.3s ease",
+                            "&:hover": {
+                                opacity: 1
+                            }
                         }}
-                        onMouseEnter={() => onIndexChange(idx)}
+                        onClick={() => onIndexChange(idx)}
+                        role="button"
+                        aria-label={`Preview image ${idx + 1}`}
+                        tabIndex={0}
                     >
                         <Image
                             src={image}
@@ -107,28 +123,6 @@ export default function ImageCarousel({
                     </Box>
                 ))}
             </Box>
-            <IconButton
-                onClick={() =>
-                    onIndexChange(
-                        Math.min(currentIndex + 1, images.length - maxVisible)
-                    )
-                }
-                sx={{
-                    position: "absolute",
-                    right: { xs: "4px", sm: "0" },
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    zIndex: 10,
-                    background: "rgba(0, 0, 0, 0.5)",
-                    color: "white",
-                    "&:hover": { background: "rgba(0, 0, 0, 0.7)" },
-                    padding: { xs: "4px", sm: "8px" },
-                    minWidth: { xs: "32px", sm: "48px" },
-                    minHeight: { xs: "32px", sm: "48px" },
-                }}
-            >
-                <ArrowCircleRightIcon sx={{ fontSize: { xs: "1.5em", sm: "3em" } }} />
-            </IconButton>
         </Box>
     );
-} 
+}; 

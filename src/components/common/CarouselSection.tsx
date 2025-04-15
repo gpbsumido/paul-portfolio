@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
-import { Box, Typography } from "@mui/material";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Box, Typography, IconButton } from "@mui/material";
 import Image from "next/image";
 import { CarouselProps } from "@/types/designs";
-import ImageCarousel from "./ImageCarousel";
 import ProgressBar from "./ProgressBar";
 import CarouselSectionLoading from "./CarouselSectionLoading";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { ImageCarousel } from "./ImageCarousel";
 
 /**
  * CarouselSection component for displaying a section with a carousel
@@ -28,12 +29,53 @@ export default function CarouselSection({
     textColor,
     isLoading = false 
 }: CarouselProps & { isLoading?: boolean }): React.ReactElement {
+    const [currentIndexState, setCurrentIndexState] = useState(currentIndex);
+    const carouselRef = useRef<HTMLDivElement>(null);
+
+    // Sync with parent's currentIndex
+    useEffect(() => {
+        setCurrentIndexState(currentIndex);
+    }, [currentIndex]);
+
+    const handlePrevious = useCallback(() => {
+        const newIndex = currentIndexState === 0 ? images.length - 1 : currentIndexState - 1;
+        setCurrentIndexState(newIndex);
+        onIndexChange(newIndex);
+    }, [currentIndexState, images.length, onIndexChange]);
+
+    const handleNext = useCallback(() => {
+        const newIndex = currentIndexState === images.length - 1 ? 0 : currentIndexState + 1;
+        setCurrentIndexState(newIndex);
+        onIndexChange(newIndex);
+    }, [currentIndexState, images.length, onIndexChange]);
+
+    // Handle keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "ArrowLeft") {
+                handlePrevious();
+            } else if (event.key === "ArrowRight") {
+                handleNext();
+            }
+        };
+
+        const carousel = carouselRef.current;
+        if (carousel) {
+            carousel.addEventListener("keydown", handleKeyDown);
+            return () => carousel.removeEventListener("keydown", handleKeyDown);
+        }
+    }, [handleNext, handlePrevious, images.length]); // Add dependencies
+
     if (isLoading) {
         return <CarouselSectionLoading />;
     }
 
     return (
         <Box
+            ref={carouselRef}
+            role="region"
+            aria-label={`${title} carousel`}
+            tabIndex={0}
             sx={{
                 height: { xs: "auto", sm: `calc(100vh + min(25vh, 25vw))` },
                 width: "100%",
@@ -45,6 +87,10 @@ export default function CarouselSection({
                 justifyContent: "start",
                 paddingTop: { xs: "2em", sm: "5em" },
                 paddingBottom: { xs: "2em", sm: "0" },
+                "&:focus": {
+                    outline: "2px solid #fff",
+                    outlineOffset: "2px",
+                },
             }}
         >
             <Typography
@@ -77,8 +123,8 @@ export default function CarouselSection({
                 }}
             >
                 <Image
-                    src={images[currentIndex]}
-                    alt={`${title} image ${currentIndex + 1}`}
+                    src={images[currentIndexState]}
+                    alt={`${title} image ${currentIndexState + 1}`}
                     style={{
                         objectFit: "contain",
                         zIndex: 100,
@@ -87,15 +133,82 @@ export default function CarouselSection({
                         height: "100%",
                     }}
                     fill={true}
-                    priority={currentIndex === 0}
+                    priority={currentIndexState === 0}
                 />
-                <ProgressBar progressKey={currentIndex} />
+                <ProgressBar progressKey={currentIndexState} />
             </Box>
-            <ImageCarousel
-                images={images}
-                currentIndex={currentIndex}
-                onIndexChange={onIndexChange}
-            />
+            <Box
+                sx={{
+                    position: "relative",
+                    width: "100%",
+                    height: "400px",
+                    overflow: "hidden",
+                }}
+            >
+                <ImageCarousel
+                    images={images}
+                    currentIndex={currentIndexState}
+                    onIndexChange={setCurrentIndexState}
+                />
+                <IconButton
+                    onClick={handlePrevious}
+                    aria-label="Previous image"
+                    sx={{
+                        position: "absolute",
+                        left: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "white",
+                        bgcolor: "rgba(0, 0, 0, 0.5)",
+                        "&:hover": { bgcolor: "rgba(0, 0, 0, 0.7)" },
+                        zIndex: 1,
+                    }}
+                >
+                    <ChevronLeft />
+                </IconButton>
+                <IconButton
+                    onClick={handleNext}
+                    aria-label="Next image"
+                    sx={{
+                        position: "absolute",
+                        right: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "white",
+                        bgcolor: "rgba(0, 0, 0, 0.5)",
+                        "&:hover": { bgcolor: "rgba(0, 0, 0, 0.7)" },
+                        zIndex: 1,
+                    }}
+                >
+                    <ChevronRight />
+                </IconButton>
+            </Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mt: 2,
+                    gap: 1,
+                }}
+            >
+                {images.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setCurrentIndexState(index)}
+                        aria-label={`Go to image ${index + 1} of ${images.length}`}
+                        aria-current={currentIndexState === index}
+                        style={{
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            border: "none",
+                            backgroundColor: currentIndexState === index ? "white" : "gray",
+                            cursor: "pointer",
+                            padding: 0,
+                        }}
+                    />
+                ))}
+            </Box>
         </Box>
     );
 } 

@@ -1,6 +1,6 @@
 "use client";
 
-import AboutSection from "@/components/features/AboutSection";
+import { AboutSection } from "@/components/features/AboutSection";
 import { Box, Skeleton } from "@mui/material";
 import Link from "next/link";
 import BrushIcon from "@mui/icons-material/Brush";

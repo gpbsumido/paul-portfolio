@@ -1,97 +1,73 @@
 "use client";
 
-import { Box, Skeleton } from "@mui/material";
-import React from "react";
+import { Box, Typography, Link, Skeleton } from "@mui/material";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import MailIcon from "@mui/icons-material/Mail";
-import PaulImg from "@/assets/paul.jpeg";
 import "@/app/globals.css";
 import SocialLink from "@/components/common/SocialLink";
+import { SOCIAL_LINKS } from "@/constants/social_links";
+import paulImage from "../../assets/paul.jpeg";
+
+interface SocialLink {
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+}
 
 /**
  * AboutSection component displaying personal information and social links
- * @component
  * @description A section component that displays the author's image, about text, and social media links
  * @returns {JSX.Element} About section with image, text, and social links
  */
-export default function AboutSection() {
-    const [clicked, setClicked] = React.useState(false);
-    const [isLoading, setIsLoading] = React.useState(true);
+export const AboutSection = (): React.ReactElement => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [clicked, setClicked] = useState(false);
 
-    const socialLinks = [
-        {
-            href: "https://www.linkedin.com/in/paulsumido/",
-            icon: LinkedInIcon,
-            text: "@paulsumido",
-        },
-        {
-            href: "https://github.com/gpbsumido",
-            icon: GitHubIcon,
-            text: "@gpbsumido",
-        },
-        {
-            href: "mailto:psumido@gmail.com",
-            icon: MailIcon,
-            text: "psumido@gmail.com",
-        },
-    ];
+    useEffect(() => {
+        const preloadImage = async () => {
+            try {
+                const img = new window.Image();
+                img.src = paulImage.src;
+                img.onload = () => setIsLoading(false);
+                img.onerror = () => setIsLoading(false);
+            } catch (error) {
+                console.error("Error preloading image:", error);
+                setIsLoading(false);
+            }
+        };
 
-    React.useEffect(() => {
-        // Preload the profile image
-        const img = new window.Image();
-        img.src = PaulImg.src;
-        img.onload = () => setIsLoading(false);
-        img.onerror = () => setIsLoading(false);
+        preloadImage();
     }, []);
 
     if (isLoading) {
         return (
             <Box
                 sx={{
-                    width: { xs: "100%", md: "50vw" },
-                    height: { xs: "50vh", md: "100%" },
-                    background: "white",
-                    color: "black",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "center",
                     alignItems: "center",
-                    transition: "all 0.6s ease",
-                    fontSize: { xs: "1.5rem", md: "2rem" },
+                    gap: 2,
+                    p: 3,
                 }}
             >
                 <Skeleton
-                    variant="rectangular"
-                    width="200px"
-                    height="300px"
+                    variant="circular"
+                    width={200}
+                    height={200}
                     sx={{ bgcolor: "grey.800" }}
                 />
                 <Skeleton
                     variant="text"
-                    width="150px"
-                    height="40px"
-                    sx={{ bgcolor: "grey.800", mt: 2 }}
+                    width="80%"
+                    height={40}
+                    sx={{ bgcolor: "grey.800" }}
                 />
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.5em",
-                        mt: 2,
-                    }}
-                >
-                    {socialLinks.map((_, index) => (
-                        <Skeleton
-                            key={index}
-                            variant="text"
-                            width="100px"
-                            height="30px"
-                            sx={{ bgcolor: "grey.800" }}
-                        />
-                    ))}
-                </Box>
+                <Skeleton
+                    variant="text"
+                    width="60%"
+                    height={20}
+                    sx={{ bgcolor: "grey.800" }}
+                />
             </Box>
         );
     }
@@ -99,64 +75,114 @@ export default function AboutSection() {
     return (
         <Box
             sx={{
-                width: { xs: "100%", md: "50vw" },
-                height: { xs: "50vh", md: "100%" },
-                background: "white",
-                color: "black",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "center",
                 alignItems: "center",
-                transition: "all 0.6s ease",
+                gap: 2,
+                p: 3,
+                width: "50%",
+                height: "50vh",
+                justifyContent: "center",
                 "&:hover": {
-                    background: "black",
-                    color: "white",
+                    color: "primary.main",
+                    transition: "color 0.3s ease"
                 },
-                fontSize: { xs: "1.5rem", md: "2rem" },
+                margin: "auto auto"
             }}
         >
             <Box
                 sx={{
-                    position: "relative",
+                    position: "relative",        
                     height: { xs: "10em", md: "20em" },
                     aspectRatio: "9/13",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    "&:focus": {
+                        outline: "2px solid #fff",
+                        outlineOffset: "2px",
+                    },
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label="Click to see a fun animation"
+                onClick={() => setClicked(!clicked)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        setClicked(!clicked);
+                    }
                 }}
             >
                 <Image
-                    src={PaulImg}
+                    src={paulImage}
+                    alt="Paul Sumido"
                     fill
-                    alt="Picture of the author"
                     style={{
                         objectFit: "cover",
-                        zIndex: 100,
-                        marginBottom: "2em",
                     }}
+                    priority
                 />
             </Box>
-            <div
-                className={`about-text ${clicked ? "clicked" : ""}`}
-                onClick={() => setClicked(true)}
+            <Typography
+                variant="h4"
+                component="h1"
+                sx={{ 
+                    color: "white", 
+                    textAlign: "center",
+                    "&:hover": {
+                        color: "primary.main",
+                        transition: "color 0.3s ease"
+                    }
+                }}
             >
                 About Paul
-            </div>
+            </Typography>
+            <Typography
+                variant="body1"
+                sx={{ 
+                    color: "white", 
+                    textAlign: "center", 
+                    maxWidth: "600px",
+                    "&:hover": {
+                        color: "primary.main",
+                        transition: "color 0.3s ease"
+                    }
+                }}
+            >
+                I&apos;m a passionate developer and designer with a
+                love for creating beautiful, functional experiences.
+            </Typography>
             <Box
                 sx={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "0.2em",
-                    marginTop: "0.5em",
-                    width: "5em"
+                    gap: 2,
+                    mt: 2,
                 }}
+                role="navigation"
+                aria-label="Social media links"
             >
-                {socialLinks.map((link, index) => (
-                    <SocialLink
-                        key={index}
+                {(SOCIAL_LINKS as SocialLink[]).map((link) => (
+                    <Link
+                        key={link.href}
                         href={link.href}
-                        icon={link.icon}
-                        text={link.text}
-                    />
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                            color: "white",
+                            "&:hover": { 
+                                color: "primary.main",
+                                transition: "color 0.3s ease"
+                            },
+                            "&:focus": {
+                                outline: "2px solid #fff",
+                                outlineOffset: "2px",
+                            },
+                        }}
+                        aria-label={`Visit my ${link.label} profile`}
+                    >
+                        {link.icon}
+                    </Link>
                 ))}
             </Box>
         </Box>
     );
-}
+};

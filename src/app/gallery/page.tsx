@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Skeleton } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Image, { StaticImageData } from "next/image";
 import { useEffect, useState } from "react";
 import React from "react";
@@ -105,6 +105,9 @@ export default function Gallery(): React.ReactElement {
     if (isLoading) {
         return (
             <Box
+                role="alert"
+                aria-busy="true"
+                aria-label="Loading gallery images"
                 sx={{
                     padding: "20px",
                     width: "100%",
@@ -132,11 +135,14 @@ export default function Gallery(): React.ReactElement {
                                     overflow: "hidden",
                                 }}
                             >
-                                <Skeleton
-                                    variant="rectangular"
-                                    width="100%"
-                                    height="100%"
-                                    sx={{ bgcolor: "grey.800" }}
+                                <div
+                                    role="presentation"
+                                    aria-hidden="true"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        backgroundColor: "#e0e0e0",
+                                    }}
                                 />
                             </Box>
                         ))}
@@ -148,13 +154,26 @@ export default function Gallery(): React.ReactElement {
 
     return (
         <Box
+            component="main"
+            role="main"
+            aria-label="Image gallery"
             sx={{
                 padding: "20px",
                 width: "100%",
                 minHeight: "100vh",
-                backgroundColor: "#f5f5f5",
             }}
         >
+            <Typography
+                variant="h1"
+                sx={{
+                    fontSize: "2rem",
+                    fontWeight: "bold",
+                    marginBottom: "1rem",
+                    textAlign: "center",
+                }}
+            >
+                Gallery
+            </Typography>
             {getOptimalRowLayout(images, containerWidth).map(
                 (row, rowIndex) => {
                     const totalAspectRatio = row.reduce(
@@ -184,6 +203,16 @@ export default function Gallery(): React.ReactElement {
                                 return (
                                     <Box
                                         key={`${rowIndex}-${imageIndex}`}
+                                        role="img"
+                                        aria-label={`Gallery image ${rowIndex * row.length + imageIndex + 1} of ${images.length}`}
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                setHoveredImage(
+                                                    hoveredImage ? null : `${rowIndex}-${imageIndex}`
+                                                );
+                                            }
+                                        }}
                                         sx={{
                                             position: "relative",
                                             width: `${width}px`,
@@ -192,6 +221,10 @@ export default function Gallery(): React.ReactElement {
                                             transform: `scale(${scale})`,
                                             transition: "transform 0.3s ease",
                                             zIndex: isHovered ? 1 : 0,
+                                            "&:focus": {
+                                                outline: "2px solid #fff",
+                                                outlineOffset: "2px",
+                                            },
                                         }}
                                         onMouseEnter={() =>
                                             setHoveredImage(
@@ -204,7 +237,7 @@ export default function Gallery(): React.ReactElement {
                                     >
                                         <Image
                                             src={image.src}
-                                            alt={`Gallery image ${rowIndex}-${imageIndex}`}
+                                            alt={`Gallery image ${rowIndex * row.length + imageIndex + 1} of ${images.length}`}
                                             fill
                                             style={{
                                                 objectFit: "cover",

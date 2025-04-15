@@ -24,6 +24,7 @@ export default function Footer(): React.ReactElement {
                 position: "fixed",
                 bottom: 0,
                 left: 0,
+                zIndex: 1000,
             }}
         >
             <IconButton
