@@ -123,6 +123,10 @@ export const ImageCarousel = ({
                                 objectFit: "cover",
                             }}
                             loading="lazy"
+                            sizes="(max-width: 768px) 33vw, 33vw"
+                            quality={75}
+                            width={400}
+                            height={233}
                         />
                     </Box>
                 ))}

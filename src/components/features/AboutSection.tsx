@@ -120,6 +120,9 @@ export const AboutSection = (): React.ReactElement => {
                         objectFit: "cover",
                     }}
                     priority
+                    sizes="(max-width: 768px) 10em, 20em"
+                    quality={90}
+                    placeholder="blur"
                 />
             </Box>
             <Typography

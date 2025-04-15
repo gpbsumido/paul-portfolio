@@ -136,6 +136,12 @@ export default function CarouselSection({
                     }}
                     fill={true}
                     priority={currentIndexState === 0}
+                    sizes="(max-width: 768px) 90vw, (max-width: 1200px) 90vw, 90vw"
+                    quality={85}
+                    placeholder="blur"
+                    blurDataURL={`data:image/svg+xml;base64,${Buffer.from(
+                        '<svg width="40" height="24" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#333"/></svg>'
+                    ).toString('base64')}`}
                 />
                 <ProgressBar progressKey={currentIndexState} />
             </Box>
