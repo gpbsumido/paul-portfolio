@@ -11,7 +11,7 @@ import {
     HELIKA_UA_IMAGES,
 } from "@/constants/constants";
 import React from "react";
-import { HomeButton } from "/Users/paulsumido/paul-portfolio/src/components/common/HomeButton"
+import { HomeButton } from "/Users/paulsumido/paul-portfolio/src/components/common/HomeButton";
 import CarouselSection from "@/components/common/CarouselSection";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";

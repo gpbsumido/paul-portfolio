@@ -103,19 +103,24 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("language", lang);
     };
 
-    const t = (key: TranslationPath, params?: Record<string, string>): string => {
+    const t = (
+        key: TranslationPath,
+        params?: Record<string, string>
+    ): string => {
         const [section, subKey] = key.split(".");
-        const translation = translations[language][section as TranslationKey][subKey as keyof Translations[TranslationKey]] as string;
-        
+        const translation = translations[language][section as TranslationKey][
+            subKey as keyof Translations[TranslationKey]
+        ] as string;
+
         if (!translation) return key;
-        
+
         if (params) {
             return translation.replace(
                 /\{(\w+)\}/g,
                 (_: string, paramKey: string) => params[paramKey] || ""
             );
         }
-        
+
         return translation;
     };
 
