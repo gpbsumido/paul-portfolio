@@ -46,19 +46,18 @@ export default function Home(): React.ReactElement {
 
     const CurrentIcon = icons[currentIconIndex];
 
-    // Base container styles that are shared between loading and loaded states
-    const containerStyles = {
-        minHeight: "100vh",
-        width: "100%",
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        overflow: "hidden",
-        position: "relative",
-    };
-
     if (isLoading) {
         return (
-            <Box sx={containerStyles}>
+            <Box
+                sx={{
+                    height: { xs: "100vh", md: "100vh" },
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    overflow: "hidden",
+                    position: "relative",
+                }}
+            >
                 {/* About Section Skeleton */}
                 <Box
                     sx={{
@@ -151,7 +150,16 @@ export default function Home(): React.ReactElement {
     }
 
     return (
-        <Box sx={containerStyles}>
+        <Box
+            sx={{
+                height: { xs: "100vh", md: "100vh" },
+                width: "100%",
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                overflow: "hidden",
+                position: "relative",
+            }}
+        >
             <Box
                 sx={{
                     position: "fixed",
@@ -173,7 +181,7 @@ export default function Home(): React.ReactElement {
                 onMouseLeave={() => setIsHovered(false)}
                 sx={{
                     width: { xs: "100%", md: "50%" },
-                    minHeight: { xs: "50vh", md: "100vh" },
+                    height: { xs: "50vh", md: "100vh" },
                     background: "white",
                     color: "black",
                     display: "flex",

@@ -110,15 +110,17 @@ export const AboutSection = (): React.ReactElement => {
                 sx={{
                     position: "relative",
                     width: { xs: "10em", md: "20em" },
-                    aspectRatio: "9/13",
+                    height: { xs: "auto", md: "auto" },
+                    aspectRatio: { xs: "9/13", md: "9/13" },
                     overflow: "hidden",
                     cursor: "pointer",
-                    borderRadius: 2,
+                    borderRadius: { xs: 2, md: 2 },
                     "&:focus": {
                         outline: "2px solid var(--foreground)",
                         outlineOffset: "2px",
                     },
                 }}
+                className={typeof window !== 'undefined' && window.innerWidth <= 768 && window.innerHeight < window.innerWidth ? 'mobile-landscape' : ''}
                 tabIndex={0}
                 role="button"
                 aria-label="Click to see a fun animation"
@@ -135,6 +137,7 @@ export const AboutSection = (): React.ReactElement => {
                     fill
                     style={{
                         objectFit: "cover",
+                        objectPosition: "50% 12%",
                     }}
                     priority
                     sizes="(max-width: 768px) 10em, 20em"
