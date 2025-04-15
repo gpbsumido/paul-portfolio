@@ -25,6 +25,8 @@ export const HomeButton = ({
 
     return (
         <Box
+            role="navigation"
+            aria-label="Home navigation"
             sx={{
                 position: "fixed",
                 top: { xs: "8px", sm: "16px" },

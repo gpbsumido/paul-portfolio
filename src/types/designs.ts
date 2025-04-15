@@ -1,4 +1,5 @@
 import { StaticImageData } from "next/image";
+import { SxProps, Theme } from "@mui/material";
 
 export interface CarouselProps {
     images: (string | StaticImageData)[];
@@ -7,6 +8,8 @@ export interface CarouselProps {
     title: string;
     textColor: string;
     isLoading?: boolean;
+    maxWidth?: string;
+    sx?: SxProps<Theme>;
 }
 
 export interface ImageCarouselProps {

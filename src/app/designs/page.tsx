@@ -115,95 +115,127 @@ export default function Designs(): React.ReactElement {
                     <HomeButton component={Link} href="/" />
                 </Box>
 
-                <CarouselSection
-                    images={HELIKA_PORTAL_IMAGES}
-                    currentIndex={currentPortalImage}
-                    onIndexChange={setCurrentPortalImage}
-                    title="Helika Portal"
-                    textColor="var(--foreground)"
-                    isLoading={isLoading}
-                />
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: { xs: "2em", sm: "4em" },
+                        paddingBottom: { xs: "2em", sm: "4em" },
+                    }}
+                >
+                    <CarouselSection
+                        images={HELIKA_PORTAL_IMAGES}
+                        currentIndex={currentPortalImage}
+                        onIndexChange={setCurrentPortalImage}
+                        title="Helika Portal"
+                        textColor="var(--foreground)"
+                        isLoading={isLoading}
+                        maxWidth="90vw"
+                        sx={{ marginBottom: { xs: "4em", sm: "6em" } }}
+                    />
 
-                <CarouselSection
-                    images={HELIKA_UA_IMAGES}
-                    currentIndex={currentUAImage}
-                    onIndexChange={setCurrentUAImage}
-                    title="Helika UA"
-                    textColor="var(--foreground)"
-                    isLoading={isLoading}
-                />
+                    <CarouselSection
+                        images={HELIKA_UA_IMAGES}
+                        currentIndex={currentUAImage}
+                        onIndexChange={setCurrentUAImage}
+                        title="Helika UA"
+                        textColor="var(--foreground)"
+                        isLoading={isLoading}
+                        maxWidth="90vw"
+                        sx={{ marginBottom: { xs: "4em", sm: "6em" } }}
+                    />
 
-                {[...Array(3)].map((_, index) => (
-                    <Box
-                        key={index}
-                        sx={{
-                            height: {
-                                xs: "auto",
-                                sm: `calc(100vh + ${index === 2 ? "0" : "min(25vh, 25vw)"})`,
-                            },
-                            width: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            scrollSnapAlign: { xs: "none", sm: "start" },
-                            color: "var(--foreground)",
-                            padding: { xs: "2em 0", sm: "0" },
-                        }}
-                    >
+                    {[...Array(3)].map((_, index) => (
                         <Box
+                            key={index}
                             sx={{
-                                height: { xs: "auto", sm: "100vh" },
-                                width: "100%",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                gap: { xs: "0.5em", sm: "1em" },
-                                padding: { xs: "1em", sm: "0" },
+                                marginBottom: { xs: "4em", sm: "6em" },
                             }}
                         >
-                            {activeIframes[index] ? (
-                                <iframe
-                                    src={figmaDesigns[index]}
-                                    style={{
-                                        width: "90%",
-                                        height: "90%",
-                                        border: "none",
-                                    }}
-                                />
-                            ) : (
+                            <Box
+                                id="design-product"
+                                sx={{
+                                    height: {
+                                        xs: "calc(100dvh - 120px)",
+                                        sm: "calc(100vh - 120px)",
+                                    },
+                                    width: "100%",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    color: "var(--foreground)",
+                                    padding: { xs: "2em 0", sm: "0" },
+                                    minHeight: {
+                                        xs: "calc(100dvh - 120px)",
+                                        sm: "calc(100vh - 120px)",
+                                    },
+                                }}
+                            >
                                 <Box
                                     sx={{
-                                        cursor: "pointer",
-                                        textDecoration: "underline",
-                                        fontSize: { xs: "1rem", sm: "1.5rem" },
-                                        fontWeight: "bold",
+                                        height: "100%",
+                                        width: "100%",
                                         display: "flex",
                                         flexDirection: "column",
-                                        alignItems: "center",
                                         justifyContent: "center",
-                                        gap: { xs: "0.25em", sm: "0.5em" },
+                                        alignItems: "center",
+                                        gap: { xs: "0.5em", sm: "1em" },
+                                        padding: { xs: "1em", sm: "0" },
+                                        minHeight: "100%",
                                     }}
-                                    onClick={() => handleTextClick(index)}
                                 >
-                                    <Image
-                                        src={figmaImages[index]}
-                                        alt={`Project ${designNames[index]}`}
-                                        style={{
-                                            width: "80%",
-                                            height: "auto",
-                                            objectFit: "contain",
-                                        }}
-                                        loading="lazy"
-                                    />
-                                    {t("designs.viewDesign", {
-                                        name: designNames[index],
-                                    })}
+                                    {activeIframes[index] ? (
+                                        <iframe
+                                            src={figmaDesigns[index]}
+                                            style={{
+                                                width: "90%",
+                                                height: "90%",
+                                                border: "none",
+                                            }}
+                                        />
+                                    ) : (
+                                        <Box
+                                            sx={{
+                                                cursor: "pointer",
+                                                textDecoration: "underline",
+                                                fontSize: {
+                                                    xs: "1rem",
+                                                    sm: "1.5rem",
+                                                },
+                                                fontWeight: "bold",
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: {
+                                                    xs: "0.25em",
+                                                    sm: "0.5em",
+                                                },
+                                            }}
+                                            onClick={() =>
+                                                handleTextClick(index)
+                                            }
+                                        >
+                                            <Image
+                                                src={figmaImages[index]}
+                                                alt={`Project ${designNames[index]}`}
+                                                style={{
+                                                    width: "80%",
+                                                    height: "auto",
+                                                    objectFit: "contain",
+                                                }}
+                                                loading="lazy"
+                                            />
+                                            {t("designs.viewDesign", {
+                                                name: designNames[index],
+                                            })}
+                                        </Box>
+                                    )}
                                 </Box>
-                            )}
+                            </Box>
                         </Box>
-                    </Box>
-                ))}
+                    ))}
+                </Box>
             </Box>
             <Footer />
         </>

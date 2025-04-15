@@ -8,8 +8,10 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Paul Sumido",
-    description: "Portfolio website of Paul Sumido",
+    title: "Paul's Portfolio",
+    description: "Glenn Paul Sumido's Portfolio",
+    keywords:
+        "Glenn Paul Sumido, Portfolio, Software Engineer, Web Developer, React, Next.js",
 };
 
 interface RootLayoutProps {

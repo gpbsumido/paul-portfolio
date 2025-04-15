@@ -28,6 +28,8 @@ export default function CarouselSection({
     title,
     textColor,
     isLoading = false,
+    maxWidth,
+    sx,
 }: CarouselProps & { isLoading?: boolean }): React.ReactElement {
     const [currentIndexState, setCurrentIndexState] = useState(currentIndex);
     const carouselRef = useRef<HTMLDivElement>(null);
@@ -79,20 +81,20 @@ export default function CarouselSection({
             aria-label={`${title} carousel`}
             tabIndex={0}
             sx={{
-                height: { xs: "auto", sm: `calc(100vh + min(25vh, 25vw))` },
+                height: { xs: "calc(100dvh - 80px)", sm: "calc(100vh - 80px)" },
                 width: "100%",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                scrollSnapAlign: "start",
+                scrollSnapAlign: "none",
                 color: textColor,
-                justifyContent: "start",
-                paddingTop: { xs: "2em", sm: "5em" },
-                paddingBottom: { xs: "2em", sm: "0" },
+                justifyContent: "center",
+                padding: { xs: "2em 0", sm: "0" },
                 "&:focus": {
                     outline: "2px solid #fff",
                     outlineOffset: "2px",
                 },
+                ...sx,
             }}
         >
             <Typography
@@ -110,9 +112,12 @@ export default function CarouselSection({
             <Box
                 id="designsbox"
                 sx={{
-                    height: { xs: "40vh", sm: "60vh" },
+                    height: {
+                        xs: "calc(50dvh - 80px)",
+                        sm: "calc(60vh - 80px)",
+                    },
                     width: { xs: "90%", sm: "auto" },
-                    maxWidth: { xs: "100%", sm: "90vw" },
+                    maxWidth: { xs: "90vw", sm: maxWidth || "90vw" },
                     aspectRatio: "3593/2090",
                     position: "relative",
                     boxShadow: "10px 0 10px -4px gray, -10px 0 10px -4px gray",
@@ -148,11 +153,13 @@ export default function CarouselSection({
             <Box
                 sx={{
                     position: "relative",
-                    width: "100%",
+                    width: { xs: "90%", sm: "100%" },
+                    maxWidth: { xs: "90vw", sm: maxWidth || "90vw" },
                     minHeight: "200px",
                     display: "flex",
                     alignItems: "center",
-                    overflow: "visible",
+                    overflow: "hidden",
+                    margin: "0 auto",
                 }}
             >
                 <ImageCarousel
@@ -165,7 +172,7 @@ export default function CarouselSection({
                     aria-label="Previous image"
                     sx={{
                         position: "absolute",
-                        left: 0,
+                        left: { xs: "4px", sm: "8px" },
                         top: "50%",
                         transform: "translateY(-50%)",
                         color: "white",
@@ -181,7 +188,7 @@ export default function CarouselSection({
                     aria-label="Next image"
                     sx={{
                         position: "absolute",
-                        right: 0,
+                        right: { xs: "4px", sm: "8px" },
                         top: "50%",
                         transform: "translateY(-50%)",
                         color: "white",
@@ -197,26 +204,26 @@ export default function CarouselSection({
                 sx={{
                     display: "flex",
                     justifyContent: "center",
-                    mt: 2,
                     gap: 1,
+                    mt: 2,
                 }}
             >
                 {images.map((_, index) => (
-                    <button
+                    <Box
                         key={index}
-                        onClick={() => setCurrentIndexState(index)}
-                        aria-label={`Go to image ${index + 1} of ${images.length}`}
-                        aria-current={currentIndexState === index}
-                        style={{
-                            width: "10px",
-                            height: "10px",
+                        sx={{
+                            width: 8,
+                            height: 8,
                             borderRadius: "50%",
-                            border: "none",
-                            backgroundColor:
-                                currentIndexState === index ? "white" : "gray",
+                            bgcolor:
+                                index === currentIndex
+                                    ? "var(--foreground)"
+                                    : "var(--background)",
+                            border: "1px solid var(--foreground)",
                             cursor: "pointer",
-                            padding: 0,
+                            transition: "all 0.3s ease",
                         }}
+                        onClick={() => onIndexChange(index)}
                     />
                 ))}
             </Box>
