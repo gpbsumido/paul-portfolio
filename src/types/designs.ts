@@ -6,12 +6,14 @@ export interface CarouselProps {
     onIndexChange: (index: number) => void;
     title: string;
     textColor: string;
+    isLoading?: boolean;
 }
 
 export interface ImageCarouselProps {
     images: (string | StaticImageData)[];
     currentIndex: number;
     onIndexChange: (index: number) => void;
+    isLoading?: boolean;
 }
 
 export interface HomeButtonProps {

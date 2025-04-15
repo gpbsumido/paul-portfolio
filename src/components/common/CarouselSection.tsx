@@ -6,6 +6,7 @@ import Image from "next/image";
 import { CarouselProps } from "@/types/designs";
 import ImageCarousel from "./ImageCarousel";
 import ProgressBar from "./ProgressBar";
+import CarouselSectionLoading from "./CarouselSectionLoading";
 
 /**
  * CarouselSection component for displaying a section with a carousel
@@ -16,9 +17,21 @@ import ProgressBar from "./ProgressBar";
  * @param {(index: number) => void} props.onIndexChange - Function to change current index
  * @param {string} props.title - Section title
  * @param {string} props.textColor - Text color
+ * @param {boolean} props.isLoading - Whether the component is in loading state
  * @returns {JSX.Element} Section with carousel and title
  */
-export default function CarouselSection({ images, currentIndex, onIndexChange, title, textColor }: CarouselProps): React.ReactElement {
+export default function CarouselSection({ 
+    images, 
+    currentIndex, 
+    onIndexChange, 
+    title, 
+    textColor,
+    isLoading = false 
+}: CarouselProps & { isLoading?: boolean }): React.ReactElement {
+    if (isLoading) {
+        return <CarouselSectionLoading />;
+    }
+
     return (
         <Box
             sx={{

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import React from "react";
 import Image from "next/image";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -18,6 +18,7 @@ import SocialLink from "@/components/common/SocialLink";
  */
 export default function AboutSection() {
     const [clicked, setClicked] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(true);
 
     const socialLinks = [
         {
@@ -36,6 +37,64 @@ export default function AboutSection() {
             text: "psumido@gmail.com",
         },
     ];
+
+    React.useEffect(() => {
+        // Preload the profile image
+        const img = new window.Image();
+        img.src = PaulImg.src;
+        img.onload = () => setIsLoading(false);
+        img.onerror = () => setIsLoading(false);
+    }, []);
+
+    if (isLoading) {
+        return (
+            <Box
+                sx={{
+                    width: { xs: "100%", md: "50vw" },
+                    height: { xs: "50vh", md: "100%" },
+                    background: "white",
+                    color: "black",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    transition: "all 0.6s ease",
+                    fontSize: { xs: "1.5rem", md: "2rem" },
+                }}
+            >
+                <Skeleton
+                    variant="rectangular"
+                    width="200px"
+                    height="300px"
+                    sx={{ bgcolor: "grey.800" }}
+                />
+                <Skeleton
+                    variant="text"
+                    width="150px"
+                    height="40px"
+                    sx={{ bgcolor: "grey.800", mt: 2 }}
+                />
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.5em",
+                        mt: 2,
+                    }}
+                >
+                    {socialLinks.map((_, index) => (
+                        <Skeleton
+                            key={index}
+                            variant="text"
+                            width="100px"
+                            height="30px"
+                            sx={{ bgcolor: "grey.800" }}
+                        />
+                    ))}
+                </Box>
+            </Box>
+        );
+    }
 
     return (
         <Box

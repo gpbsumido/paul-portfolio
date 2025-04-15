@@ -23,6 +23,7 @@ export default function Designs(): React.ReactElement {
     const sections = 5;
     const [currentPortalImage, setCurrentPortalImage] = useState(0);
     const [currentUAImage, setCurrentUAImage] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleScroll = useCallback(() => {
         const scrollTop = window.scrollY;
@@ -73,6 +74,34 @@ export default function Designs(): React.ReactElement {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, [handleScroll]);
+
+    useEffect(() => {
+        // Simulate loading time for images
+        const loadImages = async () => {
+            try {
+                // Preload images
+                const imagePromises = [
+                    ...HELIKA_PORTAL_IMAGES,
+                    ...HELIKA_UA_IMAGES,
+                ].map((src) => {
+                    return new Promise<void>((resolve, reject) => {
+                        const img = new window.Image();
+                        img.src = typeof src === 'string' ? src : src.src;
+                        img.onload = () => resolve();
+                        img.onerror = () => reject(new Error('Failed to load image'));
+                    });
+                });
+
+                await Promise.all(imagePromises);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error loading images:', error);
+                setIsLoading(false); // Still set loading to false to show error state
+            }
+        };
+
+        loadImages();
+    }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -130,6 +159,7 @@ export default function Designs(): React.ReactElement {
                     onIndexChange={setCurrentPortalImage}
                     title="Helika Portal"
                     textColor={textColor}
+                    isLoading={isLoading}
                 />
 
                 <CarouselSection
@@ -138,6 +168,7 @@ export default function Designs(): React.ReactElement {
                     onIndexChange={setCurrentUAImage}
                     title="Helika UA"
                     textColor={textColor}
+                    isLoading={isLoading}
                 />
 
                 {[...Array(sections - 2)].map((_, index) => (

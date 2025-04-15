@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import Image, { StaticImageData } from "next/image";
 import { useEffect, useState } from "react";
 import React from "react";
@@ -22,6 +22,7 @@ export default function Gallery(): React.ReactElement {
     const [images, setImages] = useState<ImageData[]>([]);
     const [containerWidth, setContainerWidth] = useState(0);
     const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     /**
      * Updates the container width based on window resize
@@ -39,6 +40,30 @@ export default function Gallery(): React.ReactElement {
         updateWidth();
         window.addEventListener("resize", updateWidth);
         return () => window.removeEventListener("resize", updateWidth);
+    }, []);
+
+    useEffect(() => {
+        // Preload images
+        const loadImages = async () => {
+            try {
+                const imagePromises = HELIKA_PORTAL_IMAGES.map((src) => {
+                    return new Promise<void>((resolve, reject) => {
+                        const img = new window.Image();
+                        img.src = typeof src === 'string' ? src : src.src;
+                        img.onload = () => resolve();
+                        img.onerror = () => reject(new Error('Failed to load image'));
+                    });
+                });
+
+                await Promise.all(imagePromises);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error loading images:', error);
+                setIsLoading(false);
+            }
+        };
+
+        loadImages();
     }, []);
 
     /**
@@ -76,6 +101,50 @@ export default function Gallery(): React.ReactElement {
 
         return rows;
     };
+
+    if (isLoading) {
+        return (
+            <Box
+                sx={{
+                    padding: "20px",
+                    width: "100%",
+                    minHeight: "100vh",
+                    backgroundColor: "#f5f5f5",
+                }}
+            >
+                {[...Array(3)].map((_, rowIndex) => (
+                    <Box
+                        key={rowIndex}
+                        sx={{
+                            display: "flex",
+                            gap: "4px",
+                            marginBottom: "4px",
+                            alignItems: "center",
+                        }}
+                    >
+                        {[...Array(3)].map((_, imageIndex) => (
+                            <Box
+                                key={`${rowIndex}-${imageIndex}`}
+                                sx={{
+                                    position: "relative",
+                                    width: "30%",
+                                    height: "300px",
+                                    overflow: "hidden",
+                                }}
+                            >
+                                <Skeleton
+                                    variant="rectangular"
+                                    width="100%"
+                                    height="100%"
+                                    sx={{ bgcolor: "grey.800" }}
+                                />
+                            </Box>
+                        ))}
+                    </Box>
+                ))}
+            </Box>
+        );
+    }
 
     return (
         <Box

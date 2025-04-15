@@ -6,6 +6,7 @@ import Image from "next/image";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import { ImageCarouselProps } from "@/types/designs";
+import ImageCarouselLoading from "./ImageCarouselLoading";
 
 /**
  * ImageCarousel component for displaying a carousel of images
@@ -14,14 +15,24 @@ import { ImageCarouselProps } from "@/types/designs";
  * @param {(string | StaticImageData)[]} props.images - Array of images to display
  * @param {number} props.currentIndex - Current image index
  * @param {(index: number) => void} props.onIndexChange - Function to change current index
+ * @param {boolean} props.isLoading - Whether the component is in loading state
  * @returns {JSX.Element} Image carousel with navigation
  */
-export default function ImageCarousel({ images, currentIndex, onIndexChange }: ImageCarouselProps): React.ReactElement {
+export default function ImageCarousel({ 
+    images, 
+    currentIndex, 
+    onIndexChange,
+    isLoading = false 
+}: ImageCarouselProps & { isLoading?: boolean }): React.ReactElement {
     const maxVisible = 3;
     const carouselIndex = useMemo(
         () => Math.min(currentIndex, images.length - maxVisible),
         [currentIndex, images.length]
     );
+
+    if (isLoading) {
+        return <ImageCarouselLoading />;
+    }
 
     return (
         <Box
