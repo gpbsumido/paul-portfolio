@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import EmailForm from "@/components/EmailForm";
+import EmailForm from "@/components/features/EmailForm";
 import { useRouter } from "next/navigation";
 import HomeIcon from "@mui/icons-material/Home";
 import { Box, IconButton, Typography } from "@mui/material";
+import React from "react";
 
-export default function EmailPage() {
+/**
+ * EmailPage component - Contact form page
+ * @component
+ * @description A page component that displays the email contact form with a home navigation button
+ * @returns {JSX.Element} Email contact page with form and navigation
+ */
+export default function EmailPage(): React.ReactElement {
     const router = useRouter();
 
     return (
@@ -34,8 +41,8 @@ export default function EmailPage() {
                     transition: "all 0.3s ease",
                     "&:hover": {
                         bgcolor: "black",
-                        color: "white"
-                    }
+                        color: "white",
+                    },
                 }}
             >
                 <HomeIcon />
