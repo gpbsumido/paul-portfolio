@@ -39,9 +39,13 @@ export const ImageCarousel = ({
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "ArrowLeft") {
-                onIndexChange(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+                onIndexChange(
+                    currentIndex === 0 ? images.length - 1 : currentIndex - 1
+                );
             } else if (event.key === "ArrowRight") {
-                onIndexChange(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
+                onIndexChange(
+                    currentIndex === images.length - 1 ? 0 : currentIndex + 1
+                );
             }
         };
 
@@ -102,8 +106,8 @@ export const ImageCarousel = ({
                             opacity: currentIndex === idx ? 1 : 0.6,
                             transition: "opacity 0.3s ease",
                             "&:hover": {
-                                opacity: 1
-                            }
+                                opacity: 1,
+                            },
                         }}
                         onClick={() => onIndexChange(idx)}
                         role="button"
@@ -119,10 +123,14 @@ export const ImageCarousel = ({
                                 objectFit: "cover",
                             }}
                             loading="lazy"
+                            sizes="(max-width: 768px) 33vw, 33vw"
+                            quality={75}
+                            width={400}
+                            height={233}
                         />
                     </Box>
                 ))}
             </Box>
         </Box>
     );
-}; 
+};

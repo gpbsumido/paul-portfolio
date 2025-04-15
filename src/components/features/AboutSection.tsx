@@ -39,66 +39,82 @@ export const AboutSection = (): React.ReactElement => {
         preloadImage();
     }, []);
 
+    // Base container styles that are shared between loading and loaded states
+    const containerStyles = {
+        width: { xs: "100%", md: "50%" },
+        minHeight: { xs: "50vh", md: "100vh" },
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 4,
+        p: 3,
+        bgcolor: "background.default",
+        color: "var(--foreground)",
+    };
+
     if (isLoading) {
         return (
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 2,
-                    p: 3,
-                }}
-            >
+            <Box sx={containerStyles}>
                 <Skeleton
-                    variant="circular"
-                    width={200}
-                    height={200}
-                    sx={{ bgcolor: "grey.800" }}
+                    variant="rectangular"
+                    sx={{
+                        width: { xs: "10em", md: "20em" },
+                        height: { xs: "15em", md: "30em" },
+                        aspectRatio: "9/13",
+                        bgcolor: "grey.800",
+                        borderRadius: 2,
+                    }}
                 />
                 <Skeleton
                     variant="text"
-                    width="80%"
-                    height={40}
-                    sx={{ bgcolor: "grey.800" }}
+                    sx={{
+                        width: "200px",
+                        height: "40px",
+                        bgcolor: "grey.800",
+                    }}
                 />
                 <Skeleton
                     variant="text"
-                    width="60%"
-                    height={20}
-                    sx={{ bgcolor: "grey.800" }}
+                    sx={{
+                        width: "300px",
+                        height: "24px",
+                        bgcolor: "grey.800",
+                    }}
                 />
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 2,
+                        mt: 2,
+                    }}
+                >
+                    {[...Array(3)].map((_, index) => (
+                        <Skeleton
+                            key={index}
+                            variant="circular"
+                            width={40}
+                            height={40}
+                            sx={{ bgcolor: "grey.800" }}
+                        />
+                    ))}
+                </Box>
             </Box>
         );
     }
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                p: 3,
-                width: "50%",
-                height: "50vh",
-                justifyContent: "center",
-                "&:hover": {
-                    color: "primary.main",
-                    transition: "color 0.3s ease"
-                },
-                margin: "auto auto"
-            }}
-        >
+        <Box sx={containerStyles}>
             <Box
                 sx={{
-                    position: "relative",        
-                    height: { xs: "10em", md: "20em" },
+                    position: "relative",
+                    width: { xs: "10em", md: "20em" },
                     aspectRatio: "9/13",
                     overflow: "hidden",
                     cursor: "pointer",
+                    borderRadius: 2,
                     "&:focus": {
-                        outline: "2px solid #fff",
+                        outline: "2px solid var(--foreground)",
                         outlineOffset: "2px",
                     },
                 }}
@@ -120,36 +136,31 @@ export const AboutSection = (): React.ReactElement => {
                         objectFit: "cover",
                     }}
                     priority
+                    sizes="(max-width: 768px) 10em, 20em"
+                    quality={90}
+                    placeholder="blur"
                 />
             </Box>
             <Typography
                 variant="h4"
                 component="h1"
-                sx={{ 
-                    color: "white", 
+                sx={{
+                    color: "var(--foreground)",
                     textAlign: "center",
-                    "&:hover": {
-                        color: "primary.main",
-                        transition: "color 0.3s ease"
-                    }
                 }}
             >
                 About Paul
             </Typography>
             <Typography
                 variant="body1"
-                sx={{ 
-                    color: "white", 
-                    textAlign: "center", 
+                sx={{
+                    color: "var(--foreground)",
+                    textAlign: "center",
                     maxWidth: "600px",
-                    "&:hover": {
-                        color: "primary.main",
-                        transition: "color 0.3s ease"
-                    }
                 }}
             >
-                I&apos;m a passionate developer and designer with a
-                love for creating beautiful, functional experiences.
+                I&apos;m a passionate developer and designer with a love for
+                creating beautiful, functional experiences.
             </Typography>
             <Box
                 sx={{
@@ -167,14 +178,18 @@ export const AboutSection = (): React.ReactElement => {
                         target="_blank"
                         rel="noopener noreferrer"
                         sx={{
-                            color: "white",
-                            "&:hover": { 
+                            color: "var(--foreground)",
+                            "&:hover": {
                                 color: "primary.main",
-                                transition: "color 0.3s ease"
+                                transition: "color 0.3s ease",
                             },
                             "&:focus": {
-                                outline: "2px solid #fff",
+                                outline: "2px solid var(--foreground)",
                                 outlineOffset: "2px",
+                            },
+                            "& svg": {
+                                width: "2.5rem",
+                                height: "2rem",
                             },
                         }}
                         aria-label={`Visit my ${link.label} profile`}

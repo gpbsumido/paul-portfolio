@@ -19,68 +19,95 @@ export default function Home(): React.ReactElement {
     const icons = [BrushIcon, TerminalIcon, PreviewIcon];
     const [currentIconIndex, setCurrentIconIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentIconIndex((prevIndex) => (prevIndex + 1) % icons.length);
+            if (!isHovered) {
+                setCurrentIconIndex(
+                    (prevIndex) => (prevIndex + 1) % icons.length
+                );
+            }
         }, 1000);
 
-        // Set loading to false immediately since we don't have any actual loading
-        setIsLoading(false);
+        // simulate loading time
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 80);
 
-        return () => clearInterval(interval);
-    }, [icons.length]);
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timer);
+        };
+    }, [icons.length, isHovered]);
 
     const CurrentIcon = icons[currentIconIndex];
 
+    // Base container styles that are shared between loading and loaded states
+    const containerStyles = {
+        minHeight: "100vh", // Change from height to minHeight
+        width: "100%",
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        overflow: "hidden", // Prevent any potential scrolling during transitions
+    };
+
     if (isLoading) {
         return (
-            <Box
-                sx={{
-                    height: "100vh",
-                    width: "100vw",
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                }}
-            >
+            <Box sx={containerStyles}>
                 {/* About Section Skeleton */}
                 <Box
                     sx={{
-                        width: { xs: "100%", md: "50vw" },
-                        height: { xs: "50vh", md: "100%" },
+                        width: { xs: "100%", md: "50%" },
+                        minHeight: { xs: "50vh", md: "100vh" },
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
-                        gap: "1em",
-                        padding: "2em",
+                        gap: 4,
+                        p: 3,
+                        bgcolor: "background.default",
                     }}
                 >
                     <Skeleton
                         variant="rectangular"
-                        width="200px"
-                        height="300px"
-                        sx={{ bgcolor: "grey.800" }}
+                        sx={{
+                            width: { xs: "10em", md: "20em" },
+                            height: { xs: "15em", md: "30em" },
+                            aspectRatio: "9/13",
+                            bgcolor: "grey.800",
+                            borderRadius: 2,
+                        }}
                     />
                     <Skeleton
                         variant="text"
-                        width="150px"
-                        height="40px"
-                        sx={{ bgcolor: "grey.800" }}
+                        sx={{
+                            width: "200px",
+                            height: "40px",
+                            bgcolor: "grey.800",
+                        }}
+                    />
+                    <Skeleton
+                        variant="text"
+                        sx={{
+                            width: "300px",
+                            height: "24px",
+                            bgcolor: "grey.800",
+                        }}
                     />
                     <Box
                         sx={{
                             display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5em",
+                            gap: 2,
+                            mt: 2,
                         }}
                     >
                         {[...Array(3)].map((_, index) => (
                             <Skeleton
                                 key={index}
-                                variant="text"
-                                width="100px"
-                                height="30px"
+                                variant="circular"
+                                width={40}
+                                height={40}
                                 sx={{ bgcolor: "grey.800" }}
                             />
                         ))}
@@ -90,18 +117,29 @@ export default function Home(): React.ReactElement {
                 {/* Designs Section Skeleton */}
                 <Box
                     sx={{
-                        width: { xs: "100%", md: "50vw" },
-                        height: { xs: "50vh", md: "100%" },
+                        width: { xs: "100%", md: "50%" },
+                        minHeight: { xs: "50vh", md: "100vh" },
                         display: "flex",
+                        flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
+                        gap: 2,
+                        bgcolor: "white",
                     }}
                 >
                     <Skeleton
+                        variant="circular"
+                        width={64}
+                        height={64}
+                        sx={{ bgcolor: "grey.300" }}
+                    />
+                    <Skeleton
                         variant="text"
-                        width="200px"
-                        height="60px"
-                        sx={{ bgcolor: "grey.800" }}
+                        sx={{
+                            width: "150px",
+                            height: "40px",
+                            bgcolor: "grey.300",
+                        }}
                     />
                 </Box>
             </Box>
@@ -109,56 +147,80 @@ export default function Home(): React.ReactElement {
     }
 
     return (
-        <Box
-            sx={{
-                height: "100vh",
-                width: "100vw",
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-            }}
-        >
+        <Box sx={containerStyles}>
             <AboutSection />
             <Box
                 id="designsbox"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 sx={{
-                    width: { xs: "100vw", md: "50vw" },
-                    height: { xs: "50vh", md: "100%" },
+                    width: { xs: "100%", md: "50%" },
+                    minHeight: { xs: "50vh", md: "100vh" },
                     background: "white",
                     color: "black",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    transition: "background 0.6s ease",
+                    transition:
+                        "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+                    cursor: "pointer",
                     "&:hover": {
                         background: "black",
                         color: "white",
-                        "& svg": {
-                            display: "block",
-                        },
                     },
-                    fontSize: "2rem",
                 }}
             >
                 <Link
                     href="/designs"
                     style={{
                         fontWeight: "normal",
-                        transition: "font-weight 0.6s ease",
+                        transition:
+                            "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
+                        fontSize: "2rem",
+                        textDecoration: "none",
+                        color: "inherit",
+                        padding: "2rem",
+                        width: "100%",
+                        height: "100%",
+                        justifyContent: "center",
                     }}
                 >
                     <CurrentIcon
                         sx={{
-                            margin: "auto auto 0.2em auto",
-                            display: "none",
-                            transition: "display 0.6s ease",
-                            color: "inherit",
                             fontSize: "4rem",
+                            marginBottom: "0.5em",
+                            opacity: isHovered ? 1 : 0.7,
+                            transform: isHovered ? "scale(1.1)" : "scale(1)",
+                            transition:
+                                "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
+                            color: "inherit",
+                            display: "block",
+                            animation: !isHovered
+                                ? "float 2s ease-in-out infinite"
+                                : "none",
+                            "@keyframes float": {
+                                "0%, 100%": {
+                                    transform: "translateY(0)",
+                                },
+                                "50%": {
+                                    transform: "translateY(-10px)",
+                                },
+                            },
                         }}
                     />
-                    Designs
+                    <span
+                        style={{
+                            transition:
+                                "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
+                            transform: isHovered ? "scale(1.1)" : "scale(1)",
+                            fontWeight: isHovered ? "bold" : "normal",
+                        }}
+                    >
+                        Designs
+                    </span>
                 </Link>
             </Box>
         </Box>

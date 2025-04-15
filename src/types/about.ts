@@ -4,4 +4,4 @@ export interface SocialLinkProps {
     href: string;
     icon: ElementType;
     text: string;
-} 
+}

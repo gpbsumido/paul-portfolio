@@ -85,4 +85,4 @@ export default function CarouselSectionLoading(): React.ReactElement {
             </Box>
         </Box>
     );
-} 
+}

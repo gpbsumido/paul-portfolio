@@ -24,4 +24,4 @@ export interface HomeButtonProps {
 
 export interface ProgressBarProps {
     progressKey: number;
-} 
+}

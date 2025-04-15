@@ -21,13 +21,13 @@ import { ImageCarousel } from "./ImageCarousel";
  * @param {boolean} props.isLoading - Whether the component is in loading state
  * @returns {JSX.Element} Section with carousel and title
  */
-export default function CarouselSection({ 
-    images, 
-    currentIndex, 
-    onIndexChange, 
-    title, 
+export default function CarouselSection({
+    images,
+    currentIndex,
+    onIndexChange,
+    title,
     textColor,
-    isLoading = false 
+    isLoading = false,
 }: CarouselProps & { isLoading?: boolean }): React.ReactElement {
     const [currentIndexState, setCurrentIndexState] = useState(currentIndex);
     const carouselRef = useRef<HTMLDivElement>(null);
@@ -38,13 +38,15 @@ export default function CarouselSection({
     }, [currentIndex]);
 
     const handlePrevious = useCallback(() => {
-        const newIndex = currentIndexState === 0 ? images.length - 1 : currentIndexState - 1;
+        const newIndex =
+            currentIndexState === 0 ? images.length - 1 : currentIndexState - 1;
         setCurrentIndexState(newIndex);
         onIndexChange(newIndex);
     }, [currentIndexState, images.length, onIndexChange]);
 
     const handleNext = useCallback(() => {
-        const newIndex = currentIndexState === images.length - 1 ? 0 : currentIndexState + 1;
+        const newIndex =
+            currentIndexState === images.length - 1 ? 0 : currentIndexState + 1;
         setCurrentIndexState(newIndex);
         onIndexChange(newIndex);
     }, [currentIndexState, images.length, onIndexChange]);
@@ -134,6 +136,12 @@ export default function CarouselSection({
                     }}
                     fill={true}
                     priority={currentIndexState === 0}
+                    sizes="(max-width: 768px) 90vw, (max-width: 1200px) 90vw, 90vw"
+                    quality={85}
+                    placeholder="blur"
+                    blurDataURL={`data:image/svg+xml;base64,${Buffer.from(
+                        '<svg width="40" height="24" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#333"/></svg>'
+                    ).toString("base64")}`}
                 />
                 <ProgressBar progressKey={currentIndexState} />
             </Box>
@@ -204,7 +212,8 @@ export default function CarouselSection({
                             height: "10px",
                             borderRadius: "50%",
                             border: "none",
-                            backgroundColor: currentIndexState === index ? "white" : "gray",
+                            backgroundColor:
+                                currentIndexState === index ? "white" : "gray",
                             cursor: "pointer",
                             padding: 0,
                         }}
@@ -213,4 +222,4 @@ export default function CarouselSection({
             </Box>
         </Box>
     );
-} 
+}

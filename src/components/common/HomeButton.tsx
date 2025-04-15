@@ -13,7 +13,11 @@ import { HomeButtonProps } from "@/types/designs";
  * @param {string} props.bgColor - Background color
  * @returns {JSX.Element} Home button with icon
  */
-export default function HomeButton({ onClick, textColor, bgColor }: HomeButtonProps): React.ReactElement {
+export default function HomeButton({
+    onClick,
+    textColor,
+    bgColor,
+}: HomeButtonProps): React.ReactElement {
     return (
         <button
             onClick={onClick}
@@ -46,4 +50,4 @@ export default function HomeButton({ onClick, textColor, bgColor }: HomeButtonPr
             />
         </button>
     );
-} 
+}

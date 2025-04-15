@@ -33,7 +33,7 @@ export default function Footer(): React.ReactElement {
                 rel="noopener noreferrer"
                 sx={{ color: "#fff", margin: "0 8px" }}
             >
-                <LinkedInIcon />
+                <LinkedInIcon sx={{ width: "2.5rem", height: "2rem" }} />
             </IconButton>
             <IconButton
                 href="https://github.com/gpbsumido"
@@ -41,13 +41,13 @@ export default function Footer(): React.ReactElement {
                 rel="noopener noreferrer"
                 sx={{ color: "#fff", margin: "0 8px" }}
             >
-                <GitHubIcon />
+                <GitHubIcon sx={{ width: "2.5rem", height: "2rem" }} />
             </IconButton>
             <IconButton
                 href="mailto:psumido@gmail.com"
                 sx={{ color: "#fff", margin: "0 8px" }}
             >
-                <EmailIcon />
+                <EmailIcon sx={{ width: "2.5rem", height: "2rem" }} />
             </IconButton>
         </Box>
     );

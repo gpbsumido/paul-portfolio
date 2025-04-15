@@ -47,4 +47,4 @@ export default function ImageCarouselLoading(): React.ReactElement {
             </Box>
         </Box>
     );
-} 
+}

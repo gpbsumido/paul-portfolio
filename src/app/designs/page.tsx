@@ -86,16 +86,17 @@ export default function Designs(): React.ReactElement {
                 ].map((src) => {
                     return new Promise<void>((resolve, reject) => {
                         const img = new window.Image();
-                        img.src = typeof src === 'string' ? src : src.src;
+                        img.src = typeof src === "string" ? src : src.src;
                         img.onload = () => resolve();
-                        img.onerror = () => reject(new Error('Failed to load image'));
+                        img.onerror = () =>
+                            reject(new Error("Failed to load image"));
                     });
                 });
 
                 await Promise.all(imagePromises);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Error loading images:', error);
+                console.error("Error loading images:", error);
                 setIsLoading(false); // Still set loading to false to show error state
             }
         };
@@ -175,7 +176,10 @@ export default function Designs(): React.ReactElement {
                     <Box
                         key={index}
                         sx={{
-                            height: { xs: "auto", sm: `calc(100vh + ${index === sections - 3 ? "0" : "min(25vh, 25vw)"})` },
+                            height: {
+                                xs: "auto",
+                                sm: `calc(100vh + ${index === sections - 3 ? "0" : "min(25vh, 25vw)"})`,
+                            },
                             width: "100%",
                             display: "flex",
                             flexDirection: "column",

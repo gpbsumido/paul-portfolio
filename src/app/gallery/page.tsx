@@ -49,16 +49,17 @@ export default function Gallery(): React.ReactElement {
                 const imagePromises = HELIKA_PORTAL_IMAGES.map((src) => {
                     return new Promise<void>((resolve, reject) => {
                         const img = new window.Image();
-                        img.src = typeof src === 'string' ? src : src.src;
+                        img.src = typeof src === "string" ? src : src.src;
                         img.onload = () => resolve();
-                        img.onerror = () => reject(new Error('Failed to load image'));
+                        img.onerror = () =>
+                            reject(new Error("Failed to load image"));
                     });
                 });
 
                 await Promise.all(imagePromises);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Error loading images:', error);
+                console.error("Error loading images:", error);
                 setIsLoading(false);
             }
         };
@@ -207,9 +208,14 @@ export default function Gallery(): React.ReactElement {
                                         aria-label={`Gallery image ${rowIndex * row.length + imageIndex + 1} of ${images.length}`}
                                         tabIndex={0}
                                         onKeyDown={(e) => {
-                                            if (e.key === "Enter" || e.key === " ") {
+                                            if (
+                                                e.key === "Enter" ||
+                                                e.key === " "
+                                            ) {
                                                 setHoveredImage(
-                                                    hoveredImage ? null : `${rowIndex}-${imageIndex}`
+                                                    hoveredImage
+                                                        ? null
+                                                        : `${rowIndex}-${imageIndex}`
                                                 );
                                             }
                                         }}
