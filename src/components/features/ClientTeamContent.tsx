@@ -6,6 +6,7 @@ import FantasyBasketballTable from "./FantasyBasketballTable";
 import TeamSelector from "./TeamSelector";
 import { Box, Paper, Typography, Skeleton } from "@mui/material";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getBaseUrl } from "@/utils/getBaseUrl";
 
 interface ClientTeamContentProps {
     initialTeams: Team[];
@@ -48,7 +49,8 @@ export default function ClientTeamContent({
         setSelectedTeam(team);
 
         try {
-            const response = await fetch(`/api/nba/players/${team.id}`);
+            const baseUrl = getBaseUrl();
+            const response = await fetch(`${baseUrl}/api/nba/players/${team.id}`);
             if (!response.ok) {
                 throw new Error("Failed to fetch players");
             }
@@ -59,7 +61,7 @@ export default function ClientTeamContent({
             const statsPromises = newPlayers.map(async (player: Player) => {
                 try {
                     const statsResponse = await fetch(
-                        `/api/nba/stats/${player.id}`
+                        `${baseUrl}/api/nba/stats/${player.id}`
                     );
                     if (!statsResponse.ok) {
                         console.error(
