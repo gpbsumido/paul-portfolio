@@ -4,6 +4,8 @@ import { PlayerStatsResponse } from "@/types/nba";
 import { rateLimit } from "@/utils/rateLimiter";
 import { getCachedData } from "@/utils/cache";
 
+export const maxDuration = 120; // 2 minutes in seconds
+
 const BASE_URL = NBA_API.BASE_URL;
 const HEADERS = NBA_API.HEADERS;
 const CACHE_TTL = 300; // 5 minutes in seconds (stats update more frequently)

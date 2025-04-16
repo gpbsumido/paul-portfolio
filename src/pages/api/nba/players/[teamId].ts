@@ -3,6 +3,8 @@ import { NBA_API } from "@/constants/nba";
 import { Player, PlayerResponse } from "@/types/nba";
 import { getCachedData } from "@/utils/cache";
 
+export const maxDuration = 120; // 2 minutes in seconds
+
 const BASE_URL = NBA_API.BASE_URL;
 const HEADERS = NBA_API.HEADERS;
 const CACHE_TTL = 3600; // 1 hour in seconds

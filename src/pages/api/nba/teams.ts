@@ -3,6 +3,8 @@ import { NBA_API } from "@/constants/nba";
 import { TeamResponse } from "@/types/nba";
 import { getCachedData } from "@/utils/cache";
 
+export const maxDuration = 120; // 2 minutes in seconds
+
 const BASE_URL = NBA_API.BASE_URL;
 const HEADERS = NBA_API.HEADERS;
 const CACHE_KEY = "nba-teams";
