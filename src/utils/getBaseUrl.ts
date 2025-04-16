@@ -4,16 +4,14 @@
  */
 export const getBaseUrl = () => {
     if (typeof window !== "undefined") {
-        // Client-side, use the current origin
         return window.location.origin;
     }
 
-    // Server-side (e.g. getServerSideProps, API routes)
-    // Use environment variables set by Vercel
-    if (process.env.VERCEL_URL) {
-        return `https://${process.env.VERCEL_URL}`;
+    // Running on server (SSR or API), use env
+    if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+        return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
     }
 
-    // Default to localhost
-    return "http://localhost:3000";
+    // Fallback (e.g. localhost dev)
+    return "http://localhost:3009";
 };
