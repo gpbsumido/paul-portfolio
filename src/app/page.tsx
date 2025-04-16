@@ -222,7 +222,9 @@ export default function Home(): React.ReactElement {
                                 fontSize: "4rem",
                                 marginBottom: "0.5em",
                                 opacity: isHovered ? 1 : 0.7,
-                                transform: isHovered ? "scale(1.1)" : "scale(1)",
+                                transform: isHovered
+                                    ? "scale(1.1)"
+                                    : "scale(1)",
                                 transition:
                                     "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
                                 color: "inherit",
@@ -244,7 +246,9 @@ export default function Home(): React.ReactElement {
                             style={{
                                 transition:
                                     "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                                transform: isHovered ? "scale(1.1)" : "scale(1)",
+                                transform: isHovered
+                                    ? "scale(1.1)"
+                                    : "scale(1)",
                                 fontWeight: isHovered ? "bold" : "normal",
                             }}
                         >
@@ -297,7 +301,9 @@ export default function Home(): React.ReactElement {
                                 fontSize: "4rem",
                                 marginBottom: "0.5em",
                                 opacity: isFantasyHovered ? 1 : 0.7,
-                                transform: isFantasyHovered ? "scale(1.1)" : "scale(1)",
+                                transform: isFantasyHovered
+                                    ? "scale(1.1)"
+                                    : "scale(1)",
                                 transition:
                                     "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
                                 color: "inherit",
@@ -319,8 +325,12 @@ export default function Home(): React.ReactElement {
                             style={{
                                 transition:
                                     "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                                transform: isFantasyHovered ? "scale(1.1)" : "scale(1)",
-                                fontWeight: isFantasyHovered ? "bold" : "normal",
+                                transform: isFantasyHovered
+                                    ? "scale(1.1)"
+                                    : "scale(1)",
+                                fontWeight: isFantasyHovered
+                                    ? "bold"
+                                    : "normal",
                             }}
                         >
                             Fantasy Basketball
