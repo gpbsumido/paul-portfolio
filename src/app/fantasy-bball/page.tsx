@@ -9,8 +9,6 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 
-
-
 export default function FantasyBasketballPage() {
     const { t } = useLanguage();
     const [teams, setTeams] = useState<Team[]>([]);
@@ -29,39 +27,53 @@ export default function FantasyBasketballPage() {
                 });
 
                 if (!teamsResponse.ok) {
-                    throw new Error(`Failed to fetch teams: ${teamsResponse.statusText}`);
+                    throw new Error(
+                        `Failed to fetch teams: ${teamsResponse.statusText}`
+                    );
                 }
 
                 const teamsData = await teamsResponse.json();
                 setTeams(teamsData.data);
 
                 // Find Spurs team
-                const spursTeam = teamsData.data.find((team: Team) => team.full_name === "San Antonio Spurs");
+                const spursTeam = teamsData.data.find(
+                    (team: Team) => team.full_name === "San Antonio Spurs"
+                );
                 if (!spursTeam) {
                     throw new Error("San Antonio Spurs team not found");
                 }
 
                 // Then fetch Spurs players
-                const playersResponse = await fetch(`/api/nba/players/${spursTeam.id}`, {
-                    headers: { Accept: "application/json" },
-                    next: { revalidate: 3600 },
-                });
+                const playersResponse = await fetch(
+                    `/api/nba/players/${spursTeam.id}`,
+                    {
+                        headers: { Accept: "application/json" },
+                        next: { revalidate: 3600 },
+                    }
+                );
 
                 if (!playersResponse.ok) {
-                    throw new Error(`Failed to fetch players: ${playersResponse.statusText}`);
+                    throw new Error(
+                        `Failed to fetch players: ${playersResponse.statusText}`
+                    );
                 }
 
                 const playersData = await playersResponse.json();
-                const updatedPlayers = playersData.data.map((player: Player) => ({
-                    ...player,
-                    team: teamsData.data.find((team: Team) => team.id === player.team?.id) || player.team,
-                }));
+                const updatedPlayers = playersData.data.map(
+                    (player: Player) => ({
+                        ...player,
+                        team:
+                            teamsData.data.find(
+                                (team: Team) => team.id === player.team?.id
+                            ) || player.team,
+                    })
+                );
                 setPlayers(updatedPlayers);
 
                 // Batch player stats requests
                 const BATCH_SIZE = 5;
                 const statsPromises = [];
-                
+
                 for (let i = 0; i < updatedPlayers.length; i += BATCH_SIZE) {
                     const batch = updatedPlayers.slice(i, i + BATCH_SIZE);
                     const batchPromises = batch.map(async (player: Player) => {

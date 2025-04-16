@@ -43,13 +43,15 @@ const fetchStats = async (playerId: number) => {
         url.searchParams.append(key, value);
     });
 
-    const response = await fetch(url.toString(), { 
+    const response = await fetch(url.toString(), {
         headers: HEADERS,
-        next: { revalidate: CACHE_TTL }
+        next: { revalidate: CACHE_TTL },
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch player stats: ${response.status} ${response.statusText}`);
+        throw new Error(
+            `Failed to fetch player stats: ${response.status} ${response.statusText}`
+        );
     }
 
     const data = await response.json();
@@ -67,31 +69,33 @@ const fetchStats = async (playerId: number) => {
     const fantasyPoints = pts * 1 + reb * 1.2 + ast * 1.5 + stl * 3 + blk * 3;
 
     return {
-        data: [{
-            games_played: parseInt(seasonStats[2]) || 0,
-            player_id: playerId,
-            season: 2024,
-            min: seasonStats[6] || "0:00",
-            fgm: parseFloat(seasonStats[7]) || 0,
-            fga: parseFloat(seasonStats[8]) || 0,
-            fg_pct: parseFloat(seasonStats[9]) || 0,
-            fg3m: parseFloat(seasonStats[10]) || 0,
-            fg3a: parseFloat(seasonStats[11]) || 0,
-            fg3_pct: parseFloat(seasonStats[12]) || 0,
-            ftm: parseFloat(seasonStats[13]) || 0,
-            fta: parseFloat(seasonStats[14]) || 0,
-            ft_pct: parseFloat(seasonStats[15]) || 0,
-            oreb: parseFloat(seasonStats[16]) || 0,
-            dreb: parseFloat(seasonStats[17]) || 0,
-            reb,
-            ast,
-            turnover: parseFloat(seasonStats[20]) || 0,
-            stl: parseFloat(seasonStats[21]) || 0,
-            blk: parseFloat(seasonStats[22]) || 0,
-            pf: parseFloat(seasonStats[24]) || 0,
-            pts,
-            fantasy_points: fantasyPoints,
-        }],
+        data: [
+            {
+                games_played: parseInt(seasonStats[2]) || 0,
+                player_id: playerId,
+                season: 2024,
+                min: seasonStats[6] || "0:00",
+                fgm: parseFloat(seasonStats[7]) || 0,
+                fga: parseFloat(seasonStats[8]) || 0,
+                fg_pct: parseFloat(seasonStats[9]) || 0,
+                fg3m: parseFloat(seasonStats[10]) || 0,
+                fg3a: parseFloat(seasonStats[11]) || 0,
+                fg3_pct: parseFloat(seasonStats[12]) || 0,
+                ftm: parseFloat(seasonStats[13]) || 0,
+                fta: parseFloat(seasonStats[14]) || 0,
+                ft_pct: parseFloat(seasonStats[15]) || 0,
+                oreb: parseFloat(seasonStats[16]) || 0,
+                dreb: parseFloat(seasonStats[17]) || 0,
+                reb,
+                ast,
+                turnover: parseFloat(seasonStats[20]) || 0,
+                stl: parseFloat(seasonStats[21]) || 0,
+                blk: parseFloat(seasonStats[22]) || 0,
+                pf: parseFloat(seasonStats[24]) || 0,
+                pts,
+                fantasy_points: fantasyPoints,
+            },
+        ],
         meta: {
             total_pages: 1,
             current_page: 1,
@@ -116,7 +120,10 @@ export default async function handler(
     // Set CORS headers
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization"
+    );
 
     if (req.method === "GET") {
         try {
@@ -125,13 +132,18 @@ export default async function handler(
                 return res.status(400).json({ error: "Invalid player ID" });
             }
 
-            const data = await getCachedData(`player-stats-${playerId}`, () => fetchStats(parseInt(playerId)), CACHE_TTL);
+            const data = await getCachedData(
+                `player-stats-${playerId}`,
+                () => fetchStats(parseInt(playerId)),
+                CACHE_TTL
+            );
             res.status(200).json(data);
         } catch (error) {
             console.error("Error fetching player stats:", error);
             res.status(500).json({
                 error: "Failed to fetch player stats",
-                details: error instanceof Error ? error.message : "Unknown error",
+                details:
+                    error instanceof Error ? error.message : "Unknown error",
             });
         }
     } else if (req.method === "OPTIONS") {
@@ -139,4 +151,4 @@ export default async function handler(
     } else {
         res.status(405).json({ error: "Method not allowed" });
     }
-} 
+}

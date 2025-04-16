@@ -58,13 +58,16 @@ export default function ClientTeamContent({
             // Fetch stats for all players in parallel
             const statsPromises = newPlayers.map((player: Player) =>
                 fetch(`/api/nba/stats/${player.id}`)
-                    .then(res => res.json())
-                    .then(stats => ({
+                    .then((res) => res.json())
+                    .then((stats) => ({
                         playerId: player.id,
-                        stats: stats.data[0]
+                        stats: stats.data[0],
                     }))
-                    .catch(error => {
-                        console.error(`Error fetching stats for player ${player.id}:`, error);
+                    .catch((error) => {
+                        console.error(
+                            `Error fetching stats for player ${player.id}:`,
+                            error
+                        );
                         return null;
                     })
             );

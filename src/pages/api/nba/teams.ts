@@ -14,13 +14,15 @@ const fetchTeams = async () => {
     url.searchParams.append("Season", "2024-25");
     url.searchParams.append("SeasonType", "Regular Season");
 
-    const response = await fetch(url.toString(), { 
+    const response = await fetch(url.toString(), {
         headers: HEADERS,
-        next: { revalidate: CACHE_TTL }
+        next: { revalidate: CACHE_TTL },
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch teams: ${response.status} ${response.statusText}`);
+        throw new Error(
+            `Failed to fetch teams: ${response.status} ${response.statusText}`
+        );
     }
 
     const data = await response.json();
@@ -58,19 +60,23 @@ export default async function handler(
 ) {
     if (req.method === "GET") {
         try {
-            const data = await getCachedData(CACHE_KEY, fetchTeams, CACHE_TTL);
+            const data = await getCachedData(CACHE_KEY, fetchTeams);
             res.status(200).json(data);
         } catch (error) {
             console.error("Error fetching teams:", error);
             res.status(500).json({
                 error: "Failed to fetch teams",
-                details: error instanceof Error ? error.message : "Unknown error",
+                details:
+                    error instanceof Error ? error.message : "Unknown error",
             });
         }
     } else if (req.method === "OPTIONS") {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res.setHeader(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Authorization"
+        );
         res.status(204).end();
     } else {
         res.status(405).json({ error: "Method not allowed" });

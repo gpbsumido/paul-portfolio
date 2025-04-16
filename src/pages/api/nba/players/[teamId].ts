@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { NBA_API } from "@/constants/nba";
-import { PlayerResponse } from "@/types/nba";
+import { Player, PlayerResponse } from "@/types/nba";
 import { getCachedData } from "@/utils/cache";
 
 const BASE_URL = NBA_API.BASE_URL;
@@ -13,13 +13,15 @@ const fetchPlayers = async (teamId: number) => {
     url.searchParams.append("Season", "2024-25");
     url.searchParams.append("TeamID", teamId.toString());
 
-    const response = await fetch(url.toString(), { 
+    const response = await fetch(url.toString(), {
         headers: HEADERS,
-        next: { revalidate: CACHE_TTL }
+        next: { revalidate: CACHE_TTL },
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch team players: ${response.status} ${response.statusText}`);
+        throw new Error(
+            `Failed to fetch team players: ${response.status} ${response.statusText}`
+        );
     }
 
     const data = await response.json();
@@ -56,7 +58,9 @@ const fetchPlayers = async (teamId: number) => {
                     last_name: playerName.split(" ").slice(1).join(" "),
                     position: position || "N/A",
                     height_feet: height ? parseInt(height.split("-")[0]) : null,
-                    height_inches: height ? parseInt(height.split("-")[1]) : null,
+                    height_inches: height
+                        ? parseInt(height.split("-")[1])
+                        : null,
                     team: {
                         id: teamId,
                         name: "Unknown",
@@ -72,7 +76,7 @@ const fetchPlayers = async (teamId: number) => {
                 return null;
             }
         })
-        .filter((player): player is NonNullable<typeof player> => player !== null);
+        .filter((player: Player | null): player is Player => player !== null);
 
     return {
         data: players,
@@ -94,26 +98,33 @@ export default async function handler(
         try {
             const { teamId } = req.query;
             const parsedTeamId = parseInt(teamId as string);
-            
+
             if (isNaN(parsedTeamId)) {
                 return res.status(400).json({ error: "Invalid team ID" });
             }
 
-            const data = await getCachedData(`team-players-${parsedTeamId}`, () => fetchPlayers(parsedTeamId), CACHE_TTL);
+            const data = await getCachedData(
+                `team-players-${parsedTeamId}`,
+                () => fetchPlayers(parsedTeamId)
+            );
             res.status(200).json(data);
         } catch (error) {
             console.error("Error fetching team players:", error);
             res.status(500).json({
                 error: "Failed to fetch team players",
-                details: error instanceof Error ? error.message : "Unknown error",
+                details:
+                    error instanceof Error ? error.message : "Unknown error",
             });
         }
     } else if (req.method === "OPTIONS") {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res.setHeader(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Authorization"
+        );
         res.status(204).end();
     } else {
         res.status(405).json({ error: "Method not allowed" });
     }
-} 
+}
