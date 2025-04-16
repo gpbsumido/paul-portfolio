@@ -50,9 +50,7 @@ export default function ClientTeamContent({
 
         try {
             const baseUrl = getBaseUrl();
-            const response = await fetch(
-                `${baseUrl}/api/nba/players/${team.id}`
-            );
+            const response = await fetch(`${baseUrl}/api/nba/players/${team.id}`);
             if (!response.ok) {
                 throw new Error("Failed to fetch players");
             }

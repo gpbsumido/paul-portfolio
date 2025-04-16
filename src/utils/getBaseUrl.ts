@@ -1,24 +1,19 @@
 /**
  * Utility function to determine the base URL based on the environment
- * @param req - Optional request object containing headers
  * @returns The base URL for the current environment
  */
-export const getBaseUrl = (req?: { headers: { host: string } }): string => {
-    // Client-side
+export const getBaseUrl = () => {
     if (typeof window !== "undefined") {
-        return "";
+        // Client-side, use the current origin
+        return window.location.origin;
     }
 
-    // Server-side with request object (getServerSideProps, API routes)
-    if (req) {
-        const protocol = req.headers.host.includes("localhost")
-            ? "http"
-            : "https";
-        return `${protocol}://${req.headers.host}`;
+    // Server-side (e.g. getServerSideProps, API routes)
+    // Use environment variables set by Vercel
+    if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`;
     }
 
-    // Server-side without request object (getStaticProps, API routes)
-    return process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000";
+    // Default to localhost
+    return "http://localhost:3000";
 };
