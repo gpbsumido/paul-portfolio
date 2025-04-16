@@ -4,7 +4,8 @@ import { TeamResponse } from "@/types/nba";
 
 const BASE_URL = NBA_API.BASE_URL;
 const HEADERS = NBA_API.HEADERS;
-const FETCH_TIMEOUT = 10000; // 10 seconds timeout for fetch
+const FETCH_TIMEOUT = 280000; // 10 seconds timeout for fetch
+const MAX_RETRIES = 2; // Will try up to 3 times total (initial + 2 retries)
 
 interface LogData {
     [key: string]: string | number | boolean | null | undefined;
@@ -54,6 +55,21 @@ const fetchWithTimeout = async (url: string, options: RequestInit, timeout: numb
     }
 };
 
+const safeFetchWithRetry = async (url: string, options: RequestInit, timeout: number, retries = MAX_RETRIES) => {
+    try {
+        return await fetchWithTimeout(url, options, timeout);
+    } catch (err) {
+        if (retries > 0) {
+            logRequest("Retrying fetch due to failure", { 
+                reason: err instanceof Error ? err.message : "unknown",
+                retriesLeft: retries
+            });
+            return await safeFetchWithRetry(url, options, timeout, retries - 1);
+        }
+        throw err;
+    }
+};
+
 const fetchTeams = async (): Promise<TeamResponse> => {
     const startTime = Date.now();
     logRequest('Starting teams fetch process');
@@ -64,7 +80,7 @@ const fetchTeams = async (): Promise<TeamResponse> => {
         url.searchParams.append("Season", "2024-25");
         url.searchParams.append("SeasonType", "Regular Season");
 
-        const response = await fetchWithTimeout(url.toString(), { 
+        const response = await safeFetchWithRetry(url.toString(), { 
             headers: HEADERS,
             next: { revalidate: 3600 }
         }, FETCH_TIMEOUT);
