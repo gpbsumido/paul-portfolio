@@ -22,66 +22,55 @@ export default function FantasyBasketballPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch teams
-                const teamsResponse = await fetch(
-                    `/api/nba/teams`,
-                    {
-                        headers: { Accept: "application/json" },
-                        next: { revalidate: 600 },
-                    }
-                );
-                if (!teamsResponse.ok) {
-                    throw new Error(
-                        `Failed to fetch teams: ${teamsResponse.statusText}`
-                    );
-                }
-                const teamsResponseData = await teamsResponse.json();
-                const teamsData = teamsResponseData.data;
-                setTeams(teamsData);
+                // First fetch teams
+                const teamsResponse = await fetch(`/api/nba/teams`, {
+                    headers: { Accept: "application/json" },
+                    next: { revalidate: 3600 },
+                });
 
-                // Find San Antonio Spurs team ID
-                const spursTeam = teamsData.find(
-                    (team: Team) => team.full_name === "San Antonio Spurs"
-                );
+                if (!teamsResponse.ok) {
+                    throw new Error(`Failed to fetch teams: ${teamsResponse.statusText}`);
+                }
+
+                const teamsData = await teamsResponse.json();
+                setTeams(teamsData.data);
+
+                // Find Spurs team
+                const spursTeam = teamsData.data.find((team: Team) => team.full_name === "San Antonio Spurs");
                 if (!spursTeam) {
                     throw new Error("San Antonio Spurs team not found");
                 }
 
-                // Fetch Spurs players
-                const playersResponse = await fetch(
-                    `api/nba/players/${spursTeam.id}`,
-                    {
-                        headers: { Accept: "application/json" },
-                        next: { revalidate: 600 },
-                    }
-                );
-                if (!playersResponse.ok) {
-                    throw new Error(
-                        `Failed to fetch players: ${playersResponse.statusText}`
-                    );
-                }
-                const { data: playersData } = await playersResponse.json();
-
-                const updatedPlayers = playersData.map((player: Player) => {
-                    const matchingTeam = teamsData.find(
-                        (team: Team) => team.id === player.team?.id
-                    );
-                    return {
-                        ...player,
-                        team: matchingTeam || player.team,
-                    };
+                // Then fetch Spurs players
+                const playersResponse = await fetch(`/api/nba/players/${spursTeam.id}`, {
+                    headers: { Accept: "application/json" },
+                    next: { revalidate: 3600 },
                 });
+
+                if (!playersResponse.ok) {
+                    throw new Error(`Failed to fetch players: ${playersResponse.statusText}`);
+                }
+
+                const playersData = await playersResponse.json();
+                const updatedPlayers = playersData.data.map((player: Player) => ({
+                    ...player,
+                    team: teamsData.data.find((team: Team) => team.id === player.team?.id) || player.team,
+                }));
                 setPlayers(updatedPlayers);
 
-                // Fetch player stats
-                const statsPromises = updatedPlayers.map(
-                    async (player: Player) => {
+                // Batch player stats requests
+                const BATCH_SIZE = 5;
+                const statsPromises = [];
+                
+                for (let i = 0; i < updatedPlayers.length; i += BATCH_SIZE) {
+                    const batch = updatedPlayers.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(async (player: Player) => {
                         try {
                             const statsResponse = await fetch(
                                 `/api/nba/stats/${player.id}`,
                                 {
                                     headers: { Accept: "application/json" },
-                                    next: { revalidate: 600 },
+                                    next: { revalidate: 300 },
                                 }
                             );
                             if (!statsResponse.ok) {
@@ -102,8 +91,9 @@ export default function FantasyBasketballPage() {
                             );
                             return null;
                         }
-                    }
-                );
+                    });
+                    statsPromises.push(...batchPromises);
+                }
 
                 const statsResults = await Promise.all(statsPromises);
                 const newPlayerStatsMap: PlayerStatsMap = {};
