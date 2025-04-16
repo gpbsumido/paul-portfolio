@@ -9,8 +9,7 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3009";
+
 
 export default function FantasyBasketballPage() {
     const { t } = useLanguage();
@@ -25,7 +24,7 @@ export default function FantasyBasketballPage() {
             try {
                 // Fetch teams
                 const teamsResponse = await fetch(
-                    `${API_BASE_URL}/api/nba/teams`,
+                    `/api/nba/teams`,
                     {
                         headers: { Accept: "application/json" },
                         next: { revalidate: 600 },
@@ -50,7 +49,7 @@ export default function FantasyBasketballPage() {
 
                 // Fetch Spurs players
                 const playersResponse = await fetch(
-                    `${API_BASE_URL}/api/nba/players/${spursTeam.id}`,
+                    `api/nba/players/${spursTeam.id}`,
                     {
                         headers: { Accept: "application/json" },
                         next: { revalidate: 600 },
@@ -79,7 +78,7 @@ export default function FantasyBasketballPage() {
                     async (player: Player) => {
                         try {
                             const statsResponse = await fetch(
-                                `${API_BASE_URL}/api/nba/stats/${player.id}`,
+                                `/api/nba/stats/${player.id}`,
                                 {
                                     headers: { Accept: "application/json" },
                                     next: { revalidate: 600 },
