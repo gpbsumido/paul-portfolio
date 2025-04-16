@@ -55,28 +55,19 @@ export default function ClientTeamContent({
             const { data: newPlayers } = await response.json();
             setPlayers(newPlayers);
 
-            // Fetch stats for new players
-            const statsPromises = newPlayers.map(async (player: Player) => {
-                try {
-                    const statsResponse = await fetch(
-                        `/api/nba/stats/${player.id}`
-                    );
-                    if (!statsResponse.ok) {
-                        console.error(
-                            `Failed to fetch stats for player ${player.id}`
-                        );
+            // Fetch stats for all players in parallel
+            const statsPromises = newPlayers.map((player: Player) =>
+                fetch(`/api/nba/stats/${player.id}`)
+                    .then(res => res.json())
+                    .then(stats => ({
+                        playerId: player.id,
+                        stats: stats.data[0]
+                    }))
+                    .catch(error => {
+                        console.error(`Error fetching stats for player ${player.id}:`, error);
                         return null;
-                    }
-                    const stats = await statsResponse.json();
-                    return { playerId: player.id, stats: stats.data[0] };
-                } catch (error) {
-                    console.error(
-                        `Error fetching stats for player ${player.id}:`,
-                        error
-                    );
-                    return null;
-                }
-            });
+                    })
+            );
 
             const statsResults = await Promise.all(statsPromises);
             const newPlayerStatsMap: PlayerStatsMap = {};
