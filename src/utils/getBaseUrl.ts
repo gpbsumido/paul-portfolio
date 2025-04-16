@@ -11,7 +11,9 @@ export const getBaseUrl = (req?: { headers: { host: string } }): string => {
 
     // Server-side with request object (getServerSideProps, API routes)
     if (req) {
-        const protocol = req.headers.host.includes("localhost") ? "http" : "https";
+        const protocol = req.headers.host.includes("localhost")
+            ? "http"
+            : "https";
         return `${protocol}://${req.headers.host}`;
     }
 
@@ -19,4 +21,4 @@ export const getBaseUrl = (req?: { headers: { host: string } }): string => {
     return process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : "http://localhost:3000";
-}; 
+};
