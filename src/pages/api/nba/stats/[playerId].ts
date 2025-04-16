@@ -132,10 +132,8 @@ export default async function handler(
                 return res.status(400).json({ error: "Invalid player ID" });
             }
 
-            const data = await getCachedData(
-                `player-stats-${playerId}`,
-                () => fetchStats(parseInt(playerId)),
-                CACHE_TTL
+            const data = await getCachedData(`player-stats-${playerId}`, () =>
+                fetchStats(parseInt(playerId))
             );
             res.status(200).json(data);
         } catch (error) {
