@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { TeamResponse } from "@/types/nba";
 import { prefetchTeams } from "@/utils/prefetch";
 
-export const maxDuration = 120; // 2 minutes in seconds
+export const maxDuration = 280; // 2 minutes in seconds
 
 export default async function handler(
     req: NextApiRequest,
