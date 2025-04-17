@@ -4,24 +4,17 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Language = "en" | "es" | "fr";
 
-type TranslationKey = "navigation" | "about" | "designs";
+type TranslationKey =
+    | "navigation"
+    | "about"
+    | "designs"
+    | "pages"
+    | "pages.fantasy"
+    | "pages.fantasy.subpages"
+    | "pages.fantasy.columns";
 type TranslationPath = `${TranslationKey}.${string}`;
 
-interface Translations {
-    navigation: {
-        home: string;
-        designs: string;
-        about: string;
-    };
-    about: {
-        title: string;
-        description: string;
-    };
-    designs: {
-        title: string;
-        viewDesign: string;
-    };
-}
+type TranslationValue = string | { [key: string]: TranslationValue };
 
 interface LanguageContextType {
     language: Language;
@@ -29,12 +22,13 @@ interface LanguageContextType {
     t: (key: TranslationPath, params?: Record<string, string>) => string;
 }
 
-const translations: Record<Language, Translations> = {
+const translations = {
     en: {
         navigation: {
             home: "Home",
             designs: "Designs",
             about: "About",
+            fantasybasketball: "Fantasy Basketball",
         },
         about: {
             title: "About Paul",
@@ -45,12 +39,55 @@ const translations: Record<Language, Translations> = {
             title: "Designs",
             viewDesign: "View {name} Design",
         },
+        pages: {
+            error: "Error",
+            tryAgain: "Try Again",
+            unknownError: "An unknown error occurred",
+            fantasy: {
+                title: "Fantasy Basketball",
+                dataNote: "*Data is rate limited and cached for 1 hour",
+                errorTitle: "Error Loading Fantasy Basketball Data",
+                selectTeam: "Select Team",
+                players: "Players",
+                noTeamSelected: "No Team Selected",
+                loading: "Loading...",
+                week: "Week",
+                rank: "Rank",
+                subpages: {
+                    nbaStats: "NBA Stats",
+                    league: "League",
+                    history: "History",
+                    matchups: "Matchups",
+                    visualization: "Visualization",
+                },
+                standingsTitle: "Standings",
+                playerStatsTitle: "Player Stats",
+                columns: {
+                    player: "Player",
+                    position: "POS",
+                    points: "PTS",
+                    rebounds: "REB",
+                    assists: "AST",
+                    steals: "STL",
+                    blocks: "BLK",
+                    fantasyPoints: "FP",
+                    games: "GP",
+                    finalPosition: "Final Position",
+                },
+                season: "Season",
+                historyComingSoon: "History coming soon!",
+                matchupsComingSoon: "Matchups coming soon!",
+                statsComingSoon: "Stats coming soon!",
+                playerContributionsWeekly: "Player Contributions Weekly",
+            },
+        },
     },
     es: {
         navigation: {
             home: "Inicio",
             designs: "Diseños",
             about: "Sobre mí",
+            fantasybasketball: "Baloncesto de Fantasía",
         },
         about: {
             title: "Sobre Paul",
@@ -61,12 +98,57 @@ const translations: Record<Language, Translations> = {
             title: "Diseños",
             viewDesign: "Ver diseño de {name}",
         },
+        pages: {
+            error: "Error",
+            tryAgain: "Intentar de nuevo",
+            unknownError: "Se produjo un error desconocido",
+            fantasy: {
+                title: "Baloncesto Fantasy",
+                dataNote:
+                    "*Los datos están limitados y se almacenan en caché durante 1 hora",
+                errorTitle: "Error al cargar los datos de Baloncesto Fantasy",
+                selectTeam: "Seleccionar Equipo",
+                players: "Jugadores",
+                noTeamSelected: "Ningún Equipo Seleccionado",
+                loading: "Cargando...",
+                week: "Semana",
+                rank: "Clasificación",
+                subpages: {
+                    nbaStats: "Estadísticas NBA",
+                    league: "Liga",
+                    history: "Historial",
+                    matchups: "Partidos",
+                    visualization: "Visualización",
+                },
+                standingsTitle: "Clasificaciones",
+                playerStatsTitle: "Estadísticas de Jugadores",
+                columns: {
+                    player: "Jugador",
+                    position: "POS",
+                    points: "PTS",
+                    rebounds: "REB",
+                    assists: "AST",
+                    steals: "ROB",
+                    blocks: "TAP",
+                    fantasyPoints: "FP",
+                    games: "GP",
+                    finalPosition: "Posición final",
+                },
+                season: "Temporada",
+                historyComingSoon: "¡Historial próximamente!",
+                matchupsComingSoon: "¡Partidos próximamente!",
+                statsComingSoon: "¡Estadísticas próximamente!",
+                playerContributionsWeekly:
+                    "Contribuciones Semanales de Jugadores",
+            },
+        },
     },
     fr: {
         navigation: {
             home: "Accueil",
-            designs: "Designs",
+            designs: "Désigns",
             about: "À propos",
+            fantasybasketball: "Basketball Fantaisie",
         },
         about: {
             title: "À propos de Paul",
@@ -77,12 +159,77 @@ const translations: Record<Language, Translations> = {
             title: "Designs",
             viewDesign: "Voir le design {name}",
         },
+        pages: {
+            error: "Erreur",
+            tryAgain: "Réessayer",
+            unknownError: "Une erreur inconnue s'est produite",
+            fantasy: {
+                title: "Basketball Fantasy",
+                dataNote:
+                    "*Les données sont limitées et mises en cache pendant 1 heure",
+                errorTitle:
+                    "Erreur lors du chargement des données de Basketball Fantasy",
+                selectTeam: "Sélectionner une Équipe",
+                players: "Joueurs",
+                noTeamSelected: "Aucune Équipe Sélectionnée",
+                loading: "Chargement...",
+                week: "Semaine",
+                rank: "Classement",
+                subpages: {
+                    nbaStats: "Statistiques NBA",
+                    league: "Ligue",
+                    history: "Historique",
+                    matchups: "Matchs",
+                    visualization: "Visualisation",
+                },
+                standingsTitle: "Classements",
+                playerStatsTitle: "Statistiques des Joueurs",
+                columns: {
+                    player: "Joueur",
+                    position: "POS",
+                    points: "PTS",
+                    rebounds: "REB",
+                    assists: "PAS",
+                    steals: "INT",
+                    blocks: "CTR",
+                    fantasyPoints: "FP",
+                    games: "GP",
+                    finalPosition: "Position finale",
+                },
+                season: "Saison",
+                historyComingSoon: "Historique à venir!",
+                matchupsComingSoon: "Matchs à venir!",
+                statsComingSoon: "Statistiques à venir!",
+                playerContributionsWeekly:
+                    "Contributions Hebdomadaires des Joueurs",
+            },
+        },
     },
-};
+} satisfies Record<Language, TranslationValue>;
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
     undefined
 );
+
+function getTranslationValue(
+    obj: TranslationValue,
+    path: string[]
+): string | undefined {
+    let current: TranslationValue = obj;
+
+    for (const key of path) {
+        if (
+            typeof current !== "object" ||
+            current === null ||
+            !(key in current)
+        ) {
+            return undefined;
+        }
+        current = current[key];
+    }
+
+    return typeof current === "string" ? current : undefined;
+}
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
@@ -107,21 +254,20 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
         key: TranslationPath,
         params?: Record<string, string>
     ): string => {
-        const [section, subKey] = key.split(".");
-        const translation = translations[language][section as TranslationKey][
-            subKey as keyof Translations[TranslationKey]
-        ] as string;
-
-        if (!translation) return key;
+        const keys = key.split(".");
+        const value =
+            getTranslationValue(translations[language], keys) ??
+            getTranslationValue(translations["en"], keys) ??
+            key;
 
         if (params) {
-            return translation.replace(
+            return value.replace(
                 /\{(\w+)\}/g,
-                (_: string, paramKey: string) => params[paramKey] || ""
+                (_, paramKey) => params[paramKey] || ""
             );
         }
 
-        return translation;
+        return value;
     };
 
     return (

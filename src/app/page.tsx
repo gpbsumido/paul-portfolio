@@ -50,12 +50,10 @@ export default function Home(): React.ReactElement {
         return (
             <Box
                 sx={{
-                    height: { xs: "100vh", md: "100vh" },
-                    width: "100%",
                     display: "flex",
                     flexDirection: { xs: "column", md: "row" },
-                    overflow: "hidden",
-                    position: "relative",
+                    height: "100vh",
+                    width: "100vw",
                 }}
             >
                 {/* About Section Skeleton */}
@@ -67,20 +65,15 @@ export default function Home(): React.ReactElement {
                         flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
-                        gap: 4,
-                        p: 3,
-                        bgcolor: "background.default",
+                        gap: 2,
+                        bgcolor: "black",
                     }}
                 >
                     <Skeleton
-                        variant="rectangular"
-                        sx={{
-                            width: { xs: "10em", md: "20em" },
-                            height: { xs: "15em", md: "30em" },
-                            aspectRatio: "9/13",
-                            bgcolor: "grey.800",
-                            borderRadius: 2,
-                        }}
+                        variant="circular"
+                        width={200}
+                        height={200}
+                        sx={{ bgcolor: "grey.800" }}
                     />
                     <Skeleton
                         variant="text"
@@ -94,7 +87,7 @@ export default function Home(): React.ReactElement {
                         variant="text"
                         sx={{
                             width: "300px",
-                            height: "24px",
+                            height: "100px",
                             bgcolor: "grey.800",
                         }}
                     />
@@ -152,12 +145,10 @@ export default function Home(): React.ReactElement {
     return (
         <Box
             sx={{
-                height: { xs: "100vh", md: "100vh" },
-                width: "100%",
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
-                overflow: "hidden",
-                position: "relative",
+                height: "100vh",
+                width: "100vw",
             }}
         >
             <Box
@@ -174,80 +165,95 @@ export default function Home(): React.ReactElement {
             >
                 <LanguageSwitcher />
             </Box>
+
             <AboutSection />
+
             <Box
-                id="designsbox"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
                 sx={{
                     width: { xs: "100%", md: "50%" },
-                    height: { xs: "50vh", md: "100vh" },
-                    background: "white",
-                    color: "black",
+                    height: { xs: "100vh", md: "100vh" },
                     display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    transition:
-                        "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-                    cursor: "pointer",
-                    "&:hover": {
-                        background: "black",
-                        color: "white",
-                    },
+                    flexDirection: "column",
                 }}
             >
-                <Link
-                    href="/designs"
-                    style={{
-                        fontWeight: "normal",
-                        transition:
-                            "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        fontSize: "2rem",
-                        textDecoration: "none",
-                        color: "inherit",
-                        padding: "2rem",
+                <Box
+                    id="designsbox"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    sx={{
                         width: "100%",
                         height: "100%",
+                        background: "white",
+                        color: "black",
+                        display: "flex",
                         justifyContent: "center",
+                        alignItems: "center",
+                        transition:
+                            "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+                        cursor: "pointer",
+                        "&:hover": {
+                            background: "black",
+                            color: "white",
+                        },
                     }}
                 >
-                    <CurrentIcon
-                        sx={{
-                            fontSize: "4rem",
-                            marginBottom: "0.5em",
-                            opacity: isHovered ? 1 : 0.7,
-                            transform: isHovered ? "scale(1.1)" : "scale(1)",
-                            transition:
-                                "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
-                            color: "inherit",
-                            display: "block",
-                            animation: !isHovered
-                                ? "float 2s ease-in-out infinite"
-                                : "none",
-                            "@keyframes float": {
-                                "0%, 100%": {
-                                    transform: "translateY(0)",
-                                },
-                                "50%": {
-                                    transform: "translateY(-10px)",
-                                },
-                            },
-                        }}
-                    />
-                    <span
+                    <Link
+                        href="/designs"
                         style={{
+                            fontWeight: "normal",
                             transition:
                                 "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                            transform: isHovered ? "scale(1.1)" : "scale(1)",
-                            fontWeight: isHovered ? "bold" : "normal",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            fontSize: "2rem",
+                            textDecoration: "none",
+                            color: "inherit",
+                            padding: "2rem",
+                            width: "100%",
+                            height: "100%",
+                            justifyContent: "center",
                         }}
                     >
-                        {t("navigation.designs")}
-                    </span>
-                </Link>
+                        <CurrentIcon
+                            sx={{
+                                fontSize: "4rem",
+                                marginBottom: "0.5em",
+                                opacity: isHovered ? 1 : 0.7,
+                                transform: isHovered
+                                    ? "scale(1.1)"
+                                    : "scale(1)",
+                                transition:
+                                    "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
+                                color: "inherit",
+                                display: "block",
+                                animation: !isHovered
+                                    ? "float 2s ease-in-out infinite"
+                                    : "none",
+                                "@keyframes float": {
+                                    "0%, 100%": {
+                                        transform: "translateY(0)",
+                                    },
+                                    "50%": {
+                                        transform: "translateY(-10px)",
+                                    },
+                                },
+                            }}
+                        />
+                        <span
+                            style={{
+                                transition:
+                                    "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
+                                transform: isHovered
+                                    ? "scale(1.1)"
+                                    : "scale(1)",
+                                fontWeight: isHovered ? "bold" : "normal",
+                            }}
+                        >
+                            {t("navigation.designs")}
+                        </span>
+                    </Link>
+                </Box>
             </Box>
         </Box>
     );
