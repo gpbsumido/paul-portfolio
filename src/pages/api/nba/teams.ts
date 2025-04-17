@@ -21,48 +21,57 @@ const logRequest = (message: string, data?: LogData) => {
     console.log(JSON.stringify(logData, null, 2));
 };
 
-const fetchWithTimeout = async (url: string, options: RequestInit, timeout: number) => {
+const fetchWithTimeout = async (
+    url: string,
+    options: RequestInit,
+    timeout: number
+) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
-        logRequest('Starting NBA API request', { url, timeout });
+        logRequest("Starting NBA API request", { url, timeout });
         const startTime = Date.now();
-        
+
         const response = await fetch(url, {
             ...options,
             signal: controller.signal,
         });
-        
+
         const endTime = Date.now();
         const duration = endTime - startTime;
-        
+
         clearTimeout(timeoutId);
-        logRequest('NBA API request completed', { 
+        logRequest("NBA API request completed", {
             status: response.status,
             duration: `${duration}ms`,
-            url
+            url,
         });
-        
+
         return response;
     } catch (error) {
         clearTimeout(timeoutId);
-        logRequest('NBA API request failed', { 
-            error: error instanceof Error ? error.message : 'Unknown error',
-            url
+        logRequest("NBA API request failed", {
+            error: error instanceof Error ? error.message : "Unknown error",
+            url,
         });
         throw error;
     }
 };
 
-const safeFetchWithRetry = async (url: string, options: RequestInit, timeout: number, retries = MAX_RETRIES) => {
+const safeFetchWithRetry = async (
+    url: string,
+    options: RequestInit,
+    timeout: number,
+    retries = MAX_RETRIES
+) => {
     try {
         return await fetchWithTimeout(url, options, timeout);
     } catch (err) {
         if (retries > 0) {
-            logRequest("Retrying fetch due to failure", { 
+            logRequest("Retrying fetch due to failure", {
                 reason: err instanceof Error ? err.message : "unknown",
-                retriesLeft: retries
+                retriesLeft: retries,
             });
             return await safeFetchWithRetry(url, options, timeout, retries - 1);
         }
@@ -72,7 +81,7 @@ const safeFetchWithRetry = async (url: string, options: RequestInit, timeout: nu
 
 const fetchTeams = async (): Promise<TeamResponse> => {
     const startTime = Date.now();
-    logRequest('Starting teams fetch process');
+    logRequest("Starting teams fetch process");
 
     try {
         const url = new URL(`${BASE_URL}/leaguestandingsv3`);
@@ -80,26 +89,32 @@ const fetchTeams = async (): Promise<TeamResponse> => {
         url.searchParams.append("Season", "2024-25");
         url.searchParams.append("SeasonType", "Regular Season");
 
-        const response = await safeFetchWithRetry(url.toString(), { 
-            headers: HEADERS,
-            next: { revalidate: 3600 }
-        }, FETCH_TIMEOUT);
+        const response = await safeFetchWithRetry(
+            url.toString(),
+            {
+                headers: HEADERS,
+                next: { revalidate: 3600 },
+            },
+            FETCH_TIMEOUT
+        );
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch teams: ${response.status} ${response.statusText}`);
+            throw new Error(
+                `Failed to fetch teams: ${response.status} ${response.statusText}`
+            );
         }
 
-        logRequest('Parsing NBA API response');
+        logRequest("Parsing NBA API response");
         const parseStartTime = Date.now();
         const data = await response.json();
         const parseDuration = Date.now() - parseStartTime;
-        logRequest('Response parsed', { duration: `${parseDuration}ms` });
+        logRequest("Response parsed", { duration: `${parseDuration}ms` });
 
         if (!data.resultSets?.[0]?.rowSet) {
             throw new Error("Invalid response format from NBA API [Teams]");
         }
 
-        logRequest('Transforming team data');
+        logRequest("Transforming team data");
         const transformStartTime = Date.now();
         const teams = data.resultSets[0].rowSet.map((row: string[]) => ({
             id: parseInt(row[2]),
@@ -111,15 +126,15 @@ const fetchTeams = async (): Promise<TeamResponse> => {
             division: row[10],
         }));
         const transformDuration = Date.now() - transformStartTime;
-        logRequest('Team data transformed', { 
+        logRequest("Team data transformed", {
             teamCount: teams.length,
-            duration: `${transformDuration}ms`
+            duration: `${transformDuration}ms`,
         });
 
         const totalDuration = Date.now() - startTime;
-        logRequest('Teams fetch process completed', { 
+        logRequest("Teams fetch process completed", {
             totalDuration: `${totalDuration}ms`,
-            teamCount: teams.length
+            teamCount: teams.length,
         });
 
         return {
@@ -134,9 +149,9 @@ const fetchTeams = async (): Promise<TeamResponse> => {
         };
     } catch (error) {
         const totalDuration = Date.now() - startTime;
-        logRequest('Teams fetch process failed', { 
-            error: error instanceof Error ? error.message : 'Unknown error',
-            duration: `${totalDuration}ms`
+        logRequest("Teams fetch process failed", {
+            error: error instanceof Error ? error.message : "Unknown error",
+            duration: `${totalDuration}ms`,
         });
         throw error;
     }
@@ -147,39 +162,43 @@ export default async function handler(
     res: NextApiResponse
 ) {
     const requestId = Math.random().toString(36).substring(7);
-    logRequest('Request received', { 
+    logRequest("Request received", {
         method: req.method,
-        requestId
+        requestId,
     });
 
     if (req.method === "GET") {
         try {
             const data = await fetchTeams();
-            logRequest('Sending successful response', { 
+            logRequest("Sending successful response", {
                 requestId,
-                teamCount: data.data.length
+                teamCount: data.data.length,
             });
             res.status(200).json(data);
         } catch (error) {
-            logRequest('Sending error response', { 
+            logRequest("Sending error response", {
                 requestId,
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: error instanceof Error ? error.message : "Unknown error",
             });
             res.status(500).json({
                 error: "Failed to fetch teams",
-                details: error instanceof Error ? error.message : "Unknown error",
+                details:
+                    error instanceof Error ? error.message : "Unknown error",
             });
         }
     } else if (req.method === "OPTIONS") {
-        logRequest('Handling OPTIONS request', { requestId });
+        logRequest("Handling OPTIONS request", { requestId });
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res.setHeader(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Authorization"
+        );
         res.status(204).end();
     } else {
-        logRequest('Method not allowed', { 
+        logRequest("Method not allowed", {
             requestId,
-            method: req.method
+            method: req.method,
         });
         res.status(405).json({ error: "Method not allowed" });
     }

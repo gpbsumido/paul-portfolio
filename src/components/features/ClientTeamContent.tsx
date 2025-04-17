@@ -48,7 +48,9 @@ export default function ClientTeamContent({
         setSelectedTeam(team);
 
         try {
-            const response = await fetch(`/api/nba/players/${team.id}`);
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/players/${team.id}`
+            );
             if (!response.ok) {
                 throw new Error("Failed to fetch players");
             }
@@ -57,7 +59,9 @@ export default function ClientTeamContent({
 
             // Fetch stats for all players in parallel
             const statsPromises = newPlayers.map((player: Player) =>
-                fetch(`/api/nba/stats/${player.id}`)
+                fetch(
+                    `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/stats/${player.id}`
+                )
                     .then((res) => res.json())
                     .then((stats) => ({
                         playerId: player.id,

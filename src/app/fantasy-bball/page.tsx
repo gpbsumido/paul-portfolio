@@ -21,10 +21,13 @@ export default function FantasyBasketballPage() {
         const fetchData = async () => {
             try {
                 // First fetch teams
-                const teamsResponse = await fetch(`/api/nba/teams`, {
-                    headers: { Accept: "application/json" },
-                    next: { revalidate: 3600 },
-                });
+                const teamsResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/teams`,
+                    {
+                        headers: { Accept: "application/json" },
+                        next: { revalidate: 3600 },
+                    }
+                );
 
                 if (!teamsResponse.ok) {
                     throw new Error(
@@ -33,10 +36,10 @@ export default function FantasyBasketballPage() {
                 }
 
                 const teamsData = await teamsResponse.json();
-                setTeams(teamsData.data);
+                setTeams(teamsData.data.data);
 
                 // Find Spurs team
-                const spursTeam = teamsData.data.find(
+                const spursTeam = teamsData.data.data.find(
                     (team: Team) => team.full_name === "San Antonio Spurs"
                 );
                 if (!spursTeam) {
@@ -45,7 +48,7 @@ export default function FantasyBasketballPage() {
 
                 // Then fetch Spurs players
                 const playersResponse = await fetch(
-                    `/api/nba/players/${spursTeam.id}`,
+                    `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/players/${spursTeam.id}`,
                     {
                         headers: { Accept: "application/json" },
                         next: { revalidate: 3600 },
@@ -63,7 +66,7 @@ export default function FantasyBasketballPage() {
                     (player: Player) => ({
                         ...player,
                         team:
-                            teamsData.data.find(
+                            teamsData.data.data.find(
                                 (team: Team) => team.id === player.team?.id
                             ) || player.team,
                     })
@@ -79,7 +82,7 @@ export default function FantasyBasketballPage() {
                     const batchPromises = batch.map(async (player: Player) => {
                         try {
                             const statsResponse = await fetch(
-                                `/api/nba/stats/${player.id}`,
+                                `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/stats/${player.id}`,
                                 {
                                     headers: { Accept: "application/json" },
                                     next: { revalidate: 300 },

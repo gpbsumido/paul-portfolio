@@ -10,7 +10,7 @@ let cachedTeams: TeamResponse | null = null;
 
 export const prefetchTeams = async (force = false): Promise<TeamResponse> => {
     const now = Date.now();
-    
+
     // Return cached data if it's still fresh and not forced
     if (!force && cachedTeams && now - lastPrefetchTime < PREFETCH_INTERVAL) {
         return cachedTeams;
@@ -22,13 +22,15 @@ export const prefetchTeams = async (force = false): Promise<TeamResponse> => {
         url.searchParams.append("Season", "2024-25");
         url.searchParams.append("SeasonType", "Regular Season");
 
-        const response = await fetch(url.toString(), { 
+        const response = await fetch(url.toString(), {
             headers: HEADERS,
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600 },
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch teams: ${response.status} ${response.statusText}`);
+            throw new Error(
+                `Failed to fetch teams: ${response.status} ${response.statusText}`
+            );
         }
 
         const data = await response.json();
@@ -80,4 +82,4 @@ prefetchTeams().catch(console.error);
 // Set up periodic prefetching
 setInterval(() => {
     prefetchTeams().catch(console.error);
-}, PREFETCH_INTERVAL); 
+}, PREFETCH_INTERVAL);

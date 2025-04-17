@@ -86,7 +86,9 @@ const rateLimiter = new RateLimiter();
  */
 export async function getTeams(): Promise<TeamResponse> {
     try {
-        const response = await fetch("/api/nba/teams");
+        const response = await fetch(
+            "${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/teams"
+        );
         if (!response.ok) {
             throw new Error(`Failed to fetch teams: ${response.statusText}`);
         }
@@ -105,7 +107,9 @@ export async function getTeams(): Promise<TeamResponse> {
  */
 export async function getTeamPlayers(teamId: number): Promise<PlayerResponse> {
     try {
-        const response = await fetch(`/api/nba/players/${teamId}`);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/players/${teamId}`
+        );
         if (!response.ok) {
             throw new Error(
                 `Failed to fetch team players: ${response.statusText}`
@@ -128,7 +132,9 @@ export async function getPlayerStats(
     playerId: number
 ): Promise<{ data: PlayerStats[] }> {
     try {
-        const response = await fetch(`/api/nba/stats/${playerId}`);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/stats/${playerId}`
+        );
         if (!response.ok) {
             throw new Error(
                 `Failed to fetch player stats: ${response.statusText}`
@@ -152,7 +158,7 @@ export async function getSeasonAverages(
 ): Promise<SeasonAverages[]> {
     return rateLimiter.execute(async () => {
         const url = new URL(
-            "/api/nba/season-averages",
+            `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/season-averages`,
             process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3009"
         );
         url.searchParams.append("PlayerID", playerIds[0].toString());
