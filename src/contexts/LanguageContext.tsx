@@ -60,8 +60,8 @@ const translations = {
                     matchups: "Matchups",
                     visualization: "Visualization",
                 },
-                standingsTitle: 'Standings',
-                playerStatsTitle: 'Player Stats',
+                standingsTitle: "Standings",
+                playerStatsTitle: "Player Stats",
                 columns: {
                     player: "Player",
                     position: "POS",
@@ -120,8 +120,8 @@ const translations = {
                     matchups: "Partidos",
                     visualization: "Visualización",
                 },
-                standingsTitle: 'Clasificaciones',
-                playerStatsTitle: 'Estadísticas de Jugadores',
+                standingsTitle: "Clasificaciones",
+                playerStatsTitle: "Estadísticas de Jugadores",
                 columns: {
                     player: "Jugador",
                     position: "POS",
@@ -182,8 +182,8 @@ const translations = {
                     matchups: "Matchs",
                     visualization: "Visualisation",
                 },
-                standingsTitle: 'Classements',
-                playerStatsTitle: 'Statistiques des Joueurs',
+                standingsTitle: "Classements",
+                playerStatsTitle: "Statistiques des Joueurs",
                 columns: {
                     player: "Joueur",
                     position: "POS",
