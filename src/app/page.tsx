@@ -333,7 +333,7 @@ export default function Home(): React.ReactElement {
                                     : "normal",
                             }}
                         >
-                            Fantasy Basketball
+                            {t("navigation.fantasybasketball")}
                         </span>
                     </Link>
                 </Box>

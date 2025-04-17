@@ -40,6 +40,7 @@ export interface ESPNTeam {
     roster: ESPNRoster;
     record: ESPNRecord;
     rank?: number;
+    rankCalculatedFinal?: number;
 }
 
 export interface ESPNLeagueResponse {
@@ -48,4 +49,4 @@ export interface ESPNLeagueResponse {
         name: string;
         seasonId: number;
     };
-} 
+}

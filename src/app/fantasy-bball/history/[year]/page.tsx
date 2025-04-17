@@ -8,23 +8,37 @@ interface HistoryPageProps {
 
 export default async function HistoryPage({ params }: HistoryPageProps) {
     const data = await getHistoricalLeagueInfo(params.year);
-    
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">League History - {params.year}</h1>
-            
+            <h1 className="text-3xl font-bold mb-6">
+                League History - {params.year}
+            </h1>
+
             <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Final Standings</h2>
                 <div className="overflow-x-auto">
                     <table className="min-w-full">
                         <thead>
                             <tr className="bg-gray-50">
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points For</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points Against</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Rank
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Team
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Owner
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Record
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Points For
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Points Against
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -47,7 +61,8 @@ export default async function HistoryPage({ params }: HistoryPageProps) {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">
-                                            {team.record.overall.wins}-{team.record.overall.losses}
+                                            {team.record.overall.wins}-
+                                            {team.record.overall.losses}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -68,4 +83,4 @@ export default async function HistoryPage({ params }: HistoryPageProps) {
             </div>
         </div>
     );
-} 
+}

@@ -11,6 +11,22 @@ import { useEffect, useState } from "react";
 import FantasyDropdownNav from "@/components/FantasyDropdownNav";
 import ErrorBoundary from "@/components/features/ErrorBoundary";
 
+/**
+ * NBA Stats Page Component
+ *
+ * @component
+ * @description
+ * Displays NBA player statistics in a table format with team selection capabilities.
+ * Fetches team and player data from the NBA API and allows users to view detailed
+ * statistics for players on selected teams.
+ *
+ * @example
+ * ```tsx
+ * <NBAStatsPage />
+ * ```
+ *
+ * @returns {JSX.Element} The NBA stats page component
+ */
 export default function NBAStatsPage() {
     const { t } = useLanguage();
     const [teams, setTeams] = useState<Team[]>([]);
@@ -19,6 +35,12 @@ export default function NBAStatsPage() {
     const [error, setError] = useState<Error | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    /**
+     * Fetches NBA teams and player data from the API
+     * @async
+     * @function fetchData
+     * @returns {Promise<void>}
+     */
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -122,7 +144,11 @@ export default function NBAStatsPage() {
                 setPlayerStatsMap(newPlayerStatsMap);
                 setIsLoading(false);
             } catch (err) {
-                setError(err instanceof Error ? err : new Error("An unknown error occurred"));
+                setError(
+                    err instanceof Error
+                        ? err
+                        : new Error("An unknown error occurred")
+                );
             } finally {
                 setIsLoading(false);
             }
@@ -131,11 +157,16 @@ export default function NBAStatsPage() {
         fetchData();
     }, []);
 
+    /**
+     * Renders the main content of the page based on the current state
+     * @function renderContent
+     * @returns {JSX.Element} The appropriate content based on loading/error state
+     */
     const renderContent = () => {
         if (isLoading) {
             return (
                 <Typography variant="h6" align="center" color="text.secondary">
-                    {t("common.loading")}
+                    {t("pages.fantasy.loading")}
                 </Typography>
             );
         }
@@ -148,11 +179,13 @@ export default function NBAStatsPage() {
             );
         }
 
-        return <ClientTeamContent 
-            initialTeams={teams} 
-            initialPlayers={players} 
-            initialPlayerStatsMap={playerStatsMap} 
-        />;
+        return (
+            <ClientTeamContent
+                initialTeams={teams}
+                initialPlayers={players}
+                initialPlayerStatsMap={playerStatsMap}
+            />
+        );
     };
 
     return (
@@ -164,6 +197,8 @@ export default function NBAStatsPage() {
                     left: { xs: "8px", sm: "16px" },
                     zIndex: 9999,
                 }}
+                role="navigation"
+                aria-label={t("navigation.home")}
             >
                 <HomeButton component={Link} href="/" />
             </Box>
@@ -174,6 +209,8 @@ export default function NBAStatsPage() {
                     right: { xs: "8px", sm: "16px" },
                     zIndex: 9999,
                 }}
+                role="navigation"
+                aria-label={t("navigation.language")}
             >
                 <LanguageSwitcher />
             </Box>
@@ -183,6 +220,8 @@ export default function NBAStatsPage() {
                     flexDirection: "column",
                     gap: 3,
                 }}
+                role="main"
+                aria-label={t("pages.fantasy.subpages.nbaStats")}
             >
                 <Box
                     sx={{
@@ -191,12 +230,12 @@ export default function NBAStatsPage() {
                         alignItems: "center",
                         mb: 2,
                     }}
+                    role="navigation"
+                    aria-label={t("navigation.fantasy")}
                 >
                     <FantasyDropdownNav />
                 </Box>
-                <ErrorBoundary>
-                    {renderContent()}
-                </ErrorBoundary>
+                <ErrorBoundary>{renderContent()}</ErrorBoundary>
             </Box>
         </Container>
     );

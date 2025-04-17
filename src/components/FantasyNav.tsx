@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function FantasyNav() {
     const pathname = usePathname();
@@ -15,9 +15,9 @@ export default function FantasyNav() {
                     <Link
                         href="/fantasy-bball/league"
                         className={`py-4 px-2 border-b-2 ${
-                            isActive('/fantasy-bball/league')
-                                ? 'border-blue-500 text-blue-500'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            isActive("/fantasy-bball/league")
+                                ? "border-blue-500 text-blue-500"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
                     >
                         League
@@ -25,9 +25,9 @@ export default function FantasyNav() {
                     <Link
                         href="/fantasy-bball/history/2024"
                         className={`py-4 px-2 border-b-2 ${
-                            isActive('/fantasy-bball/history/2024')
-                                ? 'border-blue-500 text-blue-500'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            isActive("/fantasy-bball/history/2024")
+                                ? "border-blue-500 text-blue-500"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
                     >
                         History
@@ -36,4 +36,4 @@ export default function FantasyNav() {
             </div>
         </nav>
     );
-} 
+}

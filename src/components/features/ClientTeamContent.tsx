@@ -117,42 +117,30 @@ export default function ClientTeamContent({
                         b.position || ""
                     );
                     break;
-                case "team":
-                    comparison = (a.team?.full_name || "").localeCompare(
-                        b.team?.full_name || ""
-                    );
-                    break;
-                case "points":
+                case "pts":
                     comparison = (statsB?.pts || 0) - (statsA?.pts || 0);
                     break;
-                case "rebounds":
+                case "reb":
                     comparison = (statsB?.reb || 0) - (statsA?.reb || 0);
                     break;
-                case "assists":
+                case "ast":
                     comparison = (statsB?.ast || 0) - (statsA?.ast || 0);
                     break;
-                case "steals":
+                case "stl":
                     comparison = (statsB?.stl || 0) - (statsA?.stl || 0);
                     break;
-                case "blocks":
+                case "blk":
                     comparison = (statsB?.blk || 0) - (statsA?.blk || 0);
                     break;
+                case "games_played":
+                    comparison =
+                        (statsB?.games_played || 0) -
+                        (statsA?.games_played || 0);
+                    break;
                 case "fantasyPoints":
-                    const fantasyPointsA = statsA
-                        ? statsA.pts +
-                          statsA.reb * 1.2 +
-                          statsA.ast * 1.5 +
-                          statsA.stl * 3 +
-                          statsA.blk * 3
-                        : 0;
-                    const fantasyPointsB = statsB
-                        ? statsB.pts +
-                          statsB.reb * 1.2 +
-                          statsB.ast * 1.5 +
-                          statsB.stl * 3 +
-                          statsB.blk * 3
-                        : 0;
-                    comparison = fantasyPointsB - fantasyPointsA;
+                    comparison =
+                        (statsB?.fantasy_points || 0) -
+                        (statsA?.fantasy_points || 0);
                     break;
             }
             return direction === "asc" ? comparison : -comparison;

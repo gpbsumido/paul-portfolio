@@ -4,7 +4,14 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Language = "en" | "es" | "fr";
 
-type TranslationKey = "navigation" | "about" | "designs" | "pages";
+type TranslationKey =
+    | "navigation"
+    | "about"
+    | "designs"
+    | "pages"
+    | "pages.fantasy"
+    | "pages.fantasy.subpages"
+    | "pages.fantasy.columns";
 type TranslationPath = `${TranslationKey}.${string}`;
 
 type TranslationValue = string | { [key: string]: TranslationValue };
@@ -21,6 +28,7 @@ const translations = {
             home: "Home",
             designs: "Designs",
             about: "About",
+            fantasybasketball: "Fantasy Basketball",
         },
         about: {
             title: "About Paul",
@@ -32,7 +40,6 @@ const translations = {
             viewDesign: "View {name} Design",
         },
         pages: {
-            loading: "Loading...",
             error: "Error",
             tryAgain: "Try Again",
             unknownError: "An unknown error occurred",
@@ -43,11 +50,12 @@ const translations = {
                 selectTeam: "Select Team",
                 players: "Players",
                 noTeamSelected: "No Team Selected",
+                loading: "Loading...",
                 subpages: {
                     nbaStats: "NBA Stats",
                     league: "League",
                     history: "History",
-                    matchups: "Matchups"
+                    matchups: "Matchups",
                 },
                 columns: {
                     player: "Player",
@@ -58,7 +66,13 @@ const translations = {
                     steals: "STL",
                     blocks: "BLK",
                     fantasyPoints: "FP",
+                    games: "GP",
+                    finalPosition: "Final Position",
                 },
+                season: "Season",
+                historyComingSoon: "History coming soon!",
+                matchupsComingSoon: "Matchups coming soon!",
+                statsComingSoon: "Stats coming soon!",
             },
         },
     },
@@ -67,6 +81,7 @@ const translations = {
             home: "Inicio",
             designs: "Diseños",
             about: "Sobre mí",
+            fantasybasketball: "Baloncesto de Fantasía",
         },
         about: {
             title: "Sobre Paul",
@@ -78,7 +93,6 @@ const translations = {
             viewDesign: "Ver diseño de {name}",
         },
         pages: {
-            loading: "Cargando...",
             error: "Error",
             tryAgain: "Intentar de nuevo",
             unknownError: "Se produjo un error desconocido",
@@ -90,11 +104,12 @@ const translations = {
                 selectTeam: "Seleccionar Equipo",
                 players: "Jugadores",
                 noTeamSelected: "Ningún Equipo Seleccionado",
+                loading: "Cargando...",
                 subpages: {
                     nbaStats: "Estadísticas NBA",
                     league: "Liga",
                     history: "Historial",
-                    matchups: "Partidos"
+                    matchups: "Partidos",
                 },
                 columns: {
                     player: "Jugador",
@@ -105,15 +120,22 @@ const translations = {
                     steals: "ROB",
                     blocks: "TAP",
                     fantasyPoints: "FP",
+                    games: "GP",
+                    finalPosition: "Posición final",
                 },
+                season: "Temporada",
+                historyComingSoon: "¡Historial próximamente!",
+                matchupsComingSoon: "¡Partidos próximamente!",
+                statsComingSoon: "¡Estadísticas próximamente!",
             },
         },
     },
     fr: {
         navigation: {
             home: "Accueil",
-            designs: "Designs",
+            designs: "Désigns",
             about: "À propos",
+            fantasybasketball: "Basketball Fantaisie",
         },
         about: {
             title: "À propos de Paul",
@@ -125,7 +147,6 @@ const translations = {
             viewDesign: "Voir le design {name}",
         },
         pages: {
-            loading: "Chargement...",
             error: "Erreur",
             tryAgain: "Réessayer",
             unknownError: "Une erreur inconnue s'est produite",
@@ -138,11 +159,12 @@ const translations = {
                 selectTeam: "Sélectionner une Équipe",
                 players: "Joueurs",
                 noTeamSelected: "Aucune Équipe Sélectionnée",
+                loading: "Chargement...",
                 subpages: {
                     nbaStats: "Statistiques NBA",
                     league: "Ligue",
                     history: "Historique",
-                    matchups: "Matchs"
+                    matchups: "Matchs",
                 },
                 columns: {
                     player: "Joueur",
@@ -153,7 +175,13 @@ const translations = {
                     steals: "INT",
                     blocks: "CTR",
                     fantasyPoints: "FP",
+                    games: "GP",
+                    finalPosition: "Position finale",
                 },
+                season: "Saison",
+                historyComingSoon: "Historique à venir!",
+                matchupsComingSoon: "Matchs à venir!",
+                statsComingSoon: "Statistiques à venir!",
             },
         },
     },

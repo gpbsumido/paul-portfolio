@@ -13,10 +13,12 @@ import {
     useMediaQuery,
     Box,
     Avatar,
+    CircularProgress,
 } from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useMemo } from "react";
 
 interface FantasyBasketballTableProps {
     players: Player[];
@@ -26,13 +28,47 @@ interface FantasyBasketballTableProps {
         column: string;
         direction: "asc" | "desc";
     };
+    isLoading?: boolean;
+    error?: Error | null;
 }
+
+const COLUMNS = [
+    { id: "name", label: "pages.fantasy.columns.player", width: "20%" },
+    { id: "position", label: "pages.fantasy.columns.position", width: "10%" },
+    { id: "games_played", label: "pages.fantasy.columns.games", width: "10%" },
+    { id: "pts", label: "pages.fantasy.columns.points", width: "10%" },
+    { id: "reb", label: "pages.fantasy.columns.rebounds", width: "10%" },
+    { id: "ast", label: "pages.fantasy.columns.assists", width: "10%" },
+    { id: "stl", label: "pages.fantasy.columns.steals", width: "10%" },
+    { id: "blk", label: "pages.fantasy.columns.blocks", width: "10%" },
+    {
+        id: "fantasyPoints",
+        label: "pages.fantasy.columns.fantasyPoints",
+        width: "10%",
+    },
+] as const;
+
+const MOBILE_COLUMNS = [
+    { id: "name", label: "pages.fantasy.columns.player", width: "25%" },
+    { id: "position", label: "pages.fantasy.columns.position", width: "10%" },
+    { id: "games_played", label: "pages.fantasy.columns.games", width: "10%" },
+    { id: "pts", label: "pages.fantasy.columns.points", width: "15%" },
+    { id: "reb", label: "pages.fantasy.columns.rebounds", width: "15%" },
+    { id: "ast", label: "pages.fantasy.columns.assists", width: "15%" },
+    {
+        id: "fantasyPoints",
+        label: "pages.fantasy.columns.fantasyPoints",
+        width: "10%",
+    },
+] as const;
 
 export default function FantasyBasketballTable({
     players,
     playerStatsMap,
     onSort,
     sortConfig,
+    isLoading = false,
+    error = null,
 }: FantasyBasketballTableProps) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -45,75 +81,62 @@ export default function FantasyBasketballTable({
         }
     };
 
-    const columns = [
-        { id: "name", label: t("pages.fantasy.columns.player"), width: "25%" },
-        {
-            id: "position",
-            label: t("pages.fantasy.columns.position"),
-            width: "10%",
-        },
-        {
-            id: "points",
-            label: t("pages.fantasy.columns.points"),
-            width: "15%",
-        },
-        {
-            id: "rebounds",
-            label: t("pages.fantasy.columns.rebounds"),
-            width: "10%",
-        },
-        {
-            id: "assists",
-            label: t("pages.fantasy.columns.assists"),
-            width: "10%",
-        },
-        {
-            id: "steals",
-            label: t("pages.fantasy.columns.steals"),
-            width: "10%",
-        },
-        {
-            id: "blocks",
-            label: t("pages.fantasy.columns.blocks"),
-            width: "10%",
-        },
-        {
-            id: "fantasyPoints",
-            label: t("pages.fantasy.columns.fantasyPoints"),
-            width: "15%",
-        },
-    ];
+    const displayColumns = useMemo(() => {
+        const columns = isMobile ? MOBILE_COLUMNS : COLUMNS;
+        return columns.map((column) => ({
+            ...column,
+            label: t(column.label),
+        }));
+    }, [isMobile, t]);
 
-    const mobileColumns = [
-        { id: "name", label: t("pages.fantasy.columns.player"), width: "30%" },
-        {
-            id: "position",
-            label: t("pages.fantasy.columns.position"),
-            width: "10%",
-        },
-        {
-            id: "points",
-            label: t("pages.fantasy.columns.points"),
-            width: "15%",
-        },
-        {
-            id: "rebounds",
-            label: t("pages.fantasy.columns.rebounds"),
-            width: "15%",
-        },
-        {
-            id: "assists",
-            label: t("pages.fantasy.columns.assists"),
-            width: "15%",
-        },
-        {
-            id: "fantasyPoints",
-            label: t("pages.fantasy.columns.fantasyPoints"),
-            width: "15%",
-        },
-    ];
+    if (isLoading) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px"
+                role="status"
+                aria-label={t("pages.fantasy.loading")}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
 
-    const displayColumns = isMobile ? mobileColumns : columns;
+    if (error) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px"
+                role="alert"
+                aria-label={t("pages.error")}
+            >
+                <Typography color="error">
+                    {error.message || t("pages.error")}
+                </Typography>
+            </Box>
+        );
+    }
+
+    if (!players.length) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px"
+                role="status"
+                aria-label={t("pages.fantasy.noPlayers")}
+            >
+                <Typography color="text.secondary">
+                    {t("pages.fantasy.noPlayers")}
+                </Typography>
+            </Box>
+        );
+    }
 
     return (
         <Box
@@ -122,6 +145,8 @@ export default function FantasyBasketballTable({
                 display: "flex",
                 flexDirection: "column",
             }}
+            role="region"
+            aria-label={t("pages.fantasy.playerStats")}
         >
             <TableContainer
                 component={Paper}
@@ -131,7 +156,7 @@ export default function FantasyBasketballTable({
                     borderRadius: 2,
                     overflow: "auto",
                     backgroundColor: theme.palette.background.paper,
-                    maxHeight: "calc(100vh - 25em)", // Adjust this value based on your layout
+                    maxHeight: "calc(100vh - 25em)",
                     "&::-webkit-scrollbar": {
                         width: 8,
                         height: 8,
@@ -164,9 +189,11 @@ export default function FantasyBasketballTable({
                         minWidth: isMobile ? 600 : 800,
                         backgroundColor: theme.palette.background.paper,
                     }}
+                    role="grid"
+                    aria-label={t("pages.fantasy.playerStatsTable")}
                 >
                     <TableHead>
-                        <TableRow>
+                        <TableRow role="row">
                             {displayColumns.map((column) => (
                                 <TableCell
                                     key={column.id}
@@ -175,6 +202,22 @@ export default function FantasyBasketballTable({
                                         handleKeyDown(e, column.id)
                                     }
                                     tabIndex={0}
+                                    role="columnheader"
+                                    scope="col"
+                                    aria-sort={
+                                        sortConfig.column === column.id
+                                            ? sortConfig.direction === "asc"
+                                                ? "ascending"
+                                                : "descending"
+                                            : "none"
+                                    }
+                                    aria-label={`${column.label}, ${
+                                        sortConfig.column === column.id
+                                            ? t(
+                                                  `pages.fantasy.sort.${sortConfig.direction}`
+                                              )
+                                            : t("pages.fantasy.sort.none")
+                                    }`}
                                     sx={{
                                         width: column.width,
                                         cursor: "pointer",
@@ -187,6 +230,10 @@ export default function FantasyBasketballTable({
                                                 theme.palette.mode === "dark"
                                                     ? theme.palette.grey[800]
                                                     : theme.palette.grey[100],
+                                            boxShadow:
+                                                theme.palette.mode === "dark"
+                                                    ? "0 0 8px rgba(255, 255, 255, 0.1)"
+                                                    : "0 0 8px rgba(0, 0, 0, 0.1)",
                                         },
                                         transition: "background-color 0.2s",
                                         borderColor: theme.palette.divider,
@@ -210,30 +257,33 @@ export default function FantasyBasketballTable({
                                             variant="subtitle2"
                                             sx={{
                                                 fontWeight: 600,
-                                                color: theme.palette.text
-                                                    .secondary,
+                                                color:
+                                                    theme.palette.mode ===
+                                                    "dark"
+                                                        ? theme.palette.text
+                                                              .primary
+                                                        : theme.palette.text
+                                                              .secondary,
                                             }}
                                         >
                                             {column.label}
                                         </Typography>
-                                        {sortConfig?.column === column.id &&
-                                            (sortConfig.direction === "asc" ? (
-                                                <ArrowUpwardIcon
-                                                    sx={{
-                                                        fontSize: 16,
-                                                        color: theme.palette
-                                                            .primary.main,
-                                                    }}
-                                                />
-                                            ) : (
-                                                <ArrowDownwardIcon
-                                                    sx={{
-                                                        fontSize: 16,
-                                                        color: theme.palette
-                                                            .primary.main,
-                                                    }}
-                                                />
-                                            ))}
+                                        {sortConfig.column === column.id && (
+                                            <Box
+                                                component="span"
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                {sortConfig.direction ===
+                                                "asc" ? (
+                                                    <ArrowUpwardIcon fontSize="small" />
+                                                ) : (
+                                                    <ArrowDownwardIcon fontSize="small" />
+                                                )}
+                                            </Box>
+                                        )}
                                     </Box>
                                 </TableCell>
                             ))}
@@ -241,149 +291,73 @@ export default function FantasyBasketballTable({
                     </TableHead>
                     <TableBody>
                         {players.map((player) => {
-                            const stats = playerStatsMap[player.id];
-                            const fantasyPoints = stats
-                                ? stats.pts +
-                                  stats.reb * 1.2 +
-                                  stats.ast * 1.5 +
-                                  stats.stl * 3 +
-                                  stats.blk * 3
-                                : 0;
-
+                            const stats = playerStatsMap[player.id] || {};
                             return (
                                 <TableRow
                                     key={player.id}
+                                    role="row"
                                     sx={{
-                                        backgroundColor:
-                                            theme.palette.background.paper,
                                         "&:hover": {
-                                            "& td": {
-                                                paddingTop: "24px",
-                                                paddingBottom: "24px",
-                                                backgroundColor:
-                                                    theme.palette.mode ===
-                                                    "dark"
-                                                        ? theme.palette
-                                                              .grey[800]
-                                                        : theme.palette
-                                                              .grey[100],
-                                                boxShadow:
-                                                    theme.palette.mode ===
-                                                    "dark"
-                                                        ? "0 4px 8px rgba(0, 0, 0, 0.3)"
-                                                        : "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                                "& .MuiTypography-root": {
-                                                    fontWeight: 600,
-                                                },
-                                            },
+                                            backgroundColor:
+                                                theme.palette.mode === "dark"
+                                                    ? theme.palette.grey[800]
+                                                    : theme.palette.grey[100],
                                         },
                                     }}
                                 >
                                     {displayColumns.map((column) => (
                                         <TableCell
-                                            key={column.id}
+                                            key={`${player.id}-${column.id}`}
+                                            role="cell"
                                             sx={{
-                                                color: theme.palette.text
-                                                    .primary,
                                                 borderColor:
                                                     theme.palette.divider,
-                                                backgroundColor:
-                                                    theme.palette.background
-                                                        .paper,
                                             }}
                                         >
-                                            {column.id === "name" && (
+                                            {column.id === "name" ? (
                                                 <Box
                                                     sx={{
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        gap: 2,
+                                                        gap: 1,
                                                     }}
                                                 >
                                                     <Avatar
                                                         src={`https://cdn.nba.com/headshots/nba/latest/260x190/${player.id}.png`}
-                                                        alt={`${player.first_name} ${player.last_name}`}
+                                                        alt={player.first_name}
                                                         sx={{
-                                                            width: 40,
-                                                            height: 40,
+                                                            width: 32,
+                                                            height: 32,
                                                         }}
                                                     />
-                                                    <Box>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                            }}
-                                                        >
-                                                            {`${player.first_name} ${player.last_name}`}
-                                                        </Typography>
-                                                    </Box>
+                                                    <Typography>
+                                                        {player.first_name}{" "}
+                                                        {player.last_name}
+                                                    </Typography>
                                                 </Box>
-                                            )}
-                                            {column.id === "position" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ textAlign: "center" }}
-                                                >
+                                            ) : column.id === "position" ? (
+                                                <Typography>
                                                     {player.position || "N/A"}
                                                 </Typography>
-                                            )}
-                                            {column.id === "points" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ textAlign: "center" }}
-                                                >
-                                                    {stats?.pts?.toFixed(1) ||
-                                                        "0.0"}
+                                            ) : column.id ===
+                                              "fantasyPoints" ? (
+                                                <Typography>
+                                                    {stats[
+                                                        "fantasy_points"
+                                                    ].toFixed(1)}
                                                 </Typography>
-                                            )}
-                                            {column.id === "rebounds" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ textAlign: "center" }}
-                                                >
-                                                    {stats?.reb?.toFixed(1) ||
-                                                        "0.0"}
+                                            ) : column.id === "games_played" ? (
+                                                <Typography>
+                                                    {stats["games_played"] ||
+                                                        "0"}
                                                 </Typography>
-                                            )}
-                                            {column.id === "assists" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ textAlign: "center" }}
-                                                >
-                                                    {stats?.ast?.toFixed(1) ||
-                                                        "0.0"}
-                                                </Typography>
-                                            )}
-                                            {column.id === "steals" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ textAlign: "center" }}
-                                                >
-                                                    {stats?.stl?.toFixed(1) ||
-                                                        "0.0"}
-                                                </Typography>
-                                            )}
-                                            {column.id === "blocks" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ textAlign: "center" }}
-                                                >
-                                                    {stats?.blk?.toFixed(1) ||
-                                                        "0.0"}
-                                                </Typography>
-                                            )}
-                                            {column.id === "fantasyPoints" && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{
-                                                        fontWeight: 600,
-                                                        color: theme.palette
-                                                            .primary.main,
-                                                        textAlign: "center",
-                                                    }}
-                                                >
-                                                    {fantasyPoints.toFixed(1)}
+                                            ) : (
+                                                <Typography>
+                                                    {Number(
+                                                        stats[
+                                                            column.id as keyof typeof stats
+                                                        ]
+                                                    )?.toFixed(1) || "0.0"}
                                                 </Typography>
                                             )}
                                         </TableCell>

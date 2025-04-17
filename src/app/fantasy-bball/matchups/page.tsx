@@ -65,10 +65,8 @@ export default function MatchupsPage() {
                 >
                     <FantasyDropdownNav />
                 </Box>
-                <ErrorBoundary>
-                    {renderContent()}
-                </ErrorBoundary>
+                <ErrorBoundary>{renderContent()}</ErrorBoundary>
             </Box>
         </Container>
     );
-} 
+}

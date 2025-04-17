@@ -1,47 +1,81 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Box, Button, Menu, MenuItem, Typography, Portal } from '@mui/material';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import SportsBasketballIcon from '@mui/icons-material/SportsBasketball';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useState } from "react";
+import {
+    Box,
+    Button,
+    Menu,
+    MenuItem,
+    Typography,
+    Portal,
+    useTheme,
+} from "@mui/material";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const subpages = [
     {
-        key: 'nbaStats',
-        href: '/fantasy-bball/nba-stats',
+        key: "nbaStats",
+        href: "/fantasy-bball/nba-stats",
     },
     {
-        key: 'league',
-        href: '/fantasy-bball/league',
+        key: "league",
+        href: "/fantasy-bball/league",
     },
     {
-        key: 'history',
-        href: '/fantasy-bball/history/2024',
+        key: "history",
+        href: "/fantasy-bball/history/2024",
     },
     {
-        key: 'matchups',
-        href: '/fantasy-bball/matchups',
-    }
+        key: "matchups",
+        href: "/fantasy-bball/matchups",
+    },
 ];
 
+/**
+ * Fantasy Dropdown Navigation Component
+ *
+ * @component
+ * @description
+ * A navigation component that displays a dropdown menu for fantasy basketball subpages.
+ * Shows the current page and allows users to navigate between different fantasy basketball sections.
+ *
+ * @example
+ * ```tsx
+ * <FantasyDropdownNav />
+ * ```
+ *
+ * @returns {JSX.Element} The fantasy dropdown navigation component
+ */
 export default function FantasyDropdownNav() {
     const { t } = useLanguage();
+    const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const pathname = usePathname();
     const open = Boolean(anchorEl);
 
+    /**
+     * Handles the click event for the dropdown button
+     * @function handleClick
+     * @param {React.MouseEvent<HTMLElement>} event - The click event
+     */
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
+    /**
+     * Closes the dropdown menu
+     * @function handleClose
+     */
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    const currentPage = subpages.find(page => pathname === page.href)?.key || 'title';
+    const currentPage =
+        subpages.find((page) => pathname === page.href)?.key || "title";
 
     return (
         <Box>
@@ -50,35 +84,51 @@ export default function FantasyDropdownNav() {
                 startIcon={<SportsBasketballIcon />}
                 endIcon={<KeyboardArrowDownIcon />}
                 onClick={handleClick}
+                aria-haspopup="true"
+                aria-expanded={open}
+                aria-controls={open ? "fantasy-menu" : undefined}
                 sx={{
-                    backgroundColor: 'primary.main',
-                    '&:hover': {
-                        backgroundColor: 'primary.dark',
+                    backgroundColor: "black",
+                    color: "white",
+                    "&:hover": {
+                        backgroundColor: "black",
                     },
+                    border:
+                        theme.palette.mode === "dark"
+                            ? "1px solid rgba(255, 255, 255, 0.23)"
+                            : "none",
                 }}
             >
-                {t(`pages.fantasy.${currentPage === 'title' ? 'title' : `subpages.${currentPage}`}`)}
+                {t(
+                    `pages.fantasy.${currentPage === "title" ? "title" : `subpages.${currentPage}`}`
+                )}
             </Button>
             {open && (
                 <Portal>
                     <Menu
+                        id="fantasy-menu"
                         anchorEl={anchorEl}
                         open={open}
                         onClose={handleClose}
                         disableScrollLock
                         anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left',
+                            vertical: "bottom",
+                            horizontal: "left",
                         }}
                         transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left',
+                            vertical: "top",
+                            horizontal: "left",
                         }}
                         sx={{
-                            '& .MuiPaper-root': {
-                                position: 'fixed',
+                            "& .MuiPaper-root": {
+                                position: "fixed",
                                 mt: 1,
-                            }
+                                backgroundColor: "background.paper",
+                                border:
+                                    theme.palette.mode === "dark"
+                                        ? "1px solid rgba(255, 255, 255, 0.12)"
+                                        : "none",
+                            },
                         }}
                     >
                         {subpages.map((page) => (
@@ -90,10 +140,11 @@ export default function FantasyDropdownNav() {
                                 selected={pathname === page.href}
                                 sx={{
                                     minWidth: 200,
-                                    '&.Mui-selected': {
-                                        backgroundColor: 'primary.light',
-                                        '&:hover': {
-                                            backgroundColor: 'primary.light',
+                                    "&.Mui-selected": {
+                                        backgroundColor: "black",
+                                        color: "white",
+                                        "&:hover": {
+                                            backgroundColor: "black",
                                         },
                                     },
                                 }}
@@ -108,4 +159,4 @@ export default function FantasyDropdownNav() {
             )}
         </Box>
     );
-} 
+}

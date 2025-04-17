@@ -65,10 +65,8 @@ export default function HistoryPage() {
                 >
                     <FantasyDropdownNav />
                 </Box>
-                <ErrorBoundary>
-                    {renderContent()}
-                </ErrorBoundary>
+                <ErrorBoundary>{renderContent()}</ErrorBoundary>
             </Box>
         </Container>
     );
-} 
+}
