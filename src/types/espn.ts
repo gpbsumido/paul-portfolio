@@ -1,4 +1,5 @@
 export interface ESPNPlayer {
+    stats: any;
     id: number;
     fullName: string;
     defaultPosition: string;
@@ -66,6 +67,7 @@ export interface ESPNScheduleMatchup {
 }
 
 export interface ESPNLeagueResponse {
+    seasonId: any;
     id: number;
     teams: ESPNTeam[];
     settings?: ESPNSettings;
