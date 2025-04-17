@@ -51,11 +51,14 @@ const translations = {
                 players: "Players",
                 noTeamSelected: "No Team Selected",
                 loading: "Loading...",
+                week: "Week",
+                rank: "Rank",
                 subpages: {
                     nbaStats: "NBA Stats",
                     league: "League",
                     history: "History",
                     matchups: "Matchups",
+                    visualization: "Visualization",
                 },
                 columns: {
                     player: "Player",
@@ -105,11 +108,14 @@ const translations = {
                 players: "Jugadores",
                 noTeamSelected: "Ningún Equipo Seleccionado",
                 loading: "Cargando...",
+                week: "Semana",
+                rank: "Clasificación",
                 subpages: {
                     nbaStats: "Estadísticas NBA",
                     league: "Liga",
                     history: "Historial",
                     matchups: "Partidos",
+                    visualization: "Visualización",
                 },
                 columns: {
                     player: "Jugador",
@@ -160,11 +166,14 @@ const translations = {
                 players: "Joueurs",
                 noTeamSelected: "Aucune Équipe Sélectionnée",
                 loading: "Chargement...",
+                week: "Semaine",
+                rank: "Classement",
                 subpages: {
                     nbaStats: "Statistiques NBA",
                     league: "Ligue",
                     history: "Historique",
                     matchups: "Matchs",
+                    visualization: "Visualisation",
                 },
                 columns: {
                     player: "Joueur",

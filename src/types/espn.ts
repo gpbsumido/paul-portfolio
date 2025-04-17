@@ -43,10 +43,30 @@ export interface ESPNTeam {
     rankCalculatedFinal?: number;
 }
 
+export interface ESPNScheduleSettings {
+    matchupPeriodCount: number;
+}
+
+export interface ESPNSettings {
+    name: string;
+    seasonId: number;
+    scheduleSettings?: ESPNScheduleSettings;
+}
+
+export interface ESPNScheduleMatchup {
+    matchupPeriodId: number;
+    home: {
+        teamId: number;
+        totalPoints: number;
+    };
+    away: {
+        teamId: number;
+        totalPoints: number;
+    };
+}
+
 export interface ESPNLeagueResponse {
     teams: ESPNTeam[];
-    settings?: {
-        name: string;
-        seasonId: number;
-    };
+    settings?: ESPNSettings;
+    schedule?: ESPNScheduleMatchup[];
 }

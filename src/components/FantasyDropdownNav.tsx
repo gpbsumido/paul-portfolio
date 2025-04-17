@@ -154,6 +154,24 @@ export default function FantasyDropdownNav() {
                                 </Typography>
                             </MenuItem>
                         ))}
+                        <MenuItem
+                            component={Link}
+                            href="/fantasy-bball/visualization"
+                            onClick={handleClose}
+                            sx={{
+                                "&.Mui-selected": {
+                                    backgroundColor: "black",
+                                    color: "white",
+                                    "&:hover": {
+                                        backgroundColor: "black",
+                                    },
+                                },
+                            }}
+                        >
+                            <Typography variant="body1">
+                                {t("pages.fantasy.subpages.visualization")}
+                            </Typography>
+                        </MenuItem>
                     </Menu>
                 </Portal>
             )}
