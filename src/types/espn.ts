@@ -66,6 +66,7 @@ export interface ESPNScheduleMatchup {
 }
 
 export interface ESPNLeagueResponse {
+    id: number;
     teams: ESPNTeam[];
     settings?: ESPNSettings;
     schedule?: ESPNScheduleMatchup[];

@@ -60,6 +60,8 @@ const translations = {
                     matchups: "Matchups",
                     visualization: "Visualization",
                 },
+                standingsTitle: 'Standings',
+                playerStatsTitle: 'Player Stats',
                 columns: {
                     player: "Player",
                     position: "POS",
@@ -76,6 +78,7 @@ const translations = {
                 historyComingSoon: "History coming soon!",
                 matchupsComingSoon: "Matchups coming soon!",
                 statsComingSoon: "Stats coming soon!",
+                playerContributionsWeekly: "Player Contributions Weekly",
             },
         },
     },
@@ -117,6 +120,8 @@ const translations = {
                     matchups: "Partidos",
                     visualization: "Visualización",
                 },
+                standingsTitle: 'Clasificaciones',
+                playerStatsTitle: 'Estadísticas de Jugadores',
                 columns: {
                     player: "Jugador",
                     position: "POS",
@@ -133,6 +138,8 @@ const translations = {
                 historyComingSoon: "¡Historial próximamente!",
                 matchupsComingSoon: "¡Partidos próximamente!",
                 statsComingSoon: "¡Estadísticas próximamente!",
+                playerContributionsWeekly:
+                    "Contribuciones Semanales de Jugadores",
             },
         },
     },
@@ -175,6 +182,8 @@ const translations = {
                     matchups: "Matchs",
                     visualization: "Visualisation",
                 },
+                standingsTitle: 'Classements',
+                playerStatsTitle: 'Statistiques des Joueurs',
                 columns: {
                     player: "Joueur",
                     position: "POS",
@@ -191,6 +200,8 @@ const translations = {
                 historyComingSoon: "Historique à venir!",
                 matchupsComingSoon: "Matchs à venir!",
                 statsComingSoon: "Statistiques à venir!",
+                playerContributionsWeekly:
+                    "Contributions Hebdomadaires des Joueurs",
             },
         },
     },

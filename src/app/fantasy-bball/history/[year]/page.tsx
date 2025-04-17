@@ -42,41 +42,59 @@ export default async function HistoryPage({ params }: HistoryPageProps) {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {data.teams.map((team: any) => (
-                                <tr key={team.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {team.rank}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {team.name}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">
-                                            {team.owners[0].displayName}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">
-                                            {team.record.overall.wins}-
-                                            {team.record.overall.losses}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">
-                                            {team.record.overall.pointsFor}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">
-                                            {team.record.overall.pointsAgainst}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {data.teams.map(
+                                (team: {
+                                    id: number;
+                                    rank: number;
+                                    name: string;
+                                    owners: { displayName: string }[];
+                                    record: {
+                                        overall: {
+                                            wins: number;
+                                            losses: number;
+                                            pointsFor: number;
+                                            pointsAgainst: number;
+                                        };
+                                    };
+                                }) => (
+                                    <tr key={team.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {team.rank}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {team.name}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {team.owners[0].displayName}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {team.record.overall.wins}-
+                                                {team.record.overall.losses}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {team.record.overall.pointsFor}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {
+                                                    team.record.overall
+                                                        .pointsAgainst
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            )}
                         </tbody>
                     </table>
                 </div>

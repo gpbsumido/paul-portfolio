@@ -40,6 +40,16 @@ export default function FantasyBasketballPage() {
             ),
         },
         {
+            title: "Visualizations",
+            description: "View interactive data visualizations and trends",
+            href: "/fantasy-bball/visualization",
+            icon: (
+                <SportsBasketballIcon
+                    sx={{ fontSize: 40, color: "primary.main" }}
+                />
+            ),
+        },
+        {
             title: "History",
             description: "View past seasons and historical data",
             href: "/fantasy-bball/history/2024",

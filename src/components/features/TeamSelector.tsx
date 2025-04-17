@@ -2,7 +2,7 @@
 
 import { Team } from "@/types/nba";
 import { Autocomplete, TextField, useTheme, Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TeamSelectorProps {
     teams: Team[];
@@ -15,7 +15,7 @@ export default function TeamSelector({
     selectedTeam,
     onTeamChange,
 }: TeamSelectorProps) {
-    const { t } = useTranslation();
+    const { t } = useLanguage();
     const theme = useTheme();
 
     return (

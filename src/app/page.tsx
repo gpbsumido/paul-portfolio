@@ -6,7 +6,6 @@ import Link from "next/link";
 import BrushIcon from "@mui/icons-material/Brush";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import PreviewIcon from "@mui/icons-material/Preview";
-import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
 import { useState, useEffect } from "react";
 import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -23,7 +22,6 @@ export default function Home(): React.ReactElement {
     const [currentIconIndex, setCurrentIconIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
-    const [isFantasyHovered, setIsFantasyHovered] = useState(false);
     const { t } = useLanguage();
 
     useEffect(() => {
@@ -184,7 +182,7 @@ export default function Home(): React.ReactElement {
                     onMouseLeave={() => setIsHovered(false)}
                     sx={{
                         width: "100%",
-                        height: "50%",
+                        height: "100%",
                         background: "white",
                         color: "black",
                         display: "flex",
@@ -253,87 +251,6 @@ export default function Home(): React.ReactElement {
                             }}
                         >
                             {t("navigation.designs")}
-                        </span>
-                    </Link>
-                </Box>
-
-                <Box
-                    id="fantasybox"
-                    onMouseEnter={() => setIsFantasyHovered(true)}
-                    onMouseLeave={() => setIsFantasyHovered(false)}
-                    sx={{
-                        width: "100%",
-                        height: "50%",
-                        background: "white",
-                        color: "black",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        transition:
-                            "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-                        cursor: "pointer",
-                        "&:hover": {
-                            background: "black",
-                            color: "white",
-                        },
-                    }}
-                >
-                    <Link
-                        href="/fantasy-bball"
-                        style={{
-                            fontWeight: "normal",
-                            transition:
-                                "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            fontSize: "2rem",
-                            textDecoration: "none",
-                            color: "inherit",
-                            padding: "2rem",
-                            width: "100%",
-                            height: "100%",
-                            justifyContent: "center",
-                        }}
-                    >
-                        <SportsBasketballIcon
-                            sx={{
-                                fontSize: "4rem",
-                                marginBottom: "0.5em",
-                                opacity: isFantasyHovered ? 1 : 0.7,
-                                transform: isFantasyHovered
-                                    ? "scale(1.1)"
-                                    : "scale(1)",
-                                transition:
-                                    "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
-                                color: "inherit",
-                                display: "block",
-                                animation: !isFantasyHovered
-                                    ? "float 2s ease-in-out infinite"
-                                    : "none",
-                                "@keyframes float": {
-                                    "0%, 100%": {
-                                        transform: "translateY(0)",
-                                    },
-                                    "50%": {
-                                        transform: "translateY(-10px)",
-                                    },
-                                },
-                            }}
-                        />
-                        <span
-                            style={{
-                                transition:
-                                    "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                                transform: isFantasyHovered
-                                    ? "scale(1.1)"
-                                    : "scale(1)",
-                                fontWeight: isFantasyHovered
-                                    ? "bold"
-                                    : "normal",
-                            }}
-                        >
-                            {t("navigation.fantasybasketball")}
                         </span>
                     </Link>
                 </Box>

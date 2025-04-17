@@ -57,7 +57,8 @@ export default function LeaguePage() {
     );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedSeason, setSelectedSeason] = useState("2025");
+    const currentYear = new Date().getFullYear().toString();
+    const [selectedSeason, setSelectedSeason] = useState(currentYear);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -233,9 +234,11 @@ export default function LeaguePage() {
                                     >
                                         <MenuItem
                                             onClick={() =>
-                                                handleSeasonChange("2025")
+                                                handleSeasonChange(currentYear)
                                             }
-                                            selected={selectedSeason === "2025"}
+                                            selected={
+                                                selectedSeason === currentYear
+                                            }
                                             sx={{
                                                 "&.Mui-selected": {
                                                     backgroundColor: "black",
@@ -248,27 +251,7 @@ export default function LeaguePage() {
                                             }}
                                         >
                                             <Typography variant="body1">
-                                                2025
-                                            </Typography>
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() =>
-                                                handleSeasonChange("2024")
-                                            }
-                                            selected={selectedSeason === "2024"}
-                                            sx={{
-                                                "&.Mui-selected": {
-                                                    backgroundColor: "black",
-                                                    color: "white",
-                                                    "&:hover": {
-                                                        backgroundColor:
-                                                            "black",
-                                                    },
-                                                },
-                                            }}
-                                        >
-                                            <Typography variant="body1">
-                                                2024
+                                                {currentYear}
                                             </Typography>
                                         </MenuItem>
                                     </Menu>

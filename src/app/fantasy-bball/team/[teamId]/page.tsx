@@ -1,4 +1,5 @@
 import { getTeamInfo } from "@/lib/espnService";
+import { ESPNRosterEntry } from "@/types/espn";
 
 interface TeamPageProps {
     params: {
@@ -43,32 +44,34 @@ export default async function TeamPage({ params }: TeamPageProps) {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {team.roster.entries.map((entry: any) => (
-                                <tr key={entry.playerId}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {
-                                                entry.playerPoolEntry.player
-                                                    .fullName
-                                            }
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">
-                                            {
-                                                entry.playerPoolEntry.player
-                                                    .defaultPosition
-                                            }
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">
-                                            {entry.playerPoolEntry.player
-                                                .injuryStatus || "Active"}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {team.roster.entries.map(
+                                (entry: ESPNRosterEntry) => (
+                                    <tr key={entry.playerId}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {
+                                                    entry.playerPoolEntry.player
+                                                        .fullName
+                                                }
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {
+                                                    entry.playerPoolEntry.player
+                                                        .defaultPosition
+                                                }
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {entry.playerPoolEntry.player
+                                                    .injuryStatus || "Active"}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            )}
                         </tbody>
                     </table>
                 </div>

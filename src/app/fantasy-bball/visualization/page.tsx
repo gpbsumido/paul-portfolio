@@ -15,12 +15,14 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import FantasyDropdownNav from "@/components/FantasyDropdownNav";
 import { useEffect, useState } from "react";
-import { ESPNLeagueResponse } from "@/types/espn";
+import { ESPNLeagueResponse, ESPNRosterEntry } from "@/types/espn";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ErrorBoundary from "@/components/features/ErrorBoundary";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@mui/material/styles";
-import ReactECharts from 'echarts-for-react';
+import ReactECharts from "echarts-for-react";
+import PlayerStats from "./player-stats";
+import Link from "next/link";
 
 interface WeeklyRanking {
     week: number;
@@ -51,11 +53,31 @@ interface TooltipParam {
     axisValue: number;
 }
 
-interface WeekData {
+interface PlayerStats {
+    seasonId: number;
+    scoringPeriodId: number;
+    statSourceId: number;
+    stats?: {
+        [key: string]: number;
+    };
+    appliedStats?: {
+        [key: string]: number;
+    };
+}
+
+interface TeamRoster {
+    entries?: ESPNRosterEntry[];
+}
+
+interface Team {
+    id: number;
     name: string;
-    rank: number;
-    record: TeamRecord | undefined;
-    color: string;
+    roster?: TeamRoster;
+}
+
+interface WeekData {
+    scoringPeriodId: number;
+    teams: Team[];
 }
 
 /**
@@ -76,7 +98,9 @@ interface WeekData {
 export default function VisualizationPage() {
     const { t } = useLanguage();
     const theme = useTheme();
-    const [leagueData, setLeagueData] = useState<ESPNLeagueResponse | null>(null);
+    const [leagueData, setLeagueData] = useState<ESPNLeagueResponse | null>(
+        null
+    );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedSeason, setSelectedSeason] = useState("2025");
@@ -106,22 +130,73 @@ export default function VisualizationPage() {
         try {
             setLoading(true);
             setError(null);
-            // Add mStandings to get weekly rankings
-            const response = await fetch(
-                `https://lm-api-reads.fantasy.espn.com/apis/v3/games/fba/seasons/${selectedSeason}/segments/0/leagues/449389534?view=mTeam&view=mRoster&view=mSettings&view=mStandings`,
-                {
-                    headers: {
-                        Accept: "application/json",
-                    },
+
+            // Fetch data for each week
+            const regularSeasonWeeks = 22;
+            const weeklyDataPromises = Array.from(
+                { length: regularSeasonWeeks },
+                (_, i) => {
+                    const scoringPeriodId = i + 1;
+                    return fetch(
+                        `https://lm-api-reads.fantasy.espn.com/apis/v3/games/fba/seasons/${selectedSeason}/segments/0/leagues/449389534?scoringPeriodId=${scoringPeriodId}&view=mTeam&view=mRoster&view=mSettings&view=mMatchup&view=mRosterStats`,
+                        {
+                            headers: {
+                                Accept: "application/json",
+                            },
+                        }
+                    ).then((response) => {
+                        if (!response.ok) {
+                            throw new Error(
+                                `Failed to fetch week ${scoringPeriodId} data`
+                            );
+                        }
+                        return response.json();
+                    });
                 }
             );
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch league data");
-            }
+            // Wait for all weekly data to be fetched
+            const weeklyData = await Promise.all<WeekData>(weeklyDataPromises);
 
-            const data = await response.json();
-            setLeagueData(data);
+            // Combine the data, preserving weekly stats
+            const combinedData: unknown = {
+                ...weeklyData[0], // Use first week's data as base
+                teams: weeklyData[0].teams.map((team: Team) => ({
+                    ...team,
+                    weeklyStats: weeklyData.map((weekData: WeekData) => {
+                        const weekTeam = weekData.teams.find(
+                            (t: Team) => t.id === team.id
+                        );
+                        return {
+                            scoringPeriodId: weekData.scoringPeriodId,
+                            stats:
+                                weekTeam?.roster?.entries?.map(
+                                    (entry: ESPNRosterEntry) => {
+                                        const player =
+                                            entry.playerPoolEntry.player;
+                                        const stats = player.stats || [];
+
+                                        return {
+                                            player,
+                                            stats: stats.filter(
+                                                (stat: PlayerStats) =>
+                                                    stat.seasonId ===
+                                                        parseInt(
+                                                            selectedSeason
+                                                        ) &&
+                                                    stat.scoringPeriodId ===
+                                                        weekData.scoringPeriodId &&
+                                                    stat.statSourceId === 0
+                                            ),
+                                        };
+                                    }
+                                ) || [],
+                        };
+                    }),
+                })),
+            };
+
+            setLeagueData(combinedData as ESPNLeagueResponse);
         } catch (err) {
             setError(
                 err instanceof Error ? err.message : "An unknown error occurred"
@@ -134,28 +209,35 @@ export default function VisualizationPage() {
 
     useEffect(() => {
         fetchLeagueData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedSeason]);
 
     const prepareChartData = (): TeamRankingData[] => {
         if (!leagueData?.teams || !leagueData.schedule) return [];
 
         // Get regular season length from schedule settings
-        const regularSeasonLength = leagueData.settings?.scheduleSettings?.matchupPeriodCount || 0;
+        const regularSeasonLength =
+            leagueData.settings?.scheduleSettings?.matchupPeriodCount || 0;
 
-        console.log('regularSeasonLength',regularSeasonLength)
-        
         // Initialize records from scratch
         const weeklyRecords: { [week: number]: WeeklyTeamRecord } = {};
         const teamNames: { [teamId: number]: string } = {};
-        const headToHeadRecords: { [teamId: number]: { [opponentId: number]: { wins: number; losses: number } } } = {};
+        const headToHeadRecords: {
+            [teamId: number]: {
+                [opponentId: number]: { wins: number; losses: number };
+            };
+        } = {};
 
         // Store team names and initialize head-to-head records
-        leagueData.teams.forEach(team => {
+        leagueData.teams.forEach((team) => {
             teamNames[team.id] = team.name;
             headToHeadRecords[team.id] = {};
-            leagueData.teams.forEach(opponent => {
+            leagueData.teams.forEach((opponent) => {
                 if (team.id !== opponent.id) {
-                    headToHeadRecords[team.id][opponent.id] = { wins: 0, losses: 0 };
+                    headToHeadRecords[team.id][opponent.id] = {
+                        wins: 0,
+                        losses: 0,
+                    };
                 }
             });
         });
@@ -163,19 +245,24 @@ export default function VisualizationPage() {
         // Pre-initialize weekly records
         for (let week = 1; week <= regularSeasonLength; week++) {
             weeklyRecords[week] = {};
-            leagueData.teams.forEach(team => {
+            leagueData.teams.forEach((team) => {
                 // Start with previous week's record if it exists, otherwise 0-0
                 const prevWeek = week - 1;
-                const prevRecord = prevWeek > 0 ? weeklyRecords[prevWeek][team.id] : { wins: 0, losses: 0, totalPoints: 0 };
+                const prevRecord =
+                    prevWeek > 0
+                        ? weeklyRecords[prevWeek][team.id]
+                        : { wins: 0, losses: 0, totalPoints: 0 };
                 weeklyRecords[week][team.id] = { ...prevRecord };
             });
         }
 
         // Sort matchups
-        const sortedMatchups = [...leagueData.schedule].sort((a, b) => a.matchupPeriodId - b.matchupPeriodId);
+        const sortedMatchups = [...leagueData.schedule].sort(
+            (a, b) => a.matchupPeriodId - b.matchupPeriodId
+        );
 
         // Process matchups
-        sortedMatchups.forEach(match => {
+        sortedMatchups.forEach((match) => {
             const week = match.matchupPeriodId;
             if (week > regularSeasonLength) return;
 
@@ -186,19 +273,25 @@ export default function VisualizationPage() {
 
             // Get previous week's records
             const prevWeek = week - 1;
-            const homePrevRecord = prevWeek > 0 ? weeklyRecords[prevWeek][homeTeamId] : { wins: 0, losses: 0, totalPoints: 0 };
-            const awayPrevRecord = prevWeek > 0 ? weeklyRecords[prevWeek][awayTeamId] : { wins: 0, losses: 0, totalPoints: 0 };
+            const homePrevRecord =
+                prevWeek > 0
+                    ? weeklyRecords[prevWeek][homeTeamId]
+                    : { wins: 0, losses: 0, totalPoints: 0 };
+            const awayPrevRecord =
+                prevWeek > 0
+                    ? weeklyRecords[prevWeek][awayTeamId]
+                    : { wins: 0, losses: 0, totalPoints: 0 };
 
             if (homePoints > awayPoints) {
                 weeklyRecords[week][homeTeamId] = {
                     wins: homePrevRecord.wins + 1,
                     losses: homePrevRecord.losses,
-                    totalPoints: homePrevRecord.totalPoints + homePoints
+                    totalPoints: homePrevRecord.totalPoints + homePoints,
                 };
                 weeklyRecords[week][awayTeamId] = {
                     wins: awayPrevRecord.wins,
                     losses: awayPrevRecord.losses + 1,
-                    totalPoints: awayPrevRecord.totalPoints + awayPoints
+                    totalPoints: awayPrevRecord.totalPoints + awayPoints,
                 };
                 headToHeadRecords[homeTeamId][awayTeamId].wins++;
                 headToHeadRecords[awayTeamId][homeTeamId].losses++;
@@ -206,12 +299,12 @@ export default function VisualizationPage() {
                 weeklyRecords[week][awayTeamId] = {
                     wins: awayPrevRecord.wins + 1,
                     losses: awayPrevRecord.losses,
-                    totalPoints: awayPrevRecord.totalPoints + awayPoints
+                    totalPoints: awayPrevRecord.totalPoints + awayPoints,
                 };
                 weeklyRecords[week][homeTeamId] = {
                     wins: homePrevRecord.wins,
                     losses: homePrevRecord.losses + 1,
-                    totalPoints: homePrevRecord.totalPoints + homePoints
+                    totalPoints: homePrevRecord.totalPoints + homePoints,
                 };
                 headToHeadRecords[awayTeamId][homeTeamId].wins++;
                 headToHeadRecords[homeTeamId][awayTeamId].losses++;
@@ -219,22 +312,26 @@ export default function VisualizationPage() {
         });
 
         // Convert weekly records to rankings
-        const teamData = leagueData.teams.map(team => {
+        const teamData = leagueData.teams.map((team) => {
             const rankings: WeeklyRanking[] = [];
-            const weeks = Object.keys(weeklyRecords).map(Number).sort((a, b) => a - b);
+            const weeks = Object.keys(weeklyRecords)
+                .map(Number)
+                .sort((a, b) => a - b);
 
-            weeks.forEach(week => {
+            weeks.forEach((week) => {
                 // Get all teams' records for this week
                 const weekRecords = weeklyRecords[week];
-                const teamRecords = Object.entries(weekRecords).map(([teamId, record]) => ({
-                    teamId: parseInt(teamId),
-                    ...record
-                }));
+                const teamRecords = Object.entries(weekRecords).map(
+                    ([teamId, record]) => ({
+                        teamId: parseInt(teamId),
+                        ...record,
+                    })
+                );
 
                 // Sort teams by wins (desc), then by head-to-head record, then by total points (desc)
                 teamRecords.sort((a, b) => {
                     if (b.wins !== a.wins) return b.wins - a.wins;
-                    
+
                     // Head-to-head tiebreaker
                     const headToHeadA = headToHeadRecords[a.teamId]?.[b.teamId];
                     const headToHeadB = headToHeadRecords[b.teamId]?.[a.teamId];
@@ -243,24 +340,28 @@ export default function VisualizationPage() {
                         const h2hB = headToHeadB.wins;
                         if (h2hA !== h2hB) return h2hB - h2hA;
                     }
-                    
+
                     return b.totalPoints - a.totalPoints;
                 });
 
                 // Find rank of current team
-                const rank = teamRecords.findIndex(record => record.teamId === team.id) + 1;
+                const rank =
+                    teamRecords.findIndex(
+                        (record) => record.teamId === team.id
+                    ) + 1;
                 rankings.push({ week, rank });
             });
 
             return {
                 name: team.name,
                 rankings,
-                color: team.rankCalculatedFinal === 1 
-                    ? theme.palette.success.main 
-                    : (team.rankCalculatedFinal ?? 0) <= 3 
-                        ? theme.palette.primary.main 
-                        : theme.palette.text.secondary,
-                records: weeks.map(week => weeklyRecords[week][team.id])
+                color:
+                    team.rankCalculatedFinal === 1
+                        ? theme.palette.success.main
+                        : (team.rankCalculatedFinal ?? 0) <= 3
+                          ? theme.palette.primary.main
+                          : theme.palette.text.secondary,
+                records: weeks.map((week) => weeklyRecords[week][team.id]),
             };
         });
 
@@ -269,52 +370,67 @@ export default function VisualizationPage() {
 
     const getChartOption = () => {
         const teamData = prepareChartData();
-        const maxWeek = Math.max(...teamData.flatMap(team => team.rankings.map(r => r.week)));
-        
-        const series = teamData.map(team => ({
+        const maxWeek = Math.max(
+            ...teamData.flatMap((team) => team.rankings.map((r) => r.week))
+        );
+
+        const series = teamData.map((team) => ({
             name: team.name,
-            type: 'line',
-            data: team.rankings.map(r => r.rank),
+            type: "line",
+            data: team.rankings.map((r) => r.rank),
             symbolSize: 6,
             lineStyle: {
-                width: 2
+                width: 2,
             },
             itemStyle: {
                 color: team.color,
                 borderColor: theme.palette.background.paper,
-                borderWidth: 1
+                borderWidth: 1,
             },
             emphasis: {
                 itemStyle: {
                     color: team.color,
                     borderColor: theme.palette.background.paper,
-                    borderWidth: 2
-                }
-            }
+                    borderWidth: 2,
+                },
+            },
         }));
 
         return {
-            backgroundColor: 'transparent',
+            backgroundColor: "transparent",
+            title: {
+                text: t("pages.fantasy.standingsTitle"),
+                left: "center",
+                top: 0,
+                textStyle: {
+                    color: theme.palette.text.primary,
+                    fontSize: 20,
+                    fontWeight: "bold",
+                },
+            },
             tooltip: {
-                trigger: 'axis',
+                trigger: "axis",
                 formatter: (params: TooltipParam[]) => {
                     const week = params[0].axisValue;
-                    
                     // Get all teams' data for this week and sort by rank
-                    const weekData: WeekData[] = params.map(param => {
-                        const team = teamData.find(t => t.name === param.seriesName);
-                        const record = team?.records[week - 1];
-                        return {
-                            name: param.seriesName,
-                            rank: param.value,
-                            record: record,
-                            color: param.color
-                        };
-                    }).sort((a, b) => a.rank - b.rank);
+                    const weekData = params
+                        .map((param) => {
+                            const team = teamData.find(
+                                (t) => t.name === param.seriesName
+                            );
+                            const record = team?.records[week - 1];
+                            return {
+                                name: param.seriesName,
+                                rank: param.value,
+                                record: record,
+                                color: param.color,
+                            };
+                        })
+                        .sort((a, b) => a.rank - b.rank);
 
                     // Build tooltip content with teams ordered by rank
                     let result = `<div style="font-weight: bold; margin-bottom: 8px;">${t("pages.fantasy.week")} ${week}</div>`;
-                    weekData.forEach(team => {
+                    weekData.forEach((team) => {
                         result += `<div style="margin: 4px 0;">
                             <span style="color:${team.color}">${team.name}</span>: 
                             ${t("pages.fantasy.rank")} ${team.rank} 
@@ -326,72 +442,72 @@ export default function VisualizationPage() {
                 backgroundColor: theme.palette.background.paper,
                 borderColor: theme.palette.divider,
                 textStyle: {
-                    color: theme.palette.text.primary
+                    color: theme.palette.text.primary,
                 },
-                extraCssText: 'padding: 12px; border-radius: 4px;'
+                extraCssText: "padding: 12px; border-radius: 4px;",
             },
             legend: {
-                data: teamData.map(team => team.name),
+                data: teamData.map((team) => team.name),
                 textStyle: {
                     color: theme.palette.text.primary,
-                    fontSize: 12
+                    fontSize: 12,
                 },
-                top: 0,
-                padding: [0, 0, 20, 0]
+                top: 40,
+                padding: [0, 0, 20, 0],
             },
             grid: {
-                top: 60,
+                top: 100,
                 right: 30,
                 bottom: 30,
-                left: 50
+                left: 50,
             },
             xAxis: {
-                type: 'category',
+                type: "category",
                 data: Array.from({ length: maxWeek }, (_, i) => i + 1),
                 name: t("pages.fantasy.week"),
-                nameLocation: 'middle',
+                nameLocation: "middle",
                 nameGap: 25,
                 axisLine: {
                     lineStyle: {
-                        color: theme.palette.text.primary
-                    }
+                        color: theme.palette.text.primary,
+                    },
                 },
                 axisLabel: {
-                    color: theme.palette.text.primary
+                    color: theme.palette.text.primary,
                 },
                 splitLine: {
                     show: true,
                     lineStyle: {
-                        type: 'dashed',
-                        color: theme.palette.divider
-                    }
-                }
+                        type: "dashed",
+                        color: theme.palette.divider,
+                    },
+                },
             },
             yAxis: {
-                type: 'value',
+                type: "value",
                 inverse: true,
                 min: 1,
                 max: teamData.length,
                 name: t("pages.fantasy.columns.finalPosition"),
-                nameLocation: 'middle',
+                nameLocation: "middle",
                 nameGap: 30,
                 axisLine: {
                     lineStyle: {
-                        color: theme.palette.text.primary
-                    }
+                        color: theme.palette.text.primary,
+                    },
                 },
                 axisLabel: {
-                    color: theme.palette.text.primary
+                    color: theme.palette.text.primary,
                 },
                 splitLine: {
                     show: true,
                     lineStyle: {
-                        type: 'dashed',
-                        color: theme.palette.divider
-                    }
-                }
+                        type: "dashed",
+                        color: theme.palette.divider,
+                    },
+                },
             },
-            series
+            series,
         };
     };
 
@@ -422,9 +538,7 @@ export default function VisualizationPage() {
                     <Typography color="error" variant="h6">
                         {t("pages.error")}
                     </Typography>
-                    <Typography color="text.secondary">
-                        {error}
-                    </Typography>
+                    <Typography color="text.secondary">{error}</Typography>
                     <Button
                         variant="contained"
                         onClick={fetchLeagueData}
@@ -459,18 +573,24 @@ export default function VisualizationPage() {
         }
 
         return (
-            <Box sx={{ width: "100%", height: "600px" }}>
-                <ReactECharts
-                    option={getChartOption()}
-                    style={{ height: '100%', width: '100%' }}
-                    theme={theme.palette.mode}
-                />
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Box sx={{ height: "600px" }}>
+                        <ReactECharts
+                            option={getChartOption()}
+                            style={{ height: "100%", width: "100%" }}
+                            theme={theme.palette.mode}
+                        />
+                    </Box>
+                </Paper>
+
+                <PlayerStats leagueData={leagueData} />
             </Box>
         );
     };
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container maxWidth="lg" sx={{ py: 2 }}>
             <Box
                 sx={{
                     position: "fixed",
@@ -479,7 +599,7 @@ export default function VisualizationPage() {
                     zIndex: 9999,
                 }}
             >
-                <HomeButton />
+                <HomeButton component={Link} href="/" />
             </Box>
             <Box
                 sx={{
@@ -503,13 +623,13 @@ export default function VisualizationPage() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        mb: 2,
+                        mb: 1,
                     }}
                 >
                     <FantasyDropdownNav />
                 </Box>
-                <Paper elevation={2} sx={{ p: 3 }}>
-                    <Box sx={{ mb: 4 }}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                    <Box sx={{ mb: 2 }}>
                         <Typography
                             variant="h4"
                             component="h1"
@@ -525,7 +645,7 @@ export default function VisualizationPage() {
                                 alignItems: "center",
                                 width: "100%",
                                 position: "relative",
-                                minHeight: "48px",
+                                minHeight: "40px",
                             }}
                         >
                             <Box sx={{ width: "200px", position: "relative" }}>
@@ -535,7 +655,9 @@ export default function VisualizationPage() {
                                     onClick={handleClick}
                                     aria-haspopup="true"
                                     aria-expanded={open}
-                                    aria-controls={open ? "season-menu" : undefined}
+                                    aria-controls={
+                                        open ? "season-menu" : undefined
+                                    }
                                     sx={{
                                         backgroundColor: "black",
                                         color: "white",
@@ -551,79 +673,66 @@ export default function VisualizationPage() {
                                 >
                                     {t("pages.fantasy.season")} {selectedSeason}
                                 </Button>
-                                {open && (
-                                    <Portal>
-                                        <Menu
-                                            id="season-menu"
-                                            anchorEl={anchorEl}
-                                            open={open}
-                                            onClose={handleClose}
-                                            disableScrollLock
-                                            aria-label={t("pages.fantasy.selectSeason")}
-                                            anchorOrigin={{
-                                                vertical: "bottom",
-                                                horizontal: "center",
-                                            }}
-                                            transformOrigin={{
-                                                vertical: "top",
-                                                horizontal: "center",
-                                            }}
-                                            sx={{
-                                                "& .MuiPaper-root": {
-                                                    position: "fixed",
-                                                    mt: 1,
-                                                    backgroundColor: "background.paper",
-                                                    border:
-                                                        theme.palette.mode === "dark"
-                                                            ? "1px solid rgba(255, 255, 255, 0.12)"
-                                                            : "none",
-                                                },
-                                            }}
-                                            PaperProps={{
-                                                sx: {
-                                                    minWidth: "200px",
-                                                },
-                                            }}
-                                        >
-                                            <MenuItem
-                                                onClick={() => handleSeasonChange("2025")}
-                                                selected={selectedSeason === "2025"}
-                                                sx={{
-                                                    "&.Mui-selected": {
-                                                        backgroundColor: "black",
-                                                        color: "white",
-                                                        "&:hover": {
-                                                            backgroundColor: "black",
-                                                        },
-                                                    },
-                                                }}
-                                            >
-                                                <Typography variant="body1">2025</Typography>
-                                            </MenuItem>
-                                            <MenuItem
-                                                onClick={() => handleSeasonChange("2024")}
-                                                selected={selectedSeason === "2024"}
-                                                sx={{
-                                                    "&.Mui-selected": {
-                                                        backgroundColor: "black",
-                                                        color: "white",
-                                                        "&:hover": {
-                                                            backgroundColor: "black",
-                                                        },
-                                                    },
-                                                }}
-                                            >
-                                                <Typography variant="body1">2024</Typography>
-                                            </MenuItem>
-                                        </Menu>
-                                    </Portal>
-                                )}
                             </Box>
                         </Box>
                     </Box>
+                    {open && (
+                        <Portal>
+                            <Menu
+                                id="season-menu"
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                disableScrollLock
+                                aria-label={t("pages.fantasy.selectSeason")}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "center",
+                                }}
+                                transformOrigin={{
+                                    vertical: "top",
+                                    horizontal: "center",
+                                }}
+                                sx={{
+                                    "& .MuiPaper-root": {
+                                        position: "fixed",
+                                        mt: 1,
+                                        backgroundColor: "background.paper",
+                                        border:
+                                            theme.palette.mode === "dark"
+                                                ? "1px solid rgba(255, 255, 255, 0.12)"
+                                                : "none",
+                                    },
+                                }}
+                                PaperProps={{
+                                    sx: {
+                                        minWidth: "200px",
+                                    },
+                                }}
+                            >
+                                <MenuItem
+                                    onClick={() => handleSeasonChange("2025")}
+                                    selected={selectedSeason === "2025"}
+                                    sx={{
+                                        "&.Mui-selected": {
+                                            backgroundColor: "black",
+                                            color: "white",
+                                            "&:hover": {
+                                                backgroundColor: "black",
+                                            },
+                                        },
+                                    }}
+                                >
+                                    <Typography variant="body1">
+                                        2025
+                                    </Typography>
+                                </MenuItem>
+                            </Menu>
+                        </Portal>
+                    )}
                     <ErrorBoundary>{renderContent()}</ErrorBoundary>
                 </Paper>
             </Box>
         </Container>
     );
-} 
+}

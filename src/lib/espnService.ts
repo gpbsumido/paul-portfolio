@@ -5,6 +5,13 @@ const ESPN_FANTASY_API = {
     SEGMENT: "0",
 } as const;
 
+export const ESPN_CONFIG = {
+    LEAGUE_ID: "449389534",
+    SEASON: new Date().getFullYear().toString(),
+    ESPN_S2: process.env.ESPN_S2,
+    SWID: process.env.SWID,
+};
+
 interface LogData {
     [key: string]: string | number | boolean | null | undefined;
 }
@@ -16,6 +23,7 @@ const logRequest = (message: string, data?: LogData) => {
         message,
         ...(data && { data }),
     };
+    console.log(JSON.stringify(logData, null, 2));
 };
 
 const fetchWithTimeout = async (
