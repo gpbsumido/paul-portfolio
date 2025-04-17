@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Language = "en" | "es" | "fr";
 
-type TranslationKey = "navigation" | "about" | "designs" | "pages" | "common";
+type TranslationKey = "navigation" | "about" | "designs" | "pages";
 type TranslationPath = `${TranslationKey}.${string}`;
 
 type TranslationValue = string | { [key: string]: TranslationValue };
@@ -32,6 +32,10 @@ const translations = {
             viewDesign: "View {name} Design",
         },
         pages: {
+            loading: "Loading...",
+            error: "Error",
+            tryAgain: "Try Again",
+            unknownError: "An unknown error occurred",
             fantasy: {
                 title: "Fantasy Basketball",
                 dataNote: "*Data is rate limited and cached for 1 hour",
@@ -39,6 +43,12 @@ const translations = {
                 selectTeam: "Select Team",
                 players: "Players",
                 noTeamSelected: "No Team Selected",
+                subpages: {
+                    nbaStats: "NBA Stats",
+                    league: "League",
+                    history: "History",
+                    matchups: "Matchups"
+                },
                 columns: {
                     player: "Player",
                     position: "POS",
@@ -50,9 +60,6 @@ const translations = {
                     fantasyPoints: "FP",
                 },
             },
-        },
-        common: {
-            unknownError: "An unknown error occurred",
         },
     },
     es: {
@@ -71,6 +78,10 @@ const translations = {
             viewDesign: "Ver diseño de {name}",
         },
         pages: {
+            loading: "Cargando...",
+            error: "Error",
+            tryAgain: "Intentar de nuevo",
+            unknownError: "Se produjo un error desconocido",
             fantasy: {
                 title: "Baloncesto Fantasy",
                 dataNote:
@@ -79,6 +90,12 @@ const translations = {
                 selectTeam: "Seleccionar Equipo",
                 players: "Jugadores",
                 noTeamSelected: "Ningún Equipo Seleccionado",
+                subpages: {
+                    nbaStats: "Estadísticas NBA",
+                    league: "Liga",
+                    history: "Historial",
+                    matchups: "Partidos"
+                },
                 columns: {
                     player: "Jugador",
                     position: "POS",
@@ -90,9 +107,6 @@ const translations = {
                     fantasyPoints: "FP",
                 },
             },
-        },
-        common: {
-            unknownError: "Se produjo un error desconocido",
         },
     },
     fr: {
@@ -111,6 +125,10 @@ const translations = {
             viewDesign: "Voir le design {name}",
         },
         pages: {
+            loading: "Chargement...",
+            error: "Erreur",
+            tryAgain: "Réessayer",
+            unknownError: "Une erreur inconnue s'est produite",
             fantasy: {
                 title: "Basketball Fantasy",
                 dataNote:
@@ -120,6 +138,12 @@ const translations = {
                 selectTeam: "Sélectionner une Équipe",
                 players: "Joueurs",
                 noTeamSelected: "Aucune Équipe Sélectionnée",
+                subpages: {
+                    nbaStats: "Statistiques NBA",
+                    league: "Ligue",
+                    history: "Historique",
+                    matchups: "Matchs"
+                },
                 columns: {
                     player: "Joueur",
                     position: "POS",
@@ -131,9 +155,6 @@ const translations = {
                     fantasyPoints: "FP",
                 },
             },
-        },
-        common: {
-            unknownError: "Une erreur inconnue s'est produite",
         },
     },
 } satisfies Record<Language, TranslationValue>;
