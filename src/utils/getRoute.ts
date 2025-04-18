@@ -25,7 +25,7 @@ export async function getRoute({
     end,
     mode,
 }: RouteOptions): Promise<RouteDetails> {
-    const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    const accessToken = process.env.MAPBOX_TOKEN;
     if (!accessToken) {
         throw new Error("Mapbox access token is not configured");
     }
@@ -35,8 +35,8 @@ export async function getRoute({
         mode === "cycling"
             ? "cycling"
             : mode === "walking"
-              ? "walking"
-              : "driving";
+                ? "walking"
+                : "driving";
     const coordinates = `${start[0]},${start[1]};${end[0]},${end[1]}`;
     const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?geometries=geojson&steps=true&access_token=${accessToken}`;
 

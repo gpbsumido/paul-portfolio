@@ -35,7 +35,7 @@ export async function getRoute(
 
     const profile = mode === "driving" ? "mapbox/driving" : "mapbox/walking";
     const coordinates = `${start.longitude},${start.latitude};${end.longitude},${end.latitude}`;
-    const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    const accessToken = process.env.MAPBOX_TOKEN;
 
     if (!accessToken) {
         throw new Error("Mapbox access token is not configured");
