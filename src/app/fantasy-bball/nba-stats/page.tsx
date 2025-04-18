@@ -46,7 +46,7 @@ export default function NBAStatsPage() {
             try {
                 // First fetch teams
                 const teamsResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/teams`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/nba/teams`,
                     {
                         headers: { Accept: "application/json" },
                         next: { revalidate: 3600 },
@@ -72,7 +72,7 @@ export default function NBAStatsPage() {
 
                 // Then fetch Spurs players
                 const playersResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/players/${spursTeam.id}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/nba/players/${spursTeam.id}`,
                     {
                         headers: { Accept: "application/json" },
                         next: { revalidate: 3600 },
@@ -106,7 +106,7 @@ export default function NBAStatsPage() {
                     const batchPromises = batch.map(async (player: Player) => {
                         try {
                             const statsResponse = await fetch(
-                                `${process.env.NEXT_PUBLIC_NBA_SERVER_URL}/api/nba/stats/${player.id}`,
+                                `${process.env.NEXT_PUBLIC_API_URL}/api/nba/stats/${player.id}`,
                                 {
                                     headers: { Accept: "application/json" },
                                     next: { revalidate: 300 },

@@ -25,7 +25,7 @@ export default function CreateMedicalPost() {
         setError(null);
 
         try {
-            const response = await fetch("http://localhost:3000/api/postmedical", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

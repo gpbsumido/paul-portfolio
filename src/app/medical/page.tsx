@@ -23,7 +23,7 @@ export default function MedicalPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/postmedical");
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch posts");
                 }
