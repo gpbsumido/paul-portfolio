@@ -11,7 +11,7 @@ import { MapMarker } from "../markers/MapMarker";
 import { MarkerForm } from "../forms/MarkerForm";
 import { LocationsTable } from "../tables/LocationsTable";
 import { RouteManager } from "../routes/RouteManager";
-import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
+import InfoIcon from '@mui/icons-material/Info';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export default function MapContent({ location }: MapContentProps) {
@@ -417,7 +417,7 @@ export default function MapContent({ location }: MapContentProps) {
                         >
                             Saved Locations
                         </Typography>
-                        <InfoOutlineIcon
+                        <InfoIcon
                             fontSize="small"
                             sx={{ mr: 1 }}
                             data-tooltip-id="info-tooltip"
@@ -467,7 +467,7 @@ export default function MapContent({ location }: MapContentProps) {
                         >
                             Route Planner
                         </Typography>
-                        <InfoOutlineIcon
+                        <InfoIcon
                             fontSize="small"
                             sx={{ mr: 1 }}
                             data-tooltip-id="route-tooltip"
