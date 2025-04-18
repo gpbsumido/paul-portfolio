@@ -45,6 +45,7 @@ const translations = {
             unknownError: "An unknown error occurred",
             fantasy: {
                 title: "Fantasy Basketball",
+                subtitle: "Fantasy Basketball Data",
                 dataNote: "*Data is rate limited and cached for 1 hour",
                 errorTitle: "Error Loading Fantasy Basketball Data",
                 selectTeam: "Select Team",
@@ -80,6 +81,11 @@ const translations = {
                 statsComingSoon: "Stats coming soon!",
                 playerContributionsWeekly: "Player Contributions Weekly",
             },
+            forum: {
+                title: "Forum",
+                createPost: "Create Post",
+                createTitle: "Create New Post",
+            },
         },
     },
     es: {
@@ -104,6 +110,7 @@ const translations = {
             unknownError: "Se produjo un error desconocido",
             fantasy: {
                 title: "Baloncesto Fantasy",
+                subtitle: "Datos de Baloncesto Fantasy",
                 dataNote:
                     "*Los datos están limitados y se almacenan en caché durante 1 hora",
                 errorTitle: "Error al cargar los datos de Baloncesto Fantasy",
@@ -141,6 +148,11 @@ const translations = {
                 playerContributionsWeekly:
                     "Contribuciones Semanales de Jugadores",
             },
+            forum: {
+                title: "Foro",
+                createPost: "Crear Post",
+                createTitle: "Crear Nuevo Post",
+            },
         },
     },
     fr: {
@@ -165,6 +177,7 @@ const translations = {
             unknownError: "Une erreur inconnue s'est produite",
             fantasy: {
                 title: "Basketball Fantasy",
+                subtitle: "Données de Basketball Fantasy",
                 dataNote:
                     "*Les données sont limitées et mises en cache pendant 1 heure",
                 errorTitle:
@@ -202,6 +215,11 @@ const translations = {
                 statsComingSoon: "Statistiques à venir!",
                 playerContributionsWeekly:
                     "Contributions Hebdomadaires des Joueurs",
+            },
+            forum: {
+                title: "Forum",
+                createPost: "Créer un Post",
+                createTitle: "Créer un Nouveau Post",
             },
         },
     },
