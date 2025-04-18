@@ -80,6 +80,11 @@ const translations = {
                 statsComingSoon: "Stats coming soon!",
                 playerContributionsWeekly: "Player Contributions Weekly",
             },
+            medical: {
+                title: "Medical",
+                createPost: "Create Post",
+                createTitle: "Create New Post",
+            },
         },
     },
     es: {
@@ -140,6 +145,11 @@ const translations = {
                 statsComingSoon: "¡Estadísticas próximamente!",
                 playerContributionsWeekly:
                     "Contribuciones Semanales de Jugadores",
+            },
+            medical: {
+                title: "Medical",
+                createPost: "Crear Post",
+                createTitle: "Crear Nuevo Post",
             },
         },
     },
@@ -202,6 +212,11 @@ const translations = {
                 statsComingSoon: "Statistiques à venir!",
                 playerContributionsWeekly:
                     "Contributions Hebdomadaires des Joueurs",
+            },
+            medical: {
+                title: "Medical",
+                createPost: "Créer un Post",
+                createTitle: "Créer un Nouveau Post",
             },
         },
     },
