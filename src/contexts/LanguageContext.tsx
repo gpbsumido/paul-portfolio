@@ -88,6 +88,7 @@ const translations = {
             },
             map: {
                 title: "Map",
+                subtitle: "Save locations and create routes",
             },
         },
     },
@@ -158,6 +159,7 @@ const translations = {
             },
             map: {
                 title: "Carte",
+                subtitle: "Guardar ubicaciones y crear rutas",
             },
         },
     },
@@ -229,6 +231,8 @@ const translations = {
             },
             map: {
                 title: "Carte",
+                subtitle:
+                    "Enregistrer des emplacements et créer des itinéraires",
             },
         },
     },

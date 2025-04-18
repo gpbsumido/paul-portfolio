@@ -15,6 +15,7 @@ import {
     Card,
     CardContent,
 } from "@mui/material";
+import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
 
 interface HistoryPageProps {
     params: {
@@ -121,10 +122,7 @@ async function HistoryContent({ year }: { year: string }) {
                                                     {team.name}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {
-                                                        team.owners[0]
-                                                            .displayName
-                                                    }
+                                                    {team.owners[0].displayName}
                                                 </TableCell>
                                                 <TableCell>
                                                     {team.record.overall.wins}-
@@ -156,7 +154,13 @@ async function HistoryContent({ year }: { year: string }) {
 
 export default function HistoryPage({ params }: HistoryPageProps) {
     return (
-        <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
+        <Box
+            sx={{
+                minHeight: "100vh",
+                backgroundColor: "background.default",
+                py: 2,
+            }}
+        >
             <Suspense
                 fallback={
                     <Box
@@ -171,6 +175,16 @@ export default function HistoryPage({ params }: HistoryPageProps) {
                     </Box>
                 }
             >
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        mb: 1,
+                    }}
+                >
+                    <FantasyDropdownNav />
+                </Box>
                 <HistoryContent year={params.year} />
             </Suspense>
         </Box>
