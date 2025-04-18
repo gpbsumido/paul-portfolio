@@ -25,11 +25,11 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import FantasyDropdownNav from "@/components/FantasyDropdownNav";
+import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
 import { useEffect, useState } from "react";
 import { ESPNLeagueResponse } from "@/types/espn";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import ErrorBoundary from "@/components/features/ErrorBoundary";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { useTheme } from "@mui/material/styles";
 

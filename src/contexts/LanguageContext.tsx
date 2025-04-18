@@ -86,6 +86,9 @@ const translations = {
                 createPost: "Create Post",
                 createTitle: "Create New Post",
             },
+            map: {
+                title: "Map",
+            },
         },
     },
     es: {
@@ -152,6 +155,9 @@ const translations = {
                 title: "Foro",
                 createPost: "Crear Post",
                 createTitle: "Crear Nuevo Post",
+            },
+            map: {
+                title: "Carte",
             },
         },
     },
@@ -220,6 +226,9 @@ const translations = {
                 title: "Forum",
                 createPost: "Créer un Post",
                 createTitle: "Créer un Nouveau Post",
+            },
+            map: {
+                title: "Carte",
             },
         },
     },

@@ -13,11 +13,11 @@ import {
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import FantasyDropdownNav from "@/components/FantasyDropdownNav";
+import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
 import { useEffect, useState } from "react";
 import { ESPNLeagueResponse, ESPNRosterEntry } from "@/types/espn";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import ErrorBoundary from "@/components/features/ErrorBoundary";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@mui/material/styles";
 import ReactECharts from "echarts-for-react";

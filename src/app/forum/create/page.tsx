@@ -34,7 +34,7 @@ export default function CreateForumPost() {
 
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/postforum`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/db/postforum`,
                 {
                     method: "POST",
                     headers: {
