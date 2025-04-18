@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Container, Typography, Paper, Button, CircularProgress } from "@mui/material";
+import {
+    Box,
+    Container,
+    Typography,
+    Paper,
+    Button,
+    CircularProgress,
+} from "@mui/material";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
@@ -23,14 +30,18 @@ export default function MedicalPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`);
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`
+                );
                 if (!response.ok) {
                     throw new Error("Failed to fetch posts");
                 }
                 const data = await response.json();
                 setPosts(data);
             } catch (err) {
-                setError(err instanceof Error ? err.message : "An error occurred");
+                setError(
+                    err instanceof Error ? err.message : "An error occurred"
+                );
             } finally {
                 setLoading(false);
             }
@@ -63,7 +74,13 @@ export default function MedicalPage() {
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
                     <Typography variant="h4" component="h1" gutterBottom>
                         {t("pages.medical.title")}
                     </Typography>
@@ -78,15 +95,31 @@ export default function MedicalPage() {
                 </Box>
 
                 {loading ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        minHeight="400px"
+                    >
                         <CircularProgress />
                     </Box>
                 ) : error ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        minHeight="400px"
+                    >
                         <Typography color="error">{error}</Typography>
                     </Box>
                 ) : (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                        }}
+                    >
                         {posts.map((post) => (
                             <Paper
                                 key={post.id}
@@ -101,14 +134,17 @@ export default function MedicalPage() {
                                 <Typography variant="h6" component="h2">
                                     {post.title}
                                 </Typography>
-                                <Typography 
-                                    variant="body1" 
+                                <Typography
+                                    variant="body1"
                                     color="text.secondary"
                                     sx={{ whiteSpace: "pre-line" }}
                                 >
                                     {post.text}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                >
                                     Posted by: {post.username}
                                 </Typography>
                             </Paper>

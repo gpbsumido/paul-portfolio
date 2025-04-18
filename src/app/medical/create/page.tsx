@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Container, Typography, TextField, Button, Paper, CircularProgress } from "@mui/material";
+import {
+    Box,
+    Container,
+    Typography,
+    TextField,
+    Button,
+    Paper,
+    CircularProgress,
+} from "@mui/material";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
@@ -16,7 +24,7 @@ export default function CreateMedicalPost() {
     const [formData, setFormData] = useState({
         title: "",
         text: "",
-        username: ""
+        username: "",
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,13 +33,16 @@ export default function CreateMedicalPost() {
         setError(null);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData)
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                }
+            );
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -47,11 +58,13 @@ export default function CreateMedicalPost() {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 
@@ -79,13 +92,24 @@ export default function CreateMedicalPost() {
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <Typography variant="h4" component="h1" align="center" gutterBottom>
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    align="center"
+                    gutterBottom
+                >
                     {t("pages.medical.createTitle")}
                 </Typography>
 
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <form onSubmit={handleSubmit}>
-                        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2,
+                            }}
+                        >
                             <TextField
                                 required
                                 label="Title"
@@ -133,7 +157,11 @@ export default function CreateMedicalPost() {
                                     disabled={loading}
                                     fullWidth
                                 >
-                                    {loading ? <CircularProgress size={24} /> : "Create Post"}
+                                    {loading ? (
+                                        <CircularProgress size={24} />
+                                    ) : (
+                                        "Create Post"
+                                    )}
                                 </Button>
                             </Box>
                         </Box>
@@ -142,4 +170,4 @@ export default function CreateMedicalPost() {
             </Box>
         </Container>
     );
-} 
+}
