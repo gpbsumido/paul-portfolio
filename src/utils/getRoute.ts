@@ -25,7 +25,7 @@ export async function getRoute({
     end,
     mode,
 }: RouteOptions): Promise<RouteDetails> {
-    const accessToken = process.env.MAPBOX_TOKEN;
+    const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!accessToken) {
         throw new Error("Mapbox access token is not configured");
     }
