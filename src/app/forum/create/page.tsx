@@ -16,7 +16,7 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function CreateMedicalPost() {
+export default function CreateForumPost() {
     const { t } = useLanguage();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function CreateMedicalPost() {
 
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/postforum`,
                 {
                     method: "POST",
                     headers: {
@@ -49,8 +49,8 @@ export default function CreateMedicalPost() {
                 throw new Error(errorData.error || "Failed to create post");
             }
 
-            // Redirect to the main medical page after successful creation
-            router.push("/medical");
+            // Redirect to the main forum page after successful creation
+            router.push("/forum");
         } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
@@ -98,7 +98,7 @@ export default function CreateMedicalPost() {
                     align="center"
                     gutterBottom
                 >
-                    {t("pages.medical.createTitle")}
+                    {t("pages.forum.createTitle")}
                 </Typography>
 
                 <Paper elevation={2} sx={{ p: 3 }}>
@@ -144,7 +144,7 @@ export default function CreateMedicalPost() {
                             <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                                 <Button
                                     component={Link}
-                                    href="/medical"
+                                    href="/forum"
                                     variant="outlined"
                                     color="primary"
                                     fullWidth

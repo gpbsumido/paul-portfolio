@@ -14,16 +14,16 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 
-interface PostMedical {
+interface PostForum {
     id: number;
     title: string;
     text: string;
     username: string;
 }
 
-export default function MedicalPage() {
+export default function ForumPage() {
     const { t } = useLanguage();
-    const [posts, setPosts] = useState<PostMedical[]>([]);
+    const [posts, setPosts] = useState<PostForum[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +31,7 @@ export default function MedicalPage() {
         const fetchPosts = async () => {
             try {
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/postmedical`
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/postforum`
                 );
                 if (!response.ok) {
                     throw new Error("Failed to fetch posts");
@@ -82,15 +82,15 @@ export default function MedicalPage() {
                     }}
                 >
                     <Typography variant="h4" component="h1" gutterBottom>
-                        {t("pages.medical.title")}
+                        {t("pages.forum.title")}
                     </Typography>
                     <Button
                         component={Link}
-                        href="/medical/create"
+                        href="/forum/create"
                         variant="contained"
                         color="primary"
                     >
-                        {t("pages.medical.createPost")}
+                        {t("pages.forum.createPost")}
                     </Button>
                 </Box>
 
