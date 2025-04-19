@@ -60,7 +60,7 @@ function MapPage() {
     const { t } = useLanguage();
 
     return (
-        <Container maxWidth="lg" sx={{ py: 2 }}>
+        <Container maxWidth="lg" sx={{ py: 2, px: { xs: 0, sm: 2 } }}>
             <Box
                 sx={{
                     position: "fixed",

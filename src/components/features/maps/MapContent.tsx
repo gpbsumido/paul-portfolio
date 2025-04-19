@@ -390,7 +390,6 @@ export default function MapContent({ location }: MapContentProps) {
                     display: "flex",
                     flexDirection: { xs: "column", md: "row" },
                     gap: 2,
-                    p: 2,
                     height: { xs: "auto", md: "40vh" },
                     flexWrap: "wrap",
                     overflow: "auto",
