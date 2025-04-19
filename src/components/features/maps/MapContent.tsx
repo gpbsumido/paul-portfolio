@@ -337,8 +337,19 @@ export default function MapContent({ location }: MapContentProps) {
     }
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <Box sx={{ position: "relative", height: "45vh" }}>
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+            }}
+        >
+            <Box
+                sx={{
+                    position: "relative",
+                    height: { xs: "40vh", sm: "45vh" },
+                }}
+            >
                 <div
                     ref={mapContainer}
                     style={{ width: "100%", height: "100%" }}
@@ -385,10 +396,12 @@ export default function MapContent({ location }: MapContentProps) {
                 id="maps-data"
                 sx={{
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: { xs: "column", md: "row" },
                     gap: 2,
                     p: 2,
-                    height: "40vh",
+                    height: { xs: "auto", md: "40vh" },
+                    flexWrap: "wrap",
+                    overflow: "auto",
                 }}
             >
                 <Box
@@ -399,8 +412,8 @@ export default function MapContent({ location }: MapContentProps) {
                         borderRadius: 1,
                         boxShadow: 1,
                         p: 2,
-                        height: "100%",
-                        display: "flex", // Ensure the child fills the parent's height
+                        height: { xs: "auto", md: "100%" },
+                        display: "flex",
                         flexDirection: "column",
                     }}
                 >
@@ -446,8 +459,9 @@ export default function MapContent({ location }: MapContentProps) {
                 <Box
                     sx={{
                         flex: 1,
-                        height: "100%",
-                        overflow: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        height: { xs: "auto", md: "100%" },
                         backgroundColor: "background.paper",
                         borderRadius: 1,
                         boxShadow: 1,

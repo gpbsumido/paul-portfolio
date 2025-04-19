@@ -82,7 +82,7 @@ function MapPage() {
                 <LanguageSwitcher />
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Typography
                     variant="h4"
                     component="h1"
