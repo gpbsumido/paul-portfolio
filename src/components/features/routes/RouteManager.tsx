@@ -133,8 +133,8 @@ export function RouteManager({ map }: RouteManagerProps) {
                         mode === "driving"
                             ? "#3b82f6"
                             : mode === "walking"
-                                ? "#10b981"
-                                : "#8b5cf6",
+                              ? "#10b981"
+                              : "#8b5cf6",
                     "line-width": 4,
                 },
             });
@@ -225,7 +225,7 @@ export function RouteManager({ map }: RouteManagerProps) {
                         onClick={startPlanning}
                         startIcon={<AddLocationIcon />}
                         sx={{
-                            margin: 'auto'
+                            margin: "auto",
                         }}
                     >
                         Plan Route
