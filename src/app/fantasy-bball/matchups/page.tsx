@@ -5,8 +5,8 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import FantasyDropdownNav from "@/components/FantasyDropdownNav";
-import ErrorBoundary from "@/components/features/ErrorBoundary";
+import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 export default function MatchupsPage() {
     const { t } = useLanguage();

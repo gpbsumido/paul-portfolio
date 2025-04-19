@@ -1,4 +1,21 @@
 import { getHistoricalLeagueInfo } from "@/lib/espnService";
+import { Suspense } from "react";
+import HistoryError from "./HistoryError";
+import {
+    Box,
+    Typography,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    CircularProgress,
+    Card,
+    CardContent,
+} from "@mui/material";
+import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
 
 interface HistoryPageProps {
     params: {
@@ -6,99 +23,170 @@ interface HistoryPageProps {
     };
 }
 
-export default async function HistoryPage({ params }: HistoryPageProps) {
-    const data = await getHistoricalLeagueInfo(params.year);
+async function HistoryContent({ year }: { year: string }) {
+    let data;
+    try {
+        data = await getHistoricalLeagueInfo(year);
+    } catch (error) {
+        console.error("Failed to fetch historical league info:", error);
+        return <HistoryError year={year} />;
+    }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">
-                League History - {params.year}
-            </h1>
+        <Box sx={{ px: 4, py: 6 }}>
+            <Typography
+                variant="h3"
+                component="h1"
+                align="center"
+                gutterBottom
+                sx={{ fontWeight: "bold" }}
+            >
+                League History - {year}
+            </Typography>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-semibold mb-4">Final Standings</h2>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full">
-                        <thead>
-                            <tr className="bg-gray-50">
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Rank
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Team
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Owner
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Record
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Points For
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Points Against
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {data.teams.map(
-                                (team: {
-                                    id: number;
-                                    rank: number;
-                                    name: string;
-                                    owners: { displayName: string }[];
-                                    record: {
-                                        overall: {
-                                            wins: number;
-                                            losses: number;
-                                            pointsFor: number;
-                                            pointsAgainst: number;
-                                        };
-                                    };
-                                }) => (
-                                    <tr key={team.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {team.rank}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {team.name}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">
-                                                {team.owners[0].displayName}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">
-                                                {team.record.overall.wins}-
-                                                {team.record.overall.losses}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">
-                                                {team.record.overall.pointsFor}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">
-                                                {
-                                                    team.record.overall
-                                                        .pointsAgainst
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+            <Card
+                sx={{
+                    backgroundColor: "background.paper",
+                    boxShadow: 3,
+                    borderRadius: 2,
+                    p: 3,
+                    mt: 4,
+                }}
+            >
+                <CardContent>
+                    <Typography
+                        variant="h5"
+                        component="h2"
+                        gutterBottom
+                        sx={{ fontWeight: "medium" }}
+                    >
+                        Final Standings
+                    </Typography>
+                    <TableContainer
+                        component={Paper}
+                        sx={{
+                            mt: 2,
+                            borderRadius: 2,
+                            boxShadow: 2,
+                            overflow: "hidden",
+                        }}
+                    >
+                        <Table>
+                            <TableHead>
+                                <TableRow sx={{ backgroundColor: "grey.200" }}>
+                                    <TableCell>Rank</TableCell>
+                                    <TableCell>Team</TableCell>
+                                    <TableCell>Owner</TableCell>
+                                    <TableCell>Record</TableCell>
+                                    <TableCell>Points For</TableCell>
+                                    <TableCell>Points Against</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {data.teams
+                                    .sort((a: any, b: any) => {
+                                        const aWins = a.record.overall.wins;
+                                        const bWins = b.record.overall.wins;
+                                        const aPointsFor =
+                                            a.record.overall.pointsFor;
+                                        const bPointsFor =
+                                            b.record.overall.pointsFor;
+
+                                        if (aWins === bWins) {
+                                            return bPointsFor - aPointsFor;
+                                        }
+                                        return bWins - aWins;
+                                    })
+                                    .map(
+                                        (team: {
+                                            id: number;
+                                            rank: number;
+                                            name: string;
+                                            owners: {
+                                                displayName: string;
+                                            }[];
+                                            record: {
+                                                overall: {
+                                                    wins: number;
+                                                    losses: number;
+                                                    pointsFor: number;
+                                                    pointsAgainst: number;
+                                                };
+                                            };
+                                        }) => (
+                                            <TableRow key={team.id}>
+                                                <TableCell>
+                                                    {team.rank}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {team.name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {team.owners[0].displayName}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {team.record.overall.wins}-
+                                                    {team.record.overall.losses}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {
+                                                        team.record.overall
+                                                            .pointsFor
+                                                    }
+                                                </TableCell>
+                                                <TableCell>
+                                                    {
+                                                        team.record.overall
+                                                            .pointsAgainst
+                                                    }
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </CardContent>
+            </Card>
+        </Box>
+    );
+}
+
+export default function HistoryPage({ params }: HistoryPageProps) {
+    return (
+        <Box
+            sx={{
+                minHeight: "100vh",
+                backgroundColor: "background.default",
+                py: 2,
+            }}
+        >
+            <Suspense
+                fallback={
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            minHeight: "100vh",
+                        }}
+                    >
+                        <CircularProgress />
+                    </Box>
+                }
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        mb: 1,
+                    }}
+                >
+                    <FantasyDropdownNav />
+                </Box>
+                <HistoryContent year={params.year} />
+            </Suspense>
+        </Box>
     );
 }

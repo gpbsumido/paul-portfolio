@@ -1,6 +1,6 @@
 "use client";
 
-import EmailForm from "@/components/features/EmailForm";
+import EmailForm from "@/components/features/home/EmailForm";
 import { useRouter } from "next/navigation";
 import HomeIcon from "@mui/icons-material/Home";
 import { Box, IconButton, Typography } from "@mui/material";

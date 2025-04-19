@@ -86,6 +86,10 @@ const translations = {
                 createPost: "Create Post",
                 createTitle: "Create New Post",
             },
+            map: {
+                title: "Map",
+                subtitle: "Save locations and create routes",
+            },
         },
     },
     es: {
@@ -152,6 +156,10 @@ const translations = {
                 title: "Foro",
                 createPost: "Crear Post",
                 createTitle: "Crear Nuevo Post",
+            },
+            map: {
+                title: "Carte",
+                subtitle: "Guardar ubicaciones y crear rutas",
             },
         },
     },
@@ -220,6 +228,11 @@ const translations = {
                 title: "Forum",
                 createPost: "Créer un Post",
                 createTitle: "Créer un Nouveau Post",
+            },
+            map: {
+                title: "Carte",
+                subtitle:
+                    "Enregistrer des emplacements et créer des itinéraires",
             },
         },
     },

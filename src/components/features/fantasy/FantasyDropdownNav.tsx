@@ -16,6 +16,8 @@ import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const currentYear = new Date().getFullYear();
+
 const subpages = [
     {
         key: "nbaStats",
@@ -26,8 +28,12 @@ const subpages = [
         href: "/fantasy-bball/league",
     },
     {
+        key: "visualization",
+        href: "/fantasy-bball/visualization",
+    },
+    {
         key: "history",
-        href: "/fantasy-bball/history/2024",
+        href: `/fantasy-bball/history/${currentYear}`,
     },
     {
         key: "matchups",
@@ -154,24 +160,6 @@ export default function FantasyDropdownNav() {
                                 </Typography>
                             </MenuItem>
                         ))}
-                        <MenuItem
-                            component={Link}
-                            href="/fantasy-bball/visualization"
-                            onClick={handleClose}
-                            sx={{
-                                "&.Mui-selected": {
-                                    backgroundColor: "black",
-                                    color: "white",
-                                    "&:hover": {
-                                        backgroundColor: "black",
-                                    },
-                                },
-                            }}
-                        >
-                            <Typography variant="body1">
-                                {t("pages.fantasy.subpages.visualization")}
-                            </Typography>
-                        </MenuItem>
                     </Menu>
                 </Portal>
             )}

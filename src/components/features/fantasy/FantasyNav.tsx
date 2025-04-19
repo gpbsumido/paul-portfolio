@@ -23,9 +23,11 @@ export default function FantasyNav() {
                         League
                     </Link>
                     <Link
-                        href="/fantasy-bball/history/2024"
+                        href={`/fantasy-bball/history/${new Date().getFullYear()}`}
                         className={`py-4 px-2 border-b-2 ${
-                            isActive("/fantasy-bball/history/2024")
+                            isActive(
+                                `/fantasy-bball/history/${new Date().getFullYear()}`
+                            )
                                 ? "border-blue-500 text-blue-500"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}

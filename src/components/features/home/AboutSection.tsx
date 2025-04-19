@@ -6,7 +6,7 @@ import Image from "next/image";
 import "@/app/globals.css";
 import SocialLink from "@/components/common/SocialLink";
 import { SOCIAL_LINKS } from "@/constants/social_links";
-import paulImage from "../../assets/paul.jpeg";
+import paulImage from "@/assets/paul.jpeg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SocialLink {

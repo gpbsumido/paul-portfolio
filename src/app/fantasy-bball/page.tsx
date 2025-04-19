@@ -17,6 +17,7 @@ import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
 
 export default function FantasyBasketballPage() {
     const { t } = useLanguage();
+    const currentYear = new Date().getFullYear();
 
     const subpages = [
         {
@@ -52,7 +53,7 @@ export default function FantasyBasketballPage() {
         {
             title: "History",
             description: "View past seasons and historical data",
-            href: "/fantasy-bball/history/2024",
+            href: `/fantasy-bball/history/${currentYear}`,
             icon: (
                 <SportsBasketballIcon
                     sx={{ fontSize: 40, color: "primary.main" }}
@@ -123,7 +124,7 @@ export default function FantasyBasketballPage() {
 
                 <Grid container spacing={3} sx={{ maxWidth: 1200 }}>
                     {subpages.map((page) => (
-                        <Grid item xs={12} sm={6} key={page.href}>
+                        <Grid item xs={12} sm={6} md={4} key={page.href}>
                             <Card
                                 sx={{
                                     height: "100%",
