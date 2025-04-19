@@ -11,7 +11,7 @@ import { MapMarker } from "../markers/MapMarker";
 import { MarkerForm } from "../forms/MarkerForm";
 import { LocationsTable } from "../tables/LocationsTable";
 import { RouteManager } from "../routes/RouteManager";
-import InfoIcon from '@mui/icons-material/Info';
+import InfoIcon from "@mui/icons-material/Info";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export default function MapContent({ location }: MapContentProps) {

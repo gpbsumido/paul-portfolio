@@ -198,7 +198,7 @@ export function RouteManager({ map }: RouteManagerProps) {
     return (
         <Box
             sx={{
-                height: "100%", // Ensure it takes the full height of its parent
+                height: "fit-content", // Ensure it takes the full height of its parent
                 overflow: "hidden", // Prevent scrolling for the entire component
                 display: "flex",
                 flexDirection: "column",

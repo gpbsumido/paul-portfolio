@@ -35,8 +35,8 @@ export async function getRoute({
         mode === "cycling"
             ? "cycling"
             : mode === "walking"
-                ? "walking"
-                : "driving";
+              ? "walking"
+              : "driving";
     const coordinates = `${start[0]},${start[1]};${end[0]},${end[1]}`;
     const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?geometries=geojson&steps=true&access_token=${accessToken}`;
 
