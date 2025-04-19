@@ -156,7 +156,7 @@ export default function MapContent({ location }: MapContentProps) {
 
         if (mapContainer.current) {
             let styleString = `https://tiles.stadiamaps.com/styles/alidade_smooth.json`;
-            if (process.env.NODE_ENV === "test") {
+            if (process.env.NEXT_PUBLIC_STADIA_LOCAL !== "LOCAL") {
                 styleString += `?api_key=${process.env.NEXT_PUBLIC_STADIAMAPS_KEY}`;
             }
             map.current = new maplibregl.Map({
