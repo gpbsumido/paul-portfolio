@@ -157,7 +157,7 @@ export default function MapContent({ location }: MapContentProps) {
         if (mapContainer.current) {
             map.current = new maplibregl.Map({
                 container: mapContainer.current,
-                style: "https://tiles.stadiamaps.com/styles/alidade_smooth.json",
+                style: `https://tiles.stadiamaps.com/styles/alidade_smooth.json?api_key=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`,
                 center: [location.lng, location.lat],
                 zoom: 13,
             });
