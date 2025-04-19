@@ -57,7 +57,6 @@ export default function MapContent({ location }: MapContentProps) {
 
     const loadMarkers = async () => {
         try {
-            console.log("Fetching markers from API...");
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/markers`
             );
@@ -67,7 +66,6 @@ export default function MapContent({ location }: MapContentProps) {
             }
 
             const apiMarkers: ApiMarker[] = await response.json();
-            console.log("Received markers from API:", apiMarkers);
 
             const convertedMarkers: CustomMarker[] = apiMarkers.map(
                 (marker) => ({
@@ -84,7 +82,6 @@ export default function MapContent({ location }: MapContentProps) {
                 })
             );
 
-            console.log("Converted markers:", convertedMarkers);
             setMarkers(convertedMarkers);
         } catch (err) {
             console.error("Error loading markers:", err);
@@ -173,7 +170,6 @@ export default function MapContent({ location }: MapContentProps) {
 
             // Load markers after map is loaded
             map.current.on("load", () => {
-                console.log("Map loaded, loading markers...");
                 loadMarkers();
             });
 
@@ -317,9 +313,6 @@ export default function MapContent({ location }: MapContentProps) {
     // Load markers when component mounts and when markers are updated
     useEffect(() => {
         if (mounted && map.current) {
-            console.log(
-                "Component mounted or markers updated, loading markers..."
-            );
             loadMarkers();
         }
     }, [mounted]);
@@ -327,7 +320,6 @@ export default function MapContent({ location }: MapContentProps) {
     // Reload markers after successful save
     useEffect(() => {
         if (!loading && !error && mounted && map.current) {
-            console.log("Save completed, reloading markers...");
             loadMarkers();
         }
     }, [loading, error]);
