@@ -91,7 +91,7 @@ const translations = {
                 createPost: "Create Post",
                 createTitle: "Create New Post",
             },
-            map: {
+            maps: {
                 title: "Map",
                 subtitle: "Save locations and create routes",
             },
@@ -167,7 +167,7 @@ const translations = {
                 createPost: "Crear Post",
                 createTitle: "Crear Nuevo Post",
             },
-            map: {
+            maps: {
                 title: "Carte",
                 subtitle: "Guardar ubicaciones y crear rutas",
             },
@@ -244,7 +244,7 @@ const translations = {
                 createPost: "Créer un Post",
                 createTitle: "Créer un Nouveau Post",
             },
-            map: {
+            maps: {
                 title: "Carte",
                 subtitle:
                     "Enregistrer des emplacements et créer des itinéraires",
