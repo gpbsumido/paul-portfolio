@@ -98,6 +98,9 @@ const DriverStandingsPage = () => {
             setLoading(true);
             setGraphLoading(true);
 
+            setDrivers([]); // Clear drivers state to avoid showing stale data
+            setPointsPerRace([]); // Clear pointsPerRace state to avoid stale graph data
+
             const [standings, points] = await Promise.all([fetchF1Data(), fetchPointsPerRace()]);
 
             setDrivers(standings);
