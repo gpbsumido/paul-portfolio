@@ -61,7 +61,7 @@ const DriverStandingsPage = () => {
             const url =
                 // Note: The local API is used for the current season as the other API does not provide the latest current year data
                 season === new Date().getFullYear().toString()
-                    ? `http://localhost:3001/api/f1/driver-points/${season}`
+                    ? `${process.env.NEXT_PUBLIC_API_URL}/api/f1/driver-points/${season}`
                     : `https://ergast.com/api/f1/${season}/driverStandings.json`;
 
             const response = await fetch(url);
@@ -86,7 +86,7 @@ const DriverStandingsPage = () => {
     const fetchPointsPerRace = useCallback(async () => {
         setGraphLoading(true);
         try {
-            const response = await fetch(`http://localhost:3001/api/f1/driver-points-per-race/${season}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/f1/driver-points-per-race/${season}`);
             const data = await response.json();
             console.log('data', data);
             setPointsPerRace(Array.isArray(data.results) ? data.results : []); // Ensure data is an array
