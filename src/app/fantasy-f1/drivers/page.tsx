@@ -48,6 +48,7 @@ const DriverStandingsPage = () => {
     const [availableYears, setAvailableYears] = useState<string[]>([]);
     const [pointsPerRace, setPointsPerRace] = useState<DriverPointsPerRace[]>([]);
     const [graphLoading, setGraphLoading] = useState(true);
+    const [dataLoading, setDataLoading] = useState(true); // New state to track combined loading
 
     useEffect(() => {
         const currentYear = new Date().getFullYear();
@@ -56,10 +57,8 @@ const DriverStandingsPage = () => {
     }, []);
 
     const fetchF1Data = useCallback(async () => {
-        setLoading(true);
         try {
             const url =
-                // Note: The local API is used for the current season as the other API does not provide the latest current year data
                 season === new Date().getFullYear().toString()
                     ? `${process.env.NEXT_PUBLIC_API_URL}/api/f1/driver-points/${season}`
                     : `https://ergast.com/api/f1/${season}/driverStandings.json`;
@@ -75,36 +74,42 @@ const DriverStandingsPage = () => {
                         points: parseFloat(driver.points),
                     }));
 
-            setDrivers(standings);
+            return standings;
         } catch (error) {
             console.error('Error fetching F1 data:', error);
-        } finally {
-            setLoading(false);
+            return [];
         }
     }, [season]);
 
     const fetchPointsPerRace = useCallback(async () => {
-        setGraphLoading(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/f1/driver-points-per-race/${season}`);
             const data = await response.json();
-            console.log('data', data);
-            setPointsPerRace(Array.isArray(data.results) ? data.results : []); // Ensure data is an array
+            return Array.isArray(data.results) ? data.results : [];
         } catch (error) {
             console.error('Error fetching points per race:', error);
-            setPointsPerRace([]); // Fallback to an empty array on error
-        } finally {
-            setGraphLoading(false);
+            return [];
         }
     }, [season]);
 
     useEffect(() => {
-        fetchF1Data();
-        fetchPointsPerRace();
-    }, [season, fetchF1Data, fetchPointsPerRace]);
+        const fetchData = async () => {
+            setDataLoading(true); // Start combined loading
+            setLoading(true);
+            setGraphLoading(true);
 
-    console.log('pointsPerRace', pointsPerRace);
-    console.log('drivers list', drivers);
+            const [standings, points] = await Promise.all([fetchF1Data(), fetchPointsPerRace()]);
+
+            setDrivers(standings);
+            setPointsPerRace(points);
+
+            setLoading(false);
+            setGraphLoading(false);
+            setDataLoading(false); // End combined loading
+        };
+
+        fetchData();
+    }, [season, fetchF1Data, fetchPointsPerRace]);
 
     const chartOptions = {
         title: {
@@ -197,7 +202,7 @@ const DriverStandingsPage = () => {
                 </CardContent>
             </Card>
             <Box sx={{ my: 5 }}>
-                {graphLoading ? (
+                {dataLoading ? (
                     <Skeleton variant="rectangular" height={400} />
                 ) : (
                     <ReactECharts option={chartOptions} style={{ height: 400 }} />
@@ -225,7 +230,7 @@ const DriverStandingsPage = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {loading
+                        {dataLoading
                             ? Array.from({ length: 10 }).map((_, index) => (
                                 <TableRow key={index}>
                                     <TableCell>
