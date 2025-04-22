@@ -90,7 +90,13 @@ const SchedulePage = () => {
             <Card elevation={3} sx={{ mb: 3 }}>
                 <CardHeader
                     title={`F1 Season Schedule ${season ? `(${season})` : ''}`}
-                    titleTypography={{ variant: 'h5', align: 'center' }}
+                    sx={{
+                        textAlign: 'center',
+                        '& .MuiCardHeader-title': {
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                        },
+                    }}
                 />
                 <CardContent>
                     <FormControl fullWidth sx={{ mb: 3 }}>
