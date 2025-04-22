@@ -70,10 +70,10 @@ const DriverStandingsPage = () => {
             const standings =
                 season === new Date().getFullYear().toString()
                     ? data.results
-                    : data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings.map((driver: any) => ({
+                    : (data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || []).map((driver: any) => ({
                         name: `${driver.Driver.givenName} ${driver.Driver.familyName}`,
                         points: parseFloat(driver.points),
-                    })) || [];
+                    }));
 
             setDrivers(standings);
         } catch (error) {
