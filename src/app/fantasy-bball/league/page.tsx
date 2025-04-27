@@ -129,7 +129,6 @@ export default function LeaguePage() {
 
     useEffect(() => {
         fetchLeagueData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedSeason]);
 
     /**
@@ -139,16 +138,8 @@ export default function LeaguePage() {
      */
     const renderContent = () => {
         return (
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 3,
-                }}
-                role="main"
-                aria-label={t("pages.fantasy.subpages.league")}
-            >
-                <Box sx={{ mb: 4 }}>
+            <Paper elevation={2} sx={{ p: 3 }}>
+                <Box sx={{ mb: 2 }}>
                     <Typography
                         variant="h4"
                         component="h1"
@@ -165,7 +156,6 @@ export default function LeaguePage() {
                             alignItems: "center",
                             width: "100%",
                             position: "relative",
-                            minHeight: "48px",
                         }}
                     >
                         <DropdownComponent
@@ -180,7 +170,7 @@ export default function LeaguePage() {
                             onChange={(value) =>
                                 handleSeasonChange(value as string)
                             }
-                            minWidth={'10em'}
+                            minWidth={'7em'}
                         />
                     </Box>
                 </Box>
@@ -282,10 +272,14 @@ export default function LeaguePage() {
                                                     width: 56,
                                                     height: 56,
                                                     mr: 2,
+                                                    cursor: "pointer",
                                                 }}
                                                 alt={team.name}
                                                 src={`https://a.espncdn.com/i/teamlogos/nba/500/${team.abbrev}.png`}
                                                 role="img"
+                                                onClick={() => {
+                                                    window.location.href = `/fantasy-bball/team/${team.id}`;
+                                                }}
                                             />
                                             <Box>
                                                 <Typography
@@ -394,9 +388,11 @@ export default function LeaguePage() {
                         ))}
                     </Grid>
                 ) : null}
-            </Box>
+            </Paper>
         );
     };
+
+    // <Paper elevation={2} sx={{ p: 3 }}>
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>

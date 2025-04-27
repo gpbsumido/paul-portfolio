@@ -1,4 +1,5 @@
 export interface ESPNPlayer {
+    [x: string]: ReactNode;
     stats: any;
     id: number;
     fullName: string;

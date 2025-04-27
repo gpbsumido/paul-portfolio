@@ -13,21 +13,33 @@ export default function MatchupsPage() {
 
     const renderContent = () => (
         <Box
+            component="div"
             sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: "200px",
+                p: 4,
+                borderRadius: 2,
+                boxShadow: 3,
+                textAlign: "center",
+                maxWidth: "500px",
+                margin: "auto",
             }}
         >
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="h5" color="text.primary" gutterBottom>
                 {t("pages.fantasy.matchupsComingSoon")}
             </Typography>
         </Box>
     );
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container
+            maxWidth="lg"
+            sx={{
+                py: 4,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                minHeight: "100vh",
+            }}
+        >
             <Box
                 sx={{
                     position: "fixed",
@@ -53,6 +65,7 @@ export default function MatchupsPage() {
                     display: "flex",
                     flexDirection: "column",
                     gap: 3,
+                    flexGrow: 1,
                 }}
             >
                 <Box

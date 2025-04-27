@@ -107,10 +107,6 @@ export default function VisualizationPage() {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
     const handleClose = () => {
         setAnchorEl(null);
     };
@@ -623,7 +619,7 @@ export default function VisualizationPage() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        mb: 1,
+                        mb: 2,
                     }}
                 >
                     <FantasyBasketballDropdownNav />
@@ -637,6 +633,7 @@ export default function VisualizationPage() {
                             width: "100%",
                             position: "relative",
                             minHeight: "40px",
+                            mb: 2,
                         }}
                     >
                         <DropdownComponent
@@ -655,60 +652,6 @@ export default function VisualizationPage() {
                             titleLocation="left"
                         />
                     </Box>
-                    {open && (
-                        <Portal>
-                            <Menu
-                                id="season-menu"
-                                anchorEl={anchorEl}
-                                open={open}
-                                onClose={handleClose}
-                                disableScrollLock
-                                aria-label={t("pages.fantasy.selectSeason")}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "center",
-                                }}
-                                transformOrigin={{
-                                    vertical: "top",
-                                    horizontal: "center",
-                                }}
-                                sx={{
-                                    "& .MuiPaper-root": {
-                                        position: "fixed",
-                                        mt: 1,
-                                        backgroundColor: "background.paper",
-                                        border:
-                                            theme.palette.mode === "dark"
-                                                ? "1px solid rgba(255, 255, 255, 0.12)"
-                                                : "none",
-                                    },
-                                }}
-                                PaperProps={{
-                                    sx: {
-                                        minWidth: "200px",
-                                    },
-                                }}
-                            >
-                                <MenuItem
-                                    onClick={() => handleSeasonChange("2025")}
-                                    selected={selectedSeason === "2025"}
-                                    sx={{
-                                        "&.Mui-selected": {
-                                            backgroundColor: "black",
-                                            color: "white",
-                                            "&:hover": {
-                                                backgroundColor: "black",
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <Typography variant="body1">
-                                        2025
-                                    </Typography>
-                                </MenuItem>
-                            </Menu>
-                        </Portal>
-                    )}
                     <ErrorBoundary>{renderContent()}</ErrorBoundary>
                 </Paper>
             </Box>

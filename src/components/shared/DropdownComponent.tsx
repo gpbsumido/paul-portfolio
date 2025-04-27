@@ -21,7 +21,7 @@ export default function DropdownComponent({
     onChange,
     minWidth = '15em',
     title,
-    titleLocation = "above", // New prop with default value
+    titleLocation = "above",
 }: DropdownComponentProps) {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -56,6 +56,7 @@ export default function DropdownComponent({
                         marginBottom: titleLocation === "above" ? 1 : 0,
                         fontWeight: "bold",
                         whiteSpace: "nowrap",
+                        color: theme.palette.text.primary,
                     }}
                 >
                     {title}
@@ -72,15 +73,15 @@ export default function DropdownComponent({
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    backgroundColor: "black",
-                    color: "white",
+                    backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[200],
+                    color: theme.palette.mode === "dark" ? "white" : "black",
                     "&:hover": {
-                        backgroundColor: "black",
+                        backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[300],
                     },
                     border:
                         theme.palette.mode === "dark"
                             ? "1px solid rgba(255, 255, 255, 0.23)"
-                            : "none",
+                            : "1px solid rgba(0, 0, 0, 0.23)",
                     minWidth: minWidth,
                     ...buttonStyles,
                 }}
@@ -110,12 +111,12 @@ export default function DropdownComponent({
                             "& .MuiPaper-root": {
                                 position: "fixed",
                                 mt: 1,
-                                minWidth: anchorEl ? anchorEl.offsetWidth : minWidth, // Match Button's width
-                                backgroundColor: "background.paper",
+                                minWidth: anchorEl ? anchorEl.offsetWidth : minWidth,
+                                backgroundColor: theme.palette.background.paper,
                                 border:
                                     theme.palette.mode === "dark"
                                         ? "1px solid rgba(255, 255, 255, 0.12)"
-                                        : "none",
+                                        : "1px solid rgba(0, 0, 0, 0.12)",
                             },
                         }}
                     >
@@ -125,15 +126,17 @@ export default function DropdownComponent({
                                 onClick={() => handleItemClick(item.value)}
                                 sx={{
                                     "&.Mui-selected": {
-                                        backgroundColor: "black",
-                                        color: "white",
+                                        backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[300],
+                                        color: theme.palette.mode === "dark" ? "white" : "black",
                                         "&:hover": {
-                                            backgroundColor: "black",
+                                            backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[400],
                                         },
                                     },
                                 }}
                             >
-                                <Typography variant="body2">{item.label}</Typography>
+                                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                                    {item.label}
+                                </Typography>
                             </MenuItem>
                         ))}
                     </Menu>
