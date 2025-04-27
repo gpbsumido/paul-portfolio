@@ -1,6 +1,6 @@
 "use client";
 
-import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
+import SportsMotorsportsIcon from '@mui/icons-material/SportsMotorsports';
 import { useLanguage } from "@/contexts/LanguageContext";
 import DropdownComponent from "@/components/shared/DropdownComponent";
 import { usePathname } from "next/navigation";
@@ -54,7 +54,8 @@ export default function F1DropdownNav() {
                 value: page.href,
             }))}
             currentSelected={currentSelected}
-            startIcon={<SportsBasketballIcon />}
+            startIcon={
+                <SportsMotorsportsIcon />}
             onChange={(value) => {
                 window.location.href = value as string;
             }}

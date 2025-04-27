@@ -22,10 +22,15 @@ import {
     CardHeader,
     Collapse,
     IconButton,
+    Button,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import F1DropdownNav from '@/components/features/fantasy/F1DropdownNav';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Link from 'next/link';
+import { HomeButton } from '@/components/common/HomeButton';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 
 interface Event {
     RoundNumber: number;
@@ -49,6 +54,7 @@ interface Event {
 
 const SchedulePage = () => {
     const theme = useTheme();
+    const { t } = useLanguage();
     const [schedule, setSchedule] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [season, setSeason] = useState<string>(new Date().getFullYear().toString());
@@ -66,6 +72,9 @@ const SchedulePage = () => {
             setLoading(true);
             try {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/f1/schedule/${season}`);
+                if (!response.ok) {
+                    throw new Error(`Error fetching schedule: ${response.statusText}`);
+                }
                 const data = await response.json();
                 setSchedule(data);
             } catch (error) {
@@ -83,190 +92,245 @@ const SchedulePage = () => {
     };
 
     return (
-        <Container sx={{ gap: 2, p: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
-                <F1DropdownNav />
-            </Box>
-            <Card elevation={3} sx={{ mb: 3 }}>
-                <CardHeader
-                    title={`F1 Season Schedule ${season ? `(${season})` : ''}`}
-                    sx={{
-                        textAlign: 'center',
-                        '& .MuiCardHeader-title': {
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                        },
-                    }}
-                />
-                <CardContent>
-                    <FormControl fullWidth sx={{ mb: 3 }}>
-                        <InputLabel id="year-selector-label">Select Year</InputLabel>
-                        <Select
-                            labelId="year-selector-label"
-                            value={season}
-                            onChange={(e) => setSeason(e.target.value)}
-                            label="Select Year"
-                        >
-                            {availableYears.map((year) => (
-                                <MenuItem key={year} value={year}>
-                                    {year}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </CardContent>
-            </Card>
-            <TableContainer
-                component={Paper}
-                elevation={3}
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                overflow: 'hidden',
+                py: 4,
+                margin: 'auto',
+            }}
+            maxWidth={'lg'}
+        >
+            <Box
                 sx={{
-                    backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : 'white',
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    left: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
                 }}
             >
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <Typography
-                                    variant="subtitle1"
-                                    fontWeight="bold"
-                                    color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
-                                >
-                                    Round
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography
-                                    variant="subtitle1"
-                                    fontWeight="bold"
-                                    color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
-                                >
-                                    Event Name
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography
-                                    variant="subtitle1"
-                                    fontWeight="bold"
-                                    color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
-                                >
-                                    Location
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography
-                                    variant="subtitle1"
-                                    fontWeight="bold"
-                                    color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
-                                >
-                                    Date
-                                </Typography>
-                            </TableCell>
-                            <TableCell />
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {loading
-                            ? Array.from({ length: 10 }).map((_, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="circular" width={24} height={24} />
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                            : schedule.map((event) => (
-                                <React.Fragment key={event.RoundNumber}>
-                                    <TableRow>
-                                        <TableCell>{event.RoundNumber}</TableCell>
-                                        <TableCell>{event.EventName}</TableCell>
-                                        <TableCell>{`${event.Location}, ${event.Country}`}</TableCell>
-                                        <TableCell>{new Date(event.EventDate).toLocaleDateString()}</TableCell>
+                <HomeButton component={Link} href="/" />
+            </Box>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    right: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <LanguageSwitcher />
+            </Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    mb: 3,
+                }}
+            >
+                <F1DropdownNav />
+            </Box>
+            <Container
+                maxWidth="lg"
+                sx={{
+                    flex: '1 1 auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                }}
+            >
+                <Card elevation={3} sx={{ mb: 3, flexShrink: 0 }}>
+                    <CardHeader
+                        title={`F1 Season Schedule ${season ? `(${season})` : ''}`}
+                        sx={{
+                            textAlign: 'center',
+                            '& .MuiCardHeader-title': {
+                                fontSize: '1.5rem',
+                                fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                    <CardContent>
+                        <FormControl fullWidth sx={{ mb: 3 }}>
+                            <InputLabel id="year-selector-label">Select Year</InputLabel>
+                            <Select
+                                labelId="year-selector-label"
+                                value={season}
+                                onChange={(e) => setSeason(e.target.value)}
+                                label="Select Year"
+                            >
+                                {availableYears.map((year) => (
+                                    <MenuItem key={year} value={year}>
+                                        {year}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </CardContent>
+                </Card>
+                <TableContainer
+                    component={Paper}
+                    elevation={3}
+                    sx={{
+                        flex: '1 1 auto',
+                        borderRadius: 2,
+                        boxShadow: 2,
+                        overflow: 'auto',
+                        backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : 'white',
+                    }}
+                >
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow
+                                sx={{
+                                    backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.200',
+                                }}
+                            >
+                                <TableCell>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
+                                    >
+                                        Round
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
+                                    >
+                                        Event Name
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
+                                    >
+                                        Location
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
+                                    >
+                                        Date
+                                    </Typography>
+                                </TableCell>
+                                <TableCell />
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading
+                                ? Array.from({ length: 10 }).map((_, index) => (
+                                    <TableRow key={index}>
                                         <TableCell>
-                                            <IconButton
-                                                onClick={() => handleRowExpand(event.RoundNumber)}
-                                                aria-label="expand row"
-                                            >
-                                                <ExpandMoreIcon
-                                                    sx={{
-                                                        transform:
-                                                            expandedRow === event.RoundNumber
-                                                                ? 'rotate(180deg)'
-                                                                : 'rotate(0deg)',
-                                                        transition: 'transform 0.2s',
-                                                    }}
-                                                />
-                                            </IconButton>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="circular" width={24} height={24} />
                                         </TableCell>
                                     </TableRow>
-                                    <TableRow>
-                                        <TableCell colSpan={5} sx={{ p: 0 }}>
-                                            <Collapse
-                                                in={expandedRow === event.RoundNumber}
-                                                timeout="auto"
-                                                unmountOnExit
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        p: 2,
-                                                        backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
-                                                    }}
+                                ))
+                                : schedule?.map((event) => (
+                                    <React.Fragment key={event.RoundNumber}>
+                                        <TableRow>
+                                            <TableCell>{event.RoundNumber}</TableCell>
+                                            <TableCell>{event.EventName}</TableCell>
+                                            <TableCell>{`${event.Location}, ${event.Country}`}</TableCell>
+                                            <TableCell>{new Date(event.EventDate).toLocaleDateString()}</TableCell>
+                                            <TableCell>
+                                                <IconButton
+                                                    onClick={() => handleRowExpand(event.RoundNumber)}
+                                                    aria-label="expand row"
                                                 >
-                                                    <Typography
-                                                        variant="subtitle1"
-                                                        fontWeight="bold"
-                                                        color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
+                                                    <ExpandMoreIcon
+                                                        sx={{
+                                                            transform:
+                                                                expandedRow === event.RoundNumber
+                                                                    ? 'rotate(180deg)'
+                                                                    : 'rotate(0deg)',
+                                                            transition: 'transform 0.2s',
+                                                        }}
+                                                    />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={5} sx={{ p: 0 }}>
+                                                <Collapse
+                                                    in={expandedRow === event.RoundNumber}
+                                                    timeout="auto"
+                                                    unmountOnExit
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            p: 2,
+                                                            backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+                                                        }}
                                                     >
-                                                        Sessions
-                                                    </Typography>
-                                                    <ul>
-                                                        {event.Session1 && (
-                                                            <li>
-                                                                {event.Session1}: {new Date(event.Session1Date!).toLocaleString()}
-                                                            </li>
-                                                        )}
-                                                        {event.Session2 && (
-                                                            <li>
-                                                                {event.Session2}: {new Date(event.Session2Date!).toLocaleString()}
-                                                            </li>
-                                                        )}
-                                                        {event.Session3 && (
-                                                            <li>
-                                                                {event.Session3}: {new Date(event.Session3Date!).toLocaleString()}
-                                                            </li>
-                                                        )}
-                                                        {event.Session4 && event.Session4Date && (
-                                                            <li>
-                                                                {event.Session4}: {new Date(event.Session4Date).toLocaleString()}
-                                                            </li>
-                                                        )}
-                                                        {event.Session5 && event.Session5Date && (
-                                                            <li>
-                                                                {event.Session5}: {new Date(event.Session5Date).toLocaleString()}
-                                                            </li>
-                                                        )}
-                                                    </ul>
-                                                </Box>
-                                            </Collapse>
-                                        </TableCell>
-                                    </TableRow>
-                                </React.Fragment>
-                            ))}
-                    </TableBody >
-                </Table >
-            </TableContainer >
-        </Container >
+                                                        <Typography
+                                                            variant="subtitle1"
+                                                            fontWeight="bold"
+                                                            color={theme.palette.mode === 'dark' ? 'grey.300' : 'text.primary'}
+                                                        >
+                                                            Sessions
+                                                        </Typography>
+                                                        <ul>
+                                                            {event.Session1 && (
+                                                                <li>
+                                                                    {event.Session1}: {new Date(event.Session1Date!).toLocaleString()}
+                                                                </li>
+                                                            )}
+                                                            {event.Session2 && (
+                                                                <li>
+                                                                    {event.Session2}: {new Date(event.Session2Date!).toLocaleString()}
+                                                                </li>
+                                                            )}
+                                                            {event.Session3 && (
+                                                                <li>
+                                                                    {event.Session3}: {new Date(event.Session3Date!).toLocaleString()}
+                                                                </li>
+                                                            )}
+                                                            {event.Session4 && event.Session4Date && (
+                                                                <li>
+                                                                    {event.Session4}: {new Date(event.Session4Date).toLocaleString()}
+                                                                </li>
+                                                            )}
+                                                            {event.Session5 && event.Session5Date && (
+                                                                <li>
+                                                                    {event.Session5}: {new Date(event.Session5Date).toLocaleString()}
+                                                                </li>
+                                                            )}
+                                                        </ul>
+                                                    </Box>
+                                                </Collapse>
+                                            </TableCell>
+                                        </TableRow>
+                                    </React.Fragment>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Container>
+        </Box>
     );
 };
 

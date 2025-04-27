@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface ESPNPlayer {
     [x: string]: ReactNode;
     stats: any;

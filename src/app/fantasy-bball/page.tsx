@@ -14,6 +14,11 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
+import BarChartIcon from '@mui/icons-material/BarChart';
+import GroupsIcon from '@mui/icons-material/Groups';
+import DataUsageIcon from '@mui/icons-material/DataUsage';
+import RestoreIcon from '@mui/icons-material/Restore';
+import SportsKabaddiIcon from '@mui/icons-material/SportsKabaddi';
 
 export default function FantasyBasketballPage() {
     const { t } = useLanguage();
@@ -25,7 +30,7 @@ export default function FantasyBasketballPage() {
             description: "View player statistics and team information",
             href: "/fantasy-bball/nba-stats",
             icon: (
-                <SportsBasketballIcon
+                <BarChartIcon
                     sx={{ fontSize: 40, color: "primary.main" }}
                 />
             ),
@@ -35,7 +40,7 @@ export default function FantasyBasketballPage() {
             description: "View your fantasy league standings and rosters",
             href: "/fantasy-bball/league",
             icon: (
-                <SportsBasketballIcon
+                <GroupsIcon
                     sx={{ fontSize: 40, color: "primary.main" }}
                 />
             ),
@@ -45,7 +50,7 @@ export default function FantasyBasketballPage() {
             description: "View interactive data visualizations and trends",
             href: "/fantasy-bball/visualization",
             icon: (
-                <SportsBasketballIcon
+                <DataUsageIcon
                     sx={{ fontSize: 40, color: "primary.main" }}
                 />
             ),
@@ -55,7 +60,7 @@ export default function FantasyBasketballPage() {
             description: "View past seasons and historical data",
             href: `/fantasy-bball/history/${currentYear}`,
             icon: (
-                <SportsBasketballIcon
+                <RestoreIcon
                     sx={{ fontSize: 40, color: "primary.main" }}
                 />
             ),
@@ -65,7 +70,7 @@ export default function FantasyBasketballPage() {
             description: "View current and upcoming matchups",
             href: "/fantasy-bball/matchups",
             icon: (
-                <SportsBasketballIcon
+                <SportsKabaddiIcon
                     sx={{ fontSize: 40, color: "primary.main" }}
                 />
             ),
