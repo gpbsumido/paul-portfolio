@@ -1,6 +1,7 @@
 "use client";
 
 import { Component, ErrorInfo, ReactNode } from "react";
+import { Box, Button, Typography, Paper } from "@mui/material";
 
 interface Props {
     children: ReactNode;
@@ -28,22 +29,50 @@ export default class ErrorBoundary extends Component<Props, State> {
     public render() {
         if (this.state.hasError) {
             return (
-                <div className="flex flex-col items-center justify-center min-h-[200px] p-4">
-                    <h2 className="text-xl font-semibold text-red-600 mb-2">
-                        Something went wrong
-                    </h2>
-                    <p className="text-gray-600 mb-4">
-                        {this.state.error?.message}
-                    </p>
-                    <button
-                        onClick={() =>
-                            this.setState({ hasError: false, error: null })
-                        }
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                        Try again
-                    </button>
-                </div>
+                <Paper
+                    elevation={3}
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minHeight: 300,
+                        p: 4,
+                        backgroundColor: "background.default",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: 2,
+                        m: 10
+                    }}
+                >
+                    <Box textAlign="center">
+                        <Typography
+                            variant="h4"
+                            color="error"
+                            fontWeight="bold"
+                            gutterBottom
+                        >
+                            Oops! Something went wrong.
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            color="text.secondary"
+                            gutterBottom
+                        >
+                            {this.state.error?.message || "An unexpected error occurred."}
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() =>
+                                this.setState({ hasError: false, error: null })
+                            }
+                            sx={{ mt: 2 }}
+                        >
+                            Try Again
+                        </Button>
+                    </Box>
+                </Paper>
             );
         }
 

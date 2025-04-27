@@ -8,7 +8,7 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
-import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 /**
@@ -233,7 +233,7 @@ export default function NBAStatsPage() {
                     role="navigation"
                     aria-label={t("navigation.fantasy")}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <ErrorBoundary>{renderContent()}</ErrorBoundary>
             </Box>

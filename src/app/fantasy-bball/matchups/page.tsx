@@ -5,7 +5,7 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 export default function MatchupsPage() {
@@ -63,7 +63,7 @@ export default function MatchupsPage() {
                         mb: 2,
                     }}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <ErrorBoundary>{renderContent()}</ErrorBoundary>
             </Box>

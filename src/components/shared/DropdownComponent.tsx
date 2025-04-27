@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
     Box,
     Button,
@@ -10,90 +11,67 @@ import {
     Portal,
     useTheme,
 } from "@mui/material";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { DropdownComponentProps } from "@/types/common";
 
-const currentYear = new Date().getFullYear();
-
-const subpages = [
-    {
-        key: "nbaStats",
-        href: "/fantasy-bball/nba-stats",
-    },
-    {
-        key: "league",
-        href: "/fantasy-bball/league",
-    },
-    {
-        key: "visualization",
-        href: "/fantasy-bball/visualization",
-    },
-    {
-        key: "history",
-        href: `/fantasy-bball/history/${currentYear}`,
-    },
-    {
-        key: "matchups",
-        href: "/fantasy-bball/matchups",
-    },
-];
-
-/**
- * Fantasy Dropdown Navigation Component
- *
- * @component
- * @description
- * A navigation component that displays a dropdown menu for fantasy basketball subpages.
- * Shows the current page and allows users to navigate between different fantasy basketball sections.
- *
- * @example
- * ```tsx
- * <FantasyDropdownNav />
- * ```
- *
- * @returns {JSX.Element} The fantasy dropdown navigation component
- */
-export default function FantasyDropdownNav() {
-    const { t } = useLanguage();
+export default function DropdownComponent({
+    items,
+    currentSelected,
+    startIcon,
+    buttonStyles,
+    onChange,
+    minWidth = '15em',
+    title,
+    titleLocation = "above", // New prop with default value
+}: DropdownComponentProps) {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const pathname = usePathname();
     const open = Boolean(anchorEl);
 
-    /**
-     * Handles the click event for the dropdown button
-     * @function handleClick
-     * @param {React.MouseEvent<HTMLElement>} event - The click event
-     */
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    /**
-     * Closes the dropdown menu
-     * @function handleClose
-     */
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    const currentPage =
-        subpages.find((page) => pathname === page.href)?.key || "title";
+    const handleItemClick = (value: any) => {
+        handleClose();
+        onChange?.(value);
+    };
 
     return (
-        <Box>
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: titleLocation === "left" ? "row" : "column",
+                alignItems: titleLocation === "left" ? "center" : "flex-start",
+                gap: titleLocation === "left" ? 2 : 0,
+            }}
+        >
+            {title && (
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        marginBottom: titleLocation === "above" ? 1 : 0,
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    {title}
+                </Typography>
+            )}
             <Button
                 variant="contained"
-                startIcon={<SportsBasketballIcon />}
-                endIcon={<KeyboardArrowDownIcon />}
+                startIcon={startIcon}
                 onClick={handleClick}
                 aria-haspopup="true"
                 aria-expanded={open}
-                aria-controls={open ? "fantasy-menu" : undefined}
+                aria-controls={open ? "dropdown-menu" : undefined}
                 sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     backgroundColor: "black",
                     color: "white",
                     "&:hover": {
@@ -103,16 +81,19 @@ export default function FantasyDropdownNav() {
                         theme.palette.mode === "dark"
                             ? "1px solid rgba(255, 255, 255, 0.23)"
                             : "none",
+                    minWidth: minWidth,
+                    ...buttonStyles,
                 }}
             >
-                {t(
-                    `pages.fantasy.${currentPage === "title" ? "title" : `subpages.${currentPage}`}`
-                )}
+                <Box sx={{ flexGrow: 1, textAlign: "left" }}>
+                    {items.find((item) => item.key === currentSelected)?.label || "Select"}
+                </Box>
+                <KeyboardArrowDownIcon />
             </Button>
             {open && (
                 <Portal>
                     <Menu
-                        id="fantasy-menu"
+                        id="dropdown-menu"
                         anchorEl={anchorEl}
                         open={open}
                         onClose={handleClose}
@@ -129,6 +110,7 @@ export default function FantasyDropdownNav() {
                             "& .MuiPaper-root": {
                                 position: "fixed",
                                 mt: 1,
+                                minWidth: anchorEl ? anchorEl.offsetWidth : minWidth, // Match Button's width
                                 backgroundColor: "background.paper",
                                 border:
                                     theme.palette.mode === "dark"
@@ -137,15 +119,11 @@ export default function FantasyDropdownNav() {
                             },
                         }}
                     >
-                        {subpages.map((page) => (
+                        {items.map((item) => (
                             <MenuItem
-                                key={page.href}
-                                component={Link}
-                                href={page.href}
-                                onClick={handleClose}
-                                selected={pathname === page.href}
+                                key={item.key}
+                                onClick={() => handleItemClick(item.value)}
                                 sx={{
-                                    minWidth: 200,
                                     "&.Mui-selected": {
                                         backgroundColor: "black",
                                         color: "white",
@@ -155,9 +133,7 @@ export default function FantasyDropdownNav() {
                                     },
                                 }}
                             >
-                                <Typography variant="body1">
-                                    {t(`pages.fantasy.subpages.${page.key}`)}
-                                </Typography>
+                                <Typography variant="body2">{item.label}</Typography>
                             </MenuItem>
                         ))}
                     </Menu>

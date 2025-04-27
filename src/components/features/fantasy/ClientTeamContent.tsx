@@ -149,44 +149,42 @@ export default function ClientTeamContent({
     };
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <Paper elevation={2} sx={{ p: 3 }}>
-                <Box sx={{ mb: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                        {t("pages.fantasy.selectTeam")}
-                    </Typography>
-                    <TeamSelector
-                        teams={teams}
-                        selectedTeam={selectedTeam}
-                        onTeamChange={handleTeamChange}
-                    />
-                </Box>
+        <Paper elevation={2} sx={{ p: 3 }}>
+            <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                    {t("pages.fantasy.selectTeam")}
+                </Typography>
+                <TeamSelector
+                    teams={teams}
+                    selectedTeam={selectedTeam}
+                    onTeamChange={handleTeamChange}
+                />
+            </Box>
 
-                {loading ? (
-                    <Box sx={{ width: "100%" }}>
-                        <Skeleton
-                            variant="rectangular"
-                            height={60}
-                            sx={{ mb: 2 }}
-                        />
-                        <Skeleton variant="rectangular" height={400} />
-                    </Box>
-                ) : (
-                    <>
-                        <Typography variant="h6" gutterBottom>
-                            {selectedTeam
-                                ? `${selectedTeam.full_name} ${t("pages.fantasy.players")}`
-                                : t("pages.fantasy.noTeamSelected")}
-                        </Typography>
-                        <FantasyBasketballTable
-                            players={players}
-                            playerStatsMap={playerStatsMap}
-                            onSort={handleSort}
-                            sortConfig={sortConfig}
-                        />
-                    </>
-                )}
-            </Paper>
-        </Box>
+            {loading ? (
+                <Box sx={{ width: "100%" }}>
+                    <Skeleton
+                        variant="rectangular"
+                        height={60}
+                        sx={{ mb: 2 }}
+                    />
+                    <Skeleton variant="rectangular" height={400} />
+                </Box>
+            ) : (
+                <>
+                    <Typography variant="h6" gutterBottom>
+                        {selectedTeam
+                            ? `${t("pages.fantasy.players")}`
+                            : t("pages.fantasy.noTeamSelected")}
+                    </Typography>
+                    <FantasyBasketballTable
+                        players={players}
+                        playerStatsMap={playerStatsMap}
+                        onSort={handleSort}
+                        sortConfig={sortConfig}
+                    />
+                </>
+            )}
+        </Paper>
     );
 }

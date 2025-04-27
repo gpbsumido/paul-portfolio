@@ -13,16 +13,16 @@ import {
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
 import { useEffect, useState } from "react";
 import { ESPNLeagueResponse, ESPNRosterEntry } from "@/types/espn";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@mui/material/styles";
 import ReactECharts from "echarts-for-react";
 import PlayerStats from "./player-stats";
 import Link from "next/link";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
+import DropdownComponent from "@/components/shared/DropdownComponent";
 
 interface WeeklyRanking {
     week: number;
@@ -181,11 +181,11 @@ export default function VisualizationPage() {
                                             stats: stats.filter(
                                                 (stat: PlayerStats) =>
                                                     stat.seasonId ===
-                                                        parseInt(
-                                                            selectedSeason
-                                                        ) &&
+                                                    parseInt(
+                                                        selectedSeason
+                                                    ) &&
                                                     stat.scoringPeriodId ===
-                                                        weekData.scoringPeriodId &&
+                                                    weekData.scoringPeriodId &&
                                                     stat.statSourceId === 0
                                             ),
                                         };
@@ -359,8 +359,8 @@ export default function VisualizationPage() {
                     team.rankCalculatedFinal === 1
                         ? theme.palette.success.main
                         : (team.rankCalculatedFinal ?? 0) <= 3
-                          ? theme.palette.primary.main
-                          : theme.palette.text.secondary,
+                            ? theme.palette.primary.main
+                            : theme.palette.text.secondary,
                 records: weeks.map((week) => weeklyRecords[week][team.id]),
             };
         });
@@ -590,7 +590,7 @@ export default function VisualizationPage() {
     };
 
     return (
-        <Container maxWidth="lg" sx={{ py: 2 }}>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
             <Box
                 sx={{
                     position: "fixed",
@@ -626,55 +626,34 @@ export default function VisualizationPage() {
                         mb: 1,
                     }}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <Paper elevation={2} sx={{ p: 2 }}>
-                    <Box sx={{ mb: 2 }}>
-                        <Typography
-                            variant="h4"
-                            component="h1"
-                            align="center"
-                            gutterBottom
-                        >
-                            {t("pages.fantasy.subpages.visualization")}
-                        </Typography>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: "100%",
-                                position: "relative",
-                                minHeight: "40px",
-                            }}
-                        >
-                            <Box sx={{ width: "200px", position: "relative" }}>
-                                <Button
-                                    variant="contained"
-                                    endIcon={<KeyboardArrowDownIcon />}
-                                    onClick={handleClick}
-                                    aria-haspopup="true"
-                                    aria-expanded={open}
-                                    aria-controls={
-                                        open ? "season-menu" : undefined
-                                    }
-                                    sx={{
-                                        backgroundColor: "black",
-                                        color: "white",
-                                        "&:hover": {
-                                            backgroundColor: "black",
-                                        },
-                                        width: "100%",
-                                        border:
-                                            theme.palette.mode === "dark"
-                                                ? "1px solid rgba(255, 255, 255, 0.23)"
-                                                : "none",
-                                    }}
-                                >
-                                    {t("pages.fantasy.season")} {selectedSeason}
-                                </Button>
-                            </Box>
-                        </Box>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: "100%",
+                            position: "relative",
+                            minHeight: "40px",
+                        }}
+                    >
+                        <DropdownComponent
+                            items={[
+                                {
+                                    key: "2025",
+                                    label: "2025",
+                                    value: "2025",
+                                },
+                            ]}
+                            currentSelected={selectedSeason}
+                            onChange={(value) =>
+                                handleSeasonChange(value as string)
+                            }
+                            title={t("pages.fantasy.season")}
+                            titleLocation="left"
+                        />
                     </Box>
                     {open && (
                         <Portal>

@@ -17,7 +17,7 @@ import {
     Button,
     Container,
 } from '@mui/material';
-import FantasyDropdownNav from '@/components/features/fantasy/FantasyDropdownNav';
+import FantasyBasketballDropdownNav from '@/components/features/fantasy/FantasyBasketballDropdownNav';
 import { useTheme } from '@mui/material/styles';
 import { getHistoricalLeagueInfo } from '@/lib/espnService';
 import HistoryError from './HistoryError';
@@ -165,14 +165,7 @@ async function HistoryContent({ year }: { year: string }) {
 
 export default function HistoryPage({ params }: HistoryPageProps) {
     return (
-        <Container
-            sx={{
-                minHeight: '100vh',
-                py: 2,
-                margin: '0 auto',
-            }}
-            maxWidth="lg"
-        >
+        <Container maxWidth="lg" sx={{ py: 4 }}>
             <Suspense
                 fallback={
                     <Box
@@ -195,7 +188,7 @@ export default function HistoryPage({ params }: HistoryPageProps) {
                         mb: 2,
                     }}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <HistoryContent year={params.year} />
             </Suspense>
