@@ -20,11 +20,13 @@ import {
     Card,
     CardContent,
     CardHeader,
+    useTheme,
 } from '@mui/material';
 import F1DropdownNav from '@/components/features/fantasy/F1DropdownNav';
 import { HomeButton } from '@/components/common/HomeButton';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import Link from 'next/link';
+import DropdownComponent from '@/components/shared/DropdownComponent';
 
 interface QualifyingResult {
     position: string;
@@ -42,9 +44,12 @@ interface QualifyingResult {
 }
 
 const QualifyingPage = () => {
+
+    const theme = useTheme();
     const [qualifyingResults, setQualifyingResults] = useState<QualifyingResult[]>([]);
     const [loading, setLoading] = useState(true);
-    const [season, setSeason] = useState<string>(new Date().getFullYear().toString());
+    const currentYear = new Date().getFullYear();
+    const [season, setSeason] = useState<string>((currentYear - 1).toString());
     const [round, setRound] = useState<string>('1');
     const [availableRounds, setAvailableRounds] = useState<string[]>([]);
     const [availableYears, setAvailableYears] = useState<string[]>([]);
@@ -52,7 +57,7 @@ const QualifyingPage = () => {
     useEffect(() => {
         const currentYear = new Date().getFullYear();
         const years = Array.from({ length: currentYear - 1950 + 1 }, (_, i) => (1950 + i).toString());
-        setAvailableYears(years.reverse());
+        setAvailableYears(years.reverse().slice(1, years.length - 1));
     }, []);
 
     useEffect(() => {
@@ -130,123 +135,153 @@ const QualifyingPage = () => {
             >
                 <F1DropdownNav />
             </Box>
-            <Card elevation={3} sx={{ mb: 3 }}>
-                <CardHeader
-                    title={`F1 Qualifying Results ${season ? `(${season})` : ''} - Round ${round}`}
+            <Container
+                maxWidth="lg"
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                }}
+            >
+                <Card elevation={3} sx={{ mb: 3, minHeight: 'fit-content' }}>
+                    <CardHeader
+                        title={`F1 Qualifying Results ${season ? `(${season})` : ''} - Round ${round}`}
+                        sx={{
+                            textAlign: 'center',
+                            '& .MuiCardHeader-title': {
+                                fontSize: '1.5rem',
+                                fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                    <CardContent sx={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
+                        <DropdownComponent
+                            title="Year"
+                            items={availableYears.map((yr) => ({
+                                key: yr,
+                                label: yr,
+                                value: yr,
+                            }))}
+                            currentSelected={season}
+                            onChange={(value) => setSeason(value as string)}
+                            titleLocation="left"
+                            minWidth={'8em'}
+                        />
+                        <DropdownComponent
+                            title="Round"
+                            items={availableRounds.map((round) => ({
+                                key: round,
+                                label: round,
+                                value: round,
+                            }))}
+                            currentSelected={round}
+                            onChange={(value) => setRound(value as string)}
+                            titleLocation="left"
+                            minWidth={'8em'}
+                        />
+                    </CardContent>
+                </Card>
+                <TableContainer
+                    component={Paper}
+                    elevation={3}
                     sx={{
-                        textAlign: 'center',
-                        '& .MuiCardHeader-title': {
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                        },
+                        borderRadius: 2,
+                        boxShadow: 2,
+                        overflow: 'auto',
+                        backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : 'white',
                     }}
-                />
-                <CardContent>
-                    <FormControl fullWidth sx={{ mb: 3 }}>
-                        <InputLabel id="year-selector-label">Select Year</InputLabel>
-                        <Select
-                            labelId="year-selector-label"
-                            value={season}
-                            onChange={(e) => setSeason(e.target.value)}
-                            label="Select Year"
-                        >
-                            {availableYears.map((year) => (
-                                <MenuItem key={year} value={year}>
-                                    {year}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth sx={{ mb: 3 }}>
-                        <InputLabel id="round-selector-label">Select Round</InputLabel>
-                        <Select
-                            labelId="round-selector-label"
-                            value={round}
-                            onChange={(e) => setRound(e.target.value)}
-                            label="Select Round"
-                        >
-                            {availableRounds.map((round) => (
-                                <MenuItem key={round} value={round}>
-                                    Round {round}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </CardContent>
-            </Card>
-            <TableContainer component={Paper} elevation={3}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Position
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Driver
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Constructor
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Q1
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Q2
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Q3
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {loading
-                            ? Array.from({ length: 10 }).map((_, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                            : qualifyingResults.map((result) => (
-                                <TableRow key={result.Driver.driverId}>
-                                    <TableCell>{result.position}</TableCell>
-                                    <TableCell>{`${result.Driver.givenName} ${result.Driver.familyName}`}</TableCell>
-                                    <TableCell>{result.Constructor.name}</TableCell>
-                                    <TableCell>{result.Q1}</TableCell>
-                                    <TableCell>{result.Q2 || 'N/A'}</TableCell>
-                                    <TableCell>{result.Q3 || 'N/A'}</TableCell>
-                                </TableRow>
-                            ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                >
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow
+                                sx={{
+                                    backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.200',
+                                }}
+                            >
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Position
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Driver
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Constructor
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Q1
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Q2
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Q3
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading
+                                ? Array.from({ length: 10 }).map((_, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                                : qualifyingResults.map((result) => (
+                                    <TableRow
+                                        key={result.Driver.driverId}
+                                        sx={{
+                                            backgroundColor:
+                                                theme.palette.mode === "dark"
+                                                    ? theme.palette.grey[900]
+                                                    : theme.palette.grey[50],
+                                            '&:hover': {
+                                                backgroundColor:
+                                                    theme.palette.mode === 'dark'
+                                                        ? 'rgba(255, 255, 255, 0.1)'
+                                                        : 'rgba(0, 0, 0, 0.08)',
+                                            },
+                                        }}
+                                    >
+                                        <TableCell>{result.position}</TableCell>
+                                        <TableCell>{`${result.Driver.givenName} ${result.Driver.familyName}`}</TableCell>
+                                        <TableCell>{result.Constructor.name}</TableCell>
+                                        <TableCell>{result.Q1}</TableCell>
+                                        <TableCell>{result.Q2 || 'N/A'}</TableCell>
+                                        <TableCell>{result.Q3 || 'N/A'}</TableCell>
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Container>
         </Box>
     );
 };

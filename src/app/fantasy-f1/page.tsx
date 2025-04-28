@@ -67,7 +67,7 @@ export default function FantasyBasketballPage() {
         {
             title: "Fantasy Scoring",
             description: "View fantasy based on Fantasy F1 Game",
-            href: "/fantasy-f1/schedule",
+            href: "/fantasy-f1/fantasy-scoring",
             icon: (
                 <TimelineIcon
                     sx={{ fontSize: 40, color: "primary.main" }}

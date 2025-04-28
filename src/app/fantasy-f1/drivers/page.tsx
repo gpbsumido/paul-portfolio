@@ -26,6 +26,7 @@ import F1DropdownNav from '@/components/features/fantasy/F1DropdownNav';
 import { HomeButton } from '@/components/common/HomeButton';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
 import Link from 'next/link';
+import DropdownComponent from '@/components/shared/DropdownComponent';
 
 interface Driver {
     name: string;
@@ -215,88 +216,97 @@ const DriverStandingsPage = () => {
             >
                 <F1DropdownNav />
             </Box>
-            <Card elevation={3} sx={{ mb: 3, flexShrink: 0 }}>
-                <CardHeader
-                    title={`F1 Driver Standings ${season ? `(${season})` : ''}`}
-                    sx={{
-                        textAlign: 'center',
-                        '& .MuiCardHeader-title': {
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                        },
-                    }}
-                />
-                <CardContent sx={{ pb: 4 }}>
-                    <FormControl fullWidth>
-                        <InputLabel id="year-selector-label">Select Year</InputLabel>
-                        <Select
-                            labelId="year-selector-label"
-                            value={season}
-                            onChange={(e) => setSeason(e.target.value)}
-                            label="Select Year"
-                        >
-                            {availableYears.map((year) => (
-                                <MenuItem key={year} value={year}>
-                                    {year}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </CardContent>
-            </Card>
-            <Box sx={{ my: 5, flexShrink: 0 }}> {/* Ensure the graph does not overlap */}
-                {dataLoading ? (
-                    <Skeleton variant="rectangular" height={400} />
-                ) : (
-                    <ReactECharts option={chartOptions} style={{ height: 400 }} />
-                )}
-            </Box>
-            <TableContainer component={Paper} elevation={3}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Position
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Driver
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Points
-                                </Typography>
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {dataLoading
-                            ? Array.from({ length: 10 }).map((_, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton variant="text" />
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                            : drivers.map((driver, index) => (
-                                <TableRow key={driver.name}>
-                                    <TableCell>{index + 1}</TableCell>
-                                    <TableCell>{driver.name}</TableCell>
-                                    <TableCell>{driver.points}</TableCell>
-                                </TableRow>
-                            ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Container
+                maxWidth="lg"
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                }}
+            >
+                <Card elevation={3} sx={{ flexShrink: 0 }}>
+                    <CardHeader
+                        title={`F1 Driver Standings ${season ? `(${season})` : ''}`}
+                        sx={{
+                            textAlign: 'center',
+                            '& .MuiCardHeader-title': {
+                                fontSize: '1.5rem',
+                                fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                    <Typography variant="body2" color="textSecondary" align="center">
+                        Disclaimer: Data may load slowly or fail to load due to rate-limited APIs.
+                    </Typography>
+                    <CardContent sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <DropdownComponent
+                            title="Year"
+                            items={availableYears.map((yr) => ({
+                                key: yr,
+                                label: yr,
+                                value: yr,
+                            }))}
+                            currentSelected={season}
+                            onChange={(value) => setSeason(value as string)}
+                            titleLocation="left"
+                            minWidth={'8em'}
+                        />
+                    </CardContent>
+                </Card>
+                <Box sx={{ my: 5, flexShrink: 0 }}> {/* Ensure the graph does not overlap */}
+                    {dataLoading ? (
+                        <Skeleton variant="rectangular" height={400} />
+                    ) : (
+                        <ReactECharts option={chartOptions} style={{ height: 400 }} />
+                    )}
+                </Box>
+                <TableContainer component={Paper} elevation={3}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Position
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Driver
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Points
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {dataLoading
+                                ? Array.from({ length: 10 }).map((_, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" />
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                                : drivers.map((driver, index) => (
+                                    <TableRow key={driver.name}>
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>{driver.name}</TableCell>
+                                        <TableCell>{driver.points}</TableCell>
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Container>
         </Box>
     );
 };

@@ -31,6 +31,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 import { HomeButton } from '@/components/common/HomeButton';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+import DropdownComponent from '@/components/shared/DropdownComponent';
 
 interface Event {
     RoundNumber: number;
@@ -154,21 +155,23 @@ const SchedulePage = () => {
                         }}
                     />
                     <CardContent>
-                        <FormControl fullWidth sx={{ mb: 3 }}>
-                            <InputLabel id="year-selector-label">Select Year</InputLabel>
-                            <Select
-                                labelId="year-selector-label"
-                                value={season}
-                                onChange={(e) => setSeason(e.target.value)}
-                                label="Select Year"
-                            >
-                                {availableYears.map((year) => (
-                                    <MenuItem key={year} value={year}>
-                                        {year}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <Typography variant="body2" color="textSecondary" align="center">
+                            Disclaimer: Data may load slowly or fail to load due to rate-limited APIs.
+                        </Typography>
+                    </CardContent>
+                    <CardContent sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <DropdownComponent
+                            title="Year"
+                            items={availableYears.map((yr) => ({
+                                key: yr,
+                                label: yr,
+                                value: yr,
+                            }))}
+                            currentSelected={season}
+                            onChange={(value) => setSeason(value as string)}
+                            titleLocation="left"
+                            minWidth={'8em'}
+                        />
                     </CardContent>
                 </Card>
                 <TableContainer
