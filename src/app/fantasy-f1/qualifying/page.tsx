@@ -63,7 +63,7 @@ const QualifyingPage = () => {
     useEffect(() => {
         const fetchRounds = async () => {
             try {
-                const response = await fetch(`http://ergast.com/api/f1/${season}.json`);
+                const response = await fetch(`https://ergast.com/api/f1/${season}.json`);
                 const data = await response.json();
                 const rounds = data.MRData.RaceTable.Races.map((race: any) => race.round);
                 setAvailableRounds(rounds);
@@ -79,7 +79,7 @@ const QualifyingPage = () => {
         const fetchQualifyingResults = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`http://ergast.com/api/f1/${season}/${round}/qualifying.json`);
+                const response = await fetch(`https://ergast.com/api/f1/${season}/${round}/qualifying.json`);
                 const data = await response.json();
                 const results = data.MRData.RaceTable.Races[0]?.QualifyingResults || [];
                 setQualifyingResults(results);
