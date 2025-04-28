@@ -9,13 +9,13 @@ src/
 ├── app/                  # Next.js app directory (pages and routing)
 │   ├── page.tsx          # Home page
 │   ├── designs/          # Design showcase
-│   ├── maps/              # Interactive map feature
-│   ├── email/            # Contact Form prototype
-│   ├── forum/            # Discussion forum prototype
 │   ├── fantasy-bball/    # Fantasy Basketball Stats for personal league
 │   ├── fantasy-f1/       # Fantasy F1 Stats as well as driver/constructor championship data
-│   └── gallery/          # Image gallery prototype
-│   ├── social-media/       # Curated Social Media timeline prototype
+│   ├── maps/             # Interactive map feature (WORK IN PROGRESS)
+│   ├── email/            # Contact Form  (WORK IN PROGRESS)
+│   ├── forum/            # Discussion forum  (WORK IN PROGRESS)
+│   └── gallery/          # Image gallery  (WORK IN PROGRESS)
+│   ├── social-media/     # Curated Social Media timeline  (WORK IN PROGRESS)
 ├── components/           # Reusable React components
 │   ├── features/         # Feature-specific components
 │   │   └── routes/       # Route management components

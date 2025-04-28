@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, useTheme } from "@mui/material";
 import { MarkerFormProps } from "@/types/maps";
 
 /**
@@ -30,6 +30,8 @@ export function MarkerForm({
     onCancel,
     onSave,
 }: MarkerFormProps) {
+    const theme = useTheme();
+
     if (!position) return null;
 
     return (
@@ -40,7 +42,8 @@ export function MarkerForm({
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 zIndex: 1003,
-                backgroundColor: "white",
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
                 padding: "20px",
                 borderRadius: "8px",
                 boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
@@ -53,7 +56,12 @@ export function MarkerForm({
                     : "Add New Marker"}
             </h3>
             {error && (
-                <div style={{ color: "red", marginBottom: "15px" }}>
+                <div
+                    style={{
+                        color: theme.palette.error.main,
+                        marginBottom: "15px",
+                    }}
+                >
                     {error}
                 </div>
             )}
@@ -67,7 +75,9 @@ export function MarkerForm({
                     padding: "8px",
                     marginBottom: "15px",
                     borderRadius: "4px",
-                    border: "1px solid #ccc",
+                    border: `1px solid ${theme.palette.divider}`,
+                    backgroundColor: theme.palette.background.default,
+                    color: theme.palette.text.primary,
                 }}
             />
             <div
@@ -82,10 +92,7 @@ export function MarkerForm({
                     variant="outlined"
                     style={{
                         padding: "8px 16px",
-                        backgroundColor: "#f5f5f5",
-                        border: "1px solid #ccc",
                         borderRadius: "4px",
-                        cursor: "pointer",
                     }}
                 >
                     Cancel
@@ -96,11 +103,7 @@ export function MarkerForm({
                     variant="contained"
                     style={{
                         padding: "8px 16px",
-                        backgroundColor: "#4287f5",
-                        color: "white",
-                        border: "none",
                         borderRadius: "4px",
-                        cursor: "pointer",
                         opacity: !text.trim() || loading ? 0.5 : 1,
                     }}
                 >
