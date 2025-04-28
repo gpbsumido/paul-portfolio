@@ -25,7 +25,5 @@ interface RootLayoutProps {
 export default function RootLayout({
     children,
 }: RootLayoutProps): React.ReactElement {
-    return (
-        <ErrorBoundary>{children}</ErrorBoundary>
-    );
+    return <ErrorBoundary>{children}</ErrorBoundary>;
 }

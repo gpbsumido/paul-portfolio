@@ -14,11 +14,11 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
-import BarChartIcon from '@mui/icons-material/BarChart';
-import GroupsIcon from '@mui/icons-material/Groups';
-import DataUsageIcon from '@mui/icons-material/DataUsage';
-import RestoreIcon from '@mui/icons-material/Restore';
-import SportsKabaddiIcon from '@mui/icons-material/SportsKabaddi';
+import BarChartIcon from "@mui/icons-material/BarChart";
+import GroupsIcon from "@mui/icons-material/Groups";
+import DataUsageIcon from "@mui/icons-material/DataUsage";
+import RestoreIcon from "@mui/icons-material/Restore";
+import SportsKabaddiIcon from "@mui/icons-material/SportsKabaddi";
 
 export default function FantasyBasketballPage() {
     const { t } = useLanguage();
@@ -29,41 +29,27 @@ export default function FantasyBasketballPage() {
             title: "NBA Stats",
             description: "View player statistics and team information",
             href: "/fantasy-bball/nba-stats",
-            icon: (
-                <BarChartIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
-            ),
+            icon: <BarChartIcon sx={{ fontSize: 40, color: "primary.main" }} />,
         },
         {
             title: "League",
             description: "View your fantasy league standings and rosters",
             href: "/fantasy-bball/league",
-            icon: (
-                <GroupsIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
-            ),
+            icon: <GroupsIcon sx={{ fontSize: 40, color: "primary.main" }} />,
         },
         {
             title: "Visualizations",
             description: "View interactive data visualizations and trends",
             href: "/fantasy-bball/visualization",
             icon: (
-                <DataUsageIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
+                <DataUsageIcon sx={{ fontSize: 40, color: "primary.main" }} />
             ),
         },
         {
             title: "History",
             description: "View past seasons and historical data",
             href: `/fantasy-bball/history/${currentYear}`,
-            icon: (
-                <RestoreIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
-            ),
+            icon: <RestoreIcon sx={{ fontSize: 40, color: "primary.main" }} />,
         },
         {
             title: "Matchups",

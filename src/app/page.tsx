@@ -23,7 +23,8 @@ export default function Home(): React.ReactElement {
     const fantasyF1Icons = [SportsMotorsportsIcon];
 
     const [designsIconIndex, setDesignsIconIndex] = useState(0);
-    const [fantasyBasketballIconIndex, setFantasyBasketballIconIndex] = useState(0);
+    const [fantasyBasketballIconIndex, setFantasyBasketballIconIndex] =
+        useState(0);
     const [fantasyF1IconIndex, setFantasyF1IconIndex] = useState(0);
 
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -34,27 +35,38 @@ export default function Home(): React.ReactElement {
 
         if (hoveredSection === "designs") {
             timer = setInterval(() => {
-                setDesignsIconIndex((prevIndex) => (prevIndex + 1) % designsIcons.length);
+                setDesignsIconIndex(
+                    (prevIndex) => (prevIndex + 1) % designsIcons.length
+                );
             }, 1000);
         } else if (hoveredSection === "fantasyBasketball") {
             timer = setInterval(() => {
                 setFantasyBasketballIconIndex(
-                    (prevIndex) => (prevIndex + 1) % fantasyBasketballIcons.length
+                    (prevIndex) =>
+                        (prevIndex + 1) % fantasyBasketballIcons.length
                 );
             }, 1000);
         } else if (hoveredSection === "fantasyF1") {
             timer = setInterval(() => {
-                setFantasyF1IconIndex((prevIndex) => (prevIndex + 1) % fantasyF1Icons.length);
+                setFantasyF1IconIndex(
+                    (prevIndex) => (prevIndex + 1) % fantasyF1Icons.length
+                );
             }, 1000);
         }
 
         return () => {
             if (timer) clearInterval(timer);
         };
-    }, [hoveredSection, designsIcons.length, fantasyBasketballIcons.length, fantasyF1Icons.length]);
+    }, [
+        hoveredSection,
+        designsIcons.length,
+        fantasyBasketballIcons.length,
+        fantasyF1Icons.length,
+    ]);
 
     const DesignsIcon = designsIcons[designsIconIndex];
-    const FantasyBasketballIcon = fantasyBasketballIcons[fantasyBasketballIconIndex];
+    const FantasyBasketballIcon =
+        fantasyBasketballIcons[fantasyBasketballIconIndex];
     const FantasyF1Icon = fantasyF1Icons[fantasyF1IconIndex];
 
     const [isLoading, setIsLoading] = useState(true);
@@ -238,14 +250,18 @@ export default function Home(): React.ReactElement {
                                 fontSize: "4rem",
                                 marginBottom: "0.5em",
                                 opacity: hoveredSection === "designs" ? 1 : 0.7,
-                                transform: hoveredSection === "designs" ? "scale(1.1)" : "scale(1)",
+                                transform:
+                                    hoveredSection === "designs"
+                                        ? "scale(1.1)"
+                                        : "scale(1)",
                                 transition:
                                     "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
                                 color: "inherit",
                                 display: "block",
-                                animation: hoveredSection === "designs"
-                                    ? "float 2s ease-in-out infinite"
-                                    : "none",
+                                animation:
+                                    hoveredSection === "designs"
+                                        ? "float 2s ease-in-out infinite"
+                                        : "none",
                                 "@keyframes float": {
                                     "0%, 100%": {
                                         transform: "translateY(0)",
@@ -260,8 +276,14 @@ export default function Home(): React.ReactElement {
                             style={{
                                 transition:
                                     "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                                transform: hoveredSection === "designs" ? "scale(1.1)" : "scale(1)",
-                                fontWeight: hoveredSection === "designs" ? "bold" : "normal",
+                                transform:
+                                    hoveredSection === "designs"
+                                        ? "scale(1.1)"
+                                        : "scale(1)",
+                                fontWeight:
+                                    hoveredSection === "designs"
+                                        ? "bold"
+                                        : "normal",
                             }}
                         >
                             {t("navigation.designs")}
@@ -312,15 +334,22 @@ export default function Home(): React.ReactElement {
                             sx={{
                                 fontSize: "4rem",
                                 marginBottom: "0.5em",
-                                opacity: hoveredSection === "fantasyBasketball" ? 1 : 0.7,
-                                transform: hoveredSection === "fantasyBasketball" ? "scale(1.1)" : "scale(1)",
+                                opacity:
+                                    hoveredSection === "fantasyBasketball"
+                                        ? 1
+                                        : 0.7,
+                                transform:
+                                    hoveredSection === "fantasyBasketball"
+                                        ? "scale(1.1)"
+                                        : "scale(1)",
                                 transition:
                                     "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
                                 color: "inherit",
                                 display: "block",
-                                animation: hoveredSection === "fantasyBasketball"
-                                    ? "float 2s ease-in-out infinite"
-                                    : "none",
+                                animation:
+                                    hoveredSection === "fantasyBasketball"
+                                        ? "float 2s ease-in-out infinite"
+                                        : "none",
                                 "@keyframes float": {
                                     "0%, 100%": {
                                         transform: "translateY(0)",
@@ -335,8 +364,14 @@ export default function Home(): React.ReactElement {
                             style={{
                                 transition:
                                     "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                                transform: hoveredSection === "fantasyBasketball" ? "scale(1.1)" : "scale(1)",
-                                fontWeight: hoveredSection === "fantasyBasketball" ? "bold" : "normal",
+                                transform:
+                                    hoveredSection === "fantasyBasketball"
+                                        ? "scale(1.1)"
+                                        : "scale(1)",
+                                fontWeight:
+                                    hoveredSection === "fantasyBasketball"
+                                        ? "bold"
+                                        : "normal",
                             }}
                         >
                             {t("navigation.fantasybasketball")}
@@ -387,15 +422,20 @@ export default function Home(): React.ReactElement {
                             sx={{
                                 fontSize: "4rem",
                                 marginBottom: "0.5em",
-                                opacity: hoveredSection === "fantasyF1" ? 1 : 0.7,
-                                transform: hoveredSection === "fantasyF1" ? "scale(1.1)" : "scale(1)",
+                                opacity:
+                                    hoveredSection === "fantasyF1" ? 1 : 0.7,
+                                transform:
+                                    hoveredSection === "fantasyF1"
+                                        ? "scale(1.1)"
+                                        : "scale(1)",
                                 transition:
                                     "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
                                 color: "inherit",
                                 display: "block",
-                                animation: hoveredSection === "fantasyF1"
-                                    ? "float 2s ease-in-out infinite"
-                                    : "none",
+                                animation:
+                                    hoveredSection === "fantasyF1"
+                                        ? "float 2s ease-in-out infinite"
+                                        : "none",
                                 "@keyframes float": {
                                     "0%, 100%": {
                                         transform: "translateY(0)",
@@ -410,8 +450,14 @@ export default function Home(): React.ReactElement {
                             style={{
                                 transition:
                                     "transform 0.3s ease-in-out, font-weight 0.3s ease-in-out",
-                                transform: hoveredSection === "fantasyF1" ? "scale(1.1)" : "scale(1)",
-                                fontWeight: hoveredSection === "fantasyF1" ? "bold" : "normal",
+                                transform:
+                                    hoveredSection === "fantasyF1"
+                                        ? "scale(1.1)"
+                                        : "scale(1)",
+                                fontWeight:
+                                    hoveredSection === "fantasyF1"
+                                        ? "bold"
+                                        : "normal",
                             }}
                         >
                             {t("navigation.fantasyF1")}

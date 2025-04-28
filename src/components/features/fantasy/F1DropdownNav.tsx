@@ -1,6 +1,6 @@
 "use client";
 
-import SportsMotorsportsIcon from '@mui/icons-material/SportsMotorsports';
+import SportsMotorsportsIcon from "@mui/icons-material/SportsMotorsports";
 import { useLanguage } from "@/contexts/LanguageContext";
 import DropdownComponent from "@/components/shared/DropdownComponent";
 import { usePathname } from "next/navigation";
@@ -44,7 +44,9 @@ export default function F1DropdownNav() {
             href: `/fantasy-f1/fantasy-scoring`,
         },
     ];
-    const currentSelected = subpages.find((page) => page.href === pathname)?.key;
+    const currentSelected = subpages.find(
+        (page) => page.href === pathname
+    )?.key;
 
     return (
         <DropdownComponent
@@ -54,8 +56,7 @@ export default function F1DropdownNav() {
                 value: page.href,
             }))}
             currentSelected={currentSelected}
-            startIcon={
-                <SportsMotorsportsIcon />}
+            startIcon={<SportsMotorsportsIcon />}
             onChange={(value) => {
                 window.location.href = value as string;
             }}

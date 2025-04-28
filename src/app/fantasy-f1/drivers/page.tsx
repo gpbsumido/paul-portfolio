@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from "react";
 import {
     Container,
     Typography,
@@ -20,13 +20,13 @@ import {
     Card,
     CardContent,
     CardHeader,
-} from '@mui/material';
-import ReactECharts from 'echarts-for-react';
-import F1DropdownNav from '@/components/features/fantasy/F1DropdownNav';
-import { HomeButton } from '@/components/common/HomeButton';
-import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
-import Link from 'next/link';
-import DropdownComponent from '@/components/shared/DropdownComponent';
+} from "@mui/material";
+import ReactECharts from "echarts-for-react";
+import F1DropdownNav from "@/components/features/fantasy/F1DropdownNav";
+import { HomeButton } from "@/components/common/HomeButton";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import Link from "next/link";
+import DropdownComponent from "@/components/shared/DropdownComponent";
 
 interface Driver {
     name: string;
@@ -48,15 +48,21 @@ interface DriverPointsPerRace {
 const DriverStandingsPage = () => {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [loading, setLoading] = useState(true);
-    const [season, setSeason] = useState<string>(new Date().getFullYear().toString());
+    const [season, setSeason] = useState<string>(
+        new Date().getFullYear().toString()
+    );
     const [availableYears, setAvailableYears] = useState<string[]>([]);
-    const [pointsPerRace, setPointsPerRace] = useState<DriverPointsPerRace[]>([]);
+    const [pointsPerRace, setPointsPerRace] = useState<DriverPointsPerRace[]>(
+        []
+    );
     const [graphLoading, setGraphLoading] = useState(true);
     const [dataLoading, setDataLoading] = useState(true); // New state to track combined loading
 
     useEffect(() => {
         const currentYear = new Date().getFullYear();
-        const years = Array.from({ length: currentYear - 1950 + 1 }, (_, i) => (1950 + i).toString());
+        const years = Array.from({ length: currentYear - 1950 + 1 }, (_, i) =>
+            (1950 + i).toString()
+        );
         setAvailableYears(years.reverse());
     }, []);
 
@@ -73,25 +79,30 @@ const DriverStandingsPage = () => {
             const standings =
                 season === new Date().getFullYear().toString()
                     ? data.results
-                    : (data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || []).map((driver: any) => ({
-                        name: `${driver.Driver.givenName} ${driver.Driver.familyName}`,
-                        points: parseFloat(driver.points),
-                    }));
+                    : (
+                          data.MRData.StandingsTable.StandingsLists[0]
+                              ?.DriverStandings || []
+                      ).map((driver: any) => ({
+                          name: `${driver.Driver.givenName} ${driver.Driver.familyName}`,
+                          points: parseFloat(driver.points),
+                      }));
 
             return standings;
         } catch (error) {
-            console.error('Error fetching F1 data:', error);
+            console.error("Error fetching F1 data:", error);
             return [];
         }
     }, [season]);
 
     const fetchPointsPerRace = useCallback(async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/f1/driver-points-per-race/${season}`);
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/f1/driver-points-per-race/${season}`
+            );
             const data = await response.json();
             return Array.isArray(data.results) ? data.results : [];
         } catch (error) {
-            console.error('Error fetching points per race:', error);
+            console.error("Error fetching points per race:", error);
             return [];
         }
     }, [season]);
@@ -105,7 +116,10 @@ const DriverStandingsPage = () => {
             setDrivers([]); // Clear drivers state to avoid showing stale data
             setPointsPerRace([]); // Clear pointsPerRace state to avoid stale graph data
 
-            const [standings, points] = await Promise.all([fetchF1Data(), fetchPointsPerRace()]);
+            const [standings, points] = await Promise.all([
+                fetchF1Data(),
+                fetchPointsPerRace(),
+            ]);
 
             setDrivers(standings);
             setPointsPerRace(points);
@@ -120,14 +134,15 @@ const DriverStandingsPage = () => {
 
     const chartOptions = {
         title: {
-            text: 'Cumulative Points Progression Per Race',
-            left: 'center',
+            text: "Cumulative Points Progression Per Race",
+            left: "center",
         },
         tooltip: {
-            trigger: 'axis',
+            trigger: "axis",
             formatter: (params: any) => {
                 const raceIndex = params[0]?.dataIndex; // Get the index of the race
-                const raceName = pointsPerRace[raceIndex]?.race_name || 'Unknown Race'; // Get the race name
+                const raceName =
+                    pointsPerRace[raceIndex]?.race_name || "Unknown Race"; // Get the race name
                 let tooltipContent = `<strong>${raceName}</strong><br/>`;
                 params
                     .sort((a: any, b: any) => b.value - a.value) // Sort by points in descending order
@@ -138,10 +153,10 @@ const DriverStandingsPage = () => {
             },
         },
         legend: {
-            orient: 'vertical', // Set legend orientation to vertical
+            orient: "vertical", // Set legend orientation to vertical
             right: 10, // Position legend on the right side
-            top: 'middle', // Center the legend vertically
-            type: 'scroll', // Enable scrolling for legends if there are too many items
+            top: "middle", // Center the legend vertically
+            type: "scroll", // Enable scrolling for legends if there are too many items
         },
         grid: {
             top: 60, // Adjust top margin to make space for the title
@@ -150,22 +165,24 @@ const DriverStandingsPage = () => {
             right: 150, // Increased right margin to add more space between the graph and the legend
         },
         xAxis: {
-            type: 'category',
+            type: "category",
             data: pointsPerRace.map((race) => race.round), // Use race numbers (round) for x-axis labels
         },
         yAxis: {
-            type: 'value',
+            type: "value",
         },
         series: drivers.map((driver) => {
             let cumulativePoints = 0; // Track cumulative points
             return {
                 name: driver.name,
-                type: 'line',
+                type: "line",
                 data: pointsPerRace.map((race) => {
                     if (!race.results || race.results.length === 0) {
                         return cumulativePoints; // No change if results are empty
                     }
-                    const driverResult = race.results.find((result) => [result.driver, result.name].includes(driver.name));
+                    const driverResult = race.results.find((result) =>
+                        [result.driver, result.name].includes(driver.name)
+                    );
                     cumulativePoints += driverResult ? driverResult.points : 0; // Add points to cumulative total
                     return cumulativePoints;
                 }),
@@ -177,14 +194,14 @@ const DriverStandingsPage = () => {
     return (
         <Box
             sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100vh',
-                overflow: 'hidden',
+                display: "flex",
+                flexDirection: "column",
+                height: "100vh",
+                overflow: "hidden",
                 py: 4,
-                margin: 'auto',
+                margin: "auto",
             }}
-            maxWidth={'lg'}
+            maxWidth={"lg"}
         >
             <Box
                 sx={{
@@ -219,26 +236,33 @@ const DriverStandingsPage = () => {
             <Container
                 maxWidth="lg"
                 sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
                 }}
             >
                 <Card elevation={3} sx={{ flexShrink: 0 }}>
                     <CardHeader
-                        title={`F1 Driver Standings ${season ? `(${season})` : ''}`}
+                        title={`F1 Driver Standings ${season ? `(${season})` : ""}`}
                         sx={{
-                            textAlign: 'center',
-                            '& .MuiCardHeader-title': {
-                                fontSize: '1.5rem',
-                                fontWeight: 'bold',
+                            textAlign: "center",
+                            "& .MuiCardHeader-title": {
+                                fontSize: "1.5rem",
+                                fontWeight: "bold",
                             },
                         }}
                     />
-                    <Typography variant="body2" color="textSecondary" align="center">
-                        Disclaimer: Data may load slowly or fail to load due to rate-limited APIs.
+                    <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        align="center"
+                    >
+                        Disclaimer: Data may load slowly or fail to load due to
+                        rate-limited APIs.
                     </Typography>
-                    <CardContent sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <CardContent
+                        sx={{ display: "flex", justifyContent: "center" }}
+                    >
                         <DropdownComponent
                             title="Year"
                             items={availableYears.map((yr) => ({
@@ -249,15 +273,20 @@ const DriverStandingsPage = () => {
                             currentSelected={season}
                             onChange={(value) => setSeason(value as string)}
                             titleLocation="left"
-                            minWidth={'8em'}
+                            minWidth={"8em"}
                         />
                     </CardContent>
                 </Card>
-                <Box sx={{ my: 5, flexShrink: 0 }}> {/* Ensure the graph does not overlap */}
+                <Box sx={{ my: 5, flexShrink: 0 }}>
+                    {" "}
+                    {/* Ensure the graph does not overlap */}
                     {dataLoading ? (
                         <Skeleton variant="rectangular" height={400} />
                     ) : (
-                        <ReactECharts option={chartOptions} style={{ height: 400 }} />
+                        <ReactECharts
+                            option={chartOptions}
+                            style={{ height: 400 }}
+                        />
                     )}
                 </Box>
                 <TableContainer component={Paper} elevation={3}>
@@ -265,17 +294,26 @@ const DriverStandingsPage = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>
-                                    <Typography variant="subtitle1" fontWeight="bold">
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                    >
                                         Position
                                     </Typography>
                                 </TableCell>
                                 <TableCell>
-                                    <Typography variant="subtitle1" fontWeight="bold">
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                    >
                                         Driver
                                     </Typography>
                                 </TableCell>
                                 <TableCell>
-                                    <Typography variant="subtitle1" fontWeight="bold">
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                    >
                                         Points
                                     </Typography>
                                 </TableCell>
@@ -284,25 +322,25 @@ const DriverStandingsPage = () => {
                         <TableBody>
                             {dataLoading
                                 ? Array.from({ length: 10 }).map((_, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>
-                                            <Skeleton variant="text" />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Skeleton variant="text" />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Skeleton variant="text" />
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                      <TableRow key={index}>
+                                          <TableCell>
+                                              <Skeleton variant="text" />
+                                          </TableCell>
+                                          <TableCell>
+                                              <Skeleton variant="text" />
+                                          </TableCell>
+                                          <TableCell>
+                                              <Skeleton variant="text" />
+                                          </TableCell>
+                                      </TableRow>
+                                  ))
                                 : drivers.map((driver, index) => (
-                                    <TableRow key={driver.name}>
-                                        <TableCell>{index + 1}</TableCell>
-                                        <TableCell>{driver.name}</TableCell>
-                                        <TableCell>{driver.points}</TableCell>
-                                    </TableRow>
-                                ))}
+                                      <TableRow key={driver.name}>
+                                          <TableCell>{index + 1}</TableCell>
+                                          <TableCell>{driver.name}</TableCell>
+                                          <TableCell>{driver.points}</TableCell>
+                                      </TableRow>
+                                  ))}
                         </TableBody>
                     </Table>
                 </TableContainer>

@@ -45,7 +45,9 @@ export default function FantasyBasketballDropdownNav() {
             href: "/fantasy-bball/matchups",
         },
     ];
-    const currentSelected = subpages.find((page) => page.href === pathname)?.key;
+    const currentSelected = subpages.find(
+        (page) => page.href === pathname
+    )?.key;
 
     return (
         <DropdownComponent

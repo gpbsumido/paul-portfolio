@@ -42,7 +42,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                         border: "1px solid",
                         borderColor: "divider",
                         borderRadius: 2,
-                        m: 10
+                        m: 10,
                     }}
                 >
                     <Box textAlign="center">
@@ -59,7 +59,8 @@ export default class ErrorBoundary extends Component<Props, State> {
                             color="text.secondary"
                             gutterBottom
                         >
-                            {this.state.error?.message || "An unexpected error occurred."}
+                            {this.state.error?.message ||
+                                "An unexpected error occurred."}
                         </Typography>
                         <Button
                             variant="contained"

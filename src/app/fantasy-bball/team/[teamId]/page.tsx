@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTeamInfo } from "@/lib/espnService";
@@ -24,7 +24,6 @@ interface TeamProps {
 }
 
 export default async function TeamPage({ params }: TeamProps) {
-
     const { t } = useLanguage();
     const data = await getTeamInfo(params.teamId);
     const team = data.teams[0];
@@ -41,9 +40,14 @@ export default async function TeamPage({ params }: TeamProps) {
     }
 
     function getOwnerName(ownerId: string): string {
-        const team = data.teams.find((owner: { id: string; }) => owner.id.toString() === ownerId.toString());
+        const team = data.teams.find(
+            (owner: { id: string }) =>
+                owner.id.toString() === ownerId.toString()
+        );
         const foundOwnerEspnId = team?.owners[0];
-        const ownerData = data.members.find((owner: { id: string; }) => owner.id === foundOwnerEspnId);
+        const ownerData = data.members.find(
+            (owner: { id: string }) => owner.id === foundOwnerEspnId
+        );
         return ownerData ? ownerData.displayName : "Unknown Owner";
     }
 
@@ -76,11 +80,16 @@ export default async function TeamPage({ params }: TeamProps) {
                     <Typography variant="h5" fontWeight="bold" gutterBottom>
                         Team Information
                     </Typography>
-                    <Typography variant="body1" color="text.secondary" gutterBottom>
+                    <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        gutterBottom
+                    >
                         Owner: {getOwnerName(params.teamId)}
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        Record: {team.record.overall.wins}-{team.record.overall.losses}
+                        Record: {team.record.overall.wins}-
+                        {team.record.overall.losses}
                     </Typography>
                 </Box>
 
@@ -100,13 +109,19 @@ export default async function TeamPage({ params }: TeamProps) {
                             mb: 2,
                         }}
                     >
-                        <Typography sx={{ margin: 'auto 0 0 0' }} variant="h5" fontWeight="bold" gutterBottom>
+                        <Typography
+                            sx={{ margin: "auto 0 0 0" }}
+                            variant="h5"
+                            fontWeight="bold"
+                            gutterBottom
+                        >
                             Roster
                         </Typography>
                         <Box>
                             <Button
                                 onClick={() => {
-                                    window.location.href = "/fantasy-bball/league";
+                                    window.location.href =
+                                        "/fantasy-bball/league";
                                 }}
                                 style={{
                                     backgroundColor: "#1976d2",
@@ -114,7 +129,7 @@ export default async function TeamPage({ params }: TeamProps) {
                                     border: "none",
                                     borderRadius: "4px",
                                     cursor: "pointer",
-                                    background: "primary"
+                                    background: "primary",
                                 }}
                             >
                                 Back
@@ -165,25 +180,45 @@ export default async function TeamPage({ params }: TeamProps) {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {team.roster.entries.map((entry: ESPNRosterEntry) => (
-                                    <TableRow key={entry.playerId}>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="medium">
-                                                {entry.playerPoolEntry.player.fullName}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {getPositionName(entry.playerPoolEntry.player.defaultPositionId)}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {entry.playerPoolEntry.player.injuryStatus || "Active"}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {team.roster.entries.map(
+                                    (entry: ESPNRosterEntry) => (
+                                        <TableRow key={entry.playerId}>
+                                            <TableCell>
+                                                <Typography
+                                                    variant="body2"
+                                                    fontWeight="medium"
+                                                >
+                                                    {
+                                                        entry.playerPoolEntry
+                                                            .player.fullName
+                                                    }
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    {getPositionName(
+                                                        entry.playerPoolEntry
+                                                            .player
+                                                            .defaultPositionId
+                                                    )}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    {entry.playerPoolEntry
+                                                        .player.injuryStatus ||
+                                                        "Active"}
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>

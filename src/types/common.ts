@@ -19,5 +19,5 @@ export interface DropdownComponentProps {
     onChange?: (value: any) => void;
     minWidth?: number | string;
     title?: string;
-    titleLocation?: "above" | "left"
+    titleLocation?: "above" | "left";
 }

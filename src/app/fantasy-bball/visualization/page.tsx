@@ -177,11 +177,11 @@ export default function VisualizationPage() {
                                             stats: stats.filter(
                                                 (stat: PlayerStats) =>
                                                     stat.seasonId ===
-                                                    parseInt(
-                                                        selectedSeason
-                                                    ) &&
+                                                        parseInt(
+                                                            selectedSeason
+                                                        ) &&
                                                     stat.scoringPeriodId ===
-                                                    weekData.scoringPeriodId &&
+                                                        weekData.scoringPeriodId &&
                                                     stat.statSourceId === 0
                                             ),
                                         };
@@ -355,8 +355,8 @@ export default function VisualizationPage() {
                     team.rankCalculatedFinal === 1
                         ? theme.palette.success.main
                         : (team.rankCalculatedFinal ?? 0) <= 3
-                            ? theme.palette.primary.main
-                            : theme.palette.text.secondary,
+                          ? theme.palette.primary.main
+                          : theme.palette.text.secondary,
                 records: weeks.map((week) => weeklyRecords[week][team.id]),
             };
         });

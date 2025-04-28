@@ -19,7 +19,7 @@ export default function DropdownComponent({
     startIcon,
     buttonStyles,
     onChange,
-    minWidth = '15em',
+    minWidth = "15em",
     title,
     titleLocation = "above",
 }: DropdownComponentProps) {
@@ -73,10 +73,16 @@ export default function DropdownComponent({
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[200],
+                    backgroundColor:
+                        theme.palette.mode === "dark"
+                            ? "black"
+                            : theme.palette.grey[200],
                     color: theme.palette.mode === "dark" ? "white" : "black",
                     "&:hover": {
-                        backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[300],
+                        backgroundColor:
+                            theme.palette.mode === "dark"
+                                ? "black"
+                                : theme.palette.grey[300],
                     },
                     border:
                         theme.palette.mode === "dark"
@@ -87,7 +93,8 @@ export default function DropdownComponent({
                 }}
             >
                 <Box sx={{ flexGrow: 1, textAlign: "left" }}>
-                    {items.find((item) => item.key === currentSelected)?.label || "Select"}
+                    {items.find((item) => item.key === currentSelected)
+                        ?.label || "Select"}
                 </Box>
                 <KeyboardArrowDownIcon />
             </Button>
@@ -111,7 +118,9 @@ export default function DropdownComponent({
                             "& .MuiPaper-root": {
                                 position: "fixed",
                                 mt: 1,
-                                minWidth: anchorEl ? anchorEl.offsetWidth : minWidth,
+                                minWidth: anchorEl
+                                    ? anchorEl.offsetWidth
+                                    : minWidth,
                                 backgroundColor: theme.palette.background.paper,
                                 border:
                                     theme.palette.mode === "dark"
@@ -126,15 +135,27 @@ export default function DropdownComponent({
                                 onClick={() => handleItemClick(item.value)}
                                 sx={{
                                     "&.Mui-selected": {
-                                        backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[300],
-                                        color: theme.palette.mode === "dark" ? "white" : "black",
+                                        backgroundColor:
+                                            theme.palette.mode === "dark"
+                                                ? "black"
+                                                : theme.palette.grey[300],
+                                        color:
+                                            theme.palette.mode === "dark"
+                                                ? "white"
+                                                : "black",
                                         "&:hover": {
-                                            backgroundColor: theme.palette.mode === "dark" ? "black" : theme.palette.grey[400],
+                                            backgroundColor:
+                                                theme.palette.mode === "dark"
+                                                    ? "black"
+                                                    : theme.palette.grey[400],
                                         },
                                     },
                                 }}
                             >
-                                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ color: theme.palette.text.primary }}
+                                >
                                     {item.label}
                                 </Typography>
                             </MenuItem>

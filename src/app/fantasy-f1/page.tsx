@@ -13,11 +13,11 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import ToysIcon from '@mui/icons-material/Toys';
-import SportsMotorsportsIcon from '@mui/icons-material/SportsMotorsports';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import TimerIcon from '@mui/icons-material/Timer';
-import TimelineIcon from '@mui/icons-material/Timeline';
+import ToysIcon from "@mui/icons-material/Toys";
+import SportsMotorsportsIcon from "@mui/icons-material/SportsMotorsports";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import TimerIcon from "@mui/icons-material/Timer";
+import TimelineIcon from "@mui/icons-material/Timeline";
 
 export default function FantasyBasketballPage() {
     const { t } = useLanguage();
@@ -38,21 +38,13 @@ export default function FantasyBasketballPage() {
             title: "Constructors Standings",
             description: "View constructor stats and standings",
             href: "/fantasy-f1/constructors",
-            icon: (
-                <ToysIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
-            ),
+            icon: <ToysIcon sx={{ fontSize: 40, color: "primary.main" }} />,
         },
         {
             title: "Qualifying Results",
             description: "View qualifying results for the current season",
             href: "/fantasy-f1/qualifying",
-            icon: (
-                <TimerIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
-            ),
+            icon: <TimerIcon sx={{ fontSize: 40, color: "primary.main" }} />,
         },
         {
             title: "Race Schedule",
@@ -68,11 +60,7 @@ export default function FantasyBasketballPage() {
             title: "Fantasy Scoring",
             description: "View fantasy based on Fantasy F1 Game",
             href: "/fantasy-f1/fantasy-scoring",
-            icon: (
-                <TimelineIcon
-                    sx={{ fontSize: 40, color: "primary.main" }}
-                />
-            ),
+            icon: <TimelineIcon sx={{ fontSize: 40, color: "primary.main" }} />,
         },
     ];
 

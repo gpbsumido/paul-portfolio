@@ -1,7 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardHeader, CardContent, CardActions, Avatar, Typography, Button, CardMedia } from '@mui/material';
+import React from "react";
+import {
+    Card,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Avatar,
+    Typography,
+    Button,
+    CardMedia,
+} from "@mui/material";
 
 interface User {
     username: string;
@@ -17,14 +26,21 @@ interface PostCardProps {
     type?: string;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ user, content, timestamp, link, thumbnail, type = 'default' }) => {
+const PostCard: React.FC<PostCardProps> = ({
+    user,
+    content,
+    timestamp,
+    link,
+    thumbnail,
+    type = "default",
+}) => {
     const renderMedia = () => {
-        if (type === 'youtube' && link) {
-            const youtubeEmbedUrl = link.replace('watch?v=', 'embed/');
+        if (type === "youtube" && link) {
+            const youtubeEmbedUrl = link.replace("watch?v=", "embed/");
             return (
                 <CardMedia
                     component="iframe"
-                    sx={{ aspectRatio: '16/9', border: 0 }}
+                    sx={{ aspectRatio: "16/9", border: 0 }}
                     src={youtubeEmbedUrl}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -36,7 +52,7 @@ const PostCard: React.FC<PostCardProps> = ({ user, content, timestamp, link, thu
             return (
                 <CardMedia
                     component="img"
-                    sx={{ aspectRatio: '16/9', objectFit: 'cover' }}
+                    sx={{ aspectRatio: "16/9", objectFit: "cover" }}
                     image={thumbnail}
                     alt="Post thumbnail"
                 />
@@ -47,11 +63,19 @@ const PostCard: React.FC<PostCardProps> = ({ user, content, timestamp, link, thu
     };
 
     return (
-        <Card sx={{ width: '100%', margin: 'auto', boxShadow: 3, transition: '0.3s', '&:hover': { boxShadow: 6 } }}>
+        <Card
+            sx={{
+                width: "100%",
+                margin: "auto",
+                boxShadow: 3,
+                transition: "0.3s",
+                "&:hover": { boxShadow: 6 },
+            }}
+        >
             <CardHeader
                 avatar={<Avatar src={user.avatarUrl} alt={user.username} />}
                 title={
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                         {user.username}
                     </Typography>
                 }
@@ -67,9 +91,15 @@ const PostCard: React.FC<PostCardProps> = ({ user, content, timestamp, link, thu
                     {content}
                 </Typography>
             </CardContent>
-            <CardActions sx={{ justifyContent: 'flex-end' }}>
-                {link && type !== 'youtube' && (
-                    <Button size="small" color="primary" href={link} target="_blank" rel="noopener noreferrer">
+            <CardActions sx={{ justifyContent: "flex-end" }}>
+                {link && type !== "youtube" && (
+                    <Button
+                        size="small"
+                        color="primary"
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         View More
                     </Button>
                 )}

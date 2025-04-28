@@ -161,16 +161,18 @@ export default function LeaguePage() {
                         <DropdownComponent
                             title={t("pages.fantasy.season")}
                             titleLocation="left"
-                            items={[{
-                                key: currentYear,
-                                label: currentYear,
-                                value: currentYear,
-                            }]}
+                            items={[
+                                {
+                                    key: currentYear,
+                                    label: currentYear,
+                                    value: currentYear,
+                                },
+                            ]}
                             currentSelected={selectedSeason}
                             onChange={(value) =>
                                 handleSeasonChange(value as string)
                             }
-                            minWidth={'7em'}
+                            minWidth={"7em"}
                         />
                     </Box>
                 </Box>
@@ -314,12 +316,12 @@ export default function LeaguePage() {
                                                     label={`${t("pages.fantasy.columns.finalPosition")}: ${team.rankCalculatedFinal}`}
                                                     color={
                                                         team.rankCalculatedFinal ===
-                                                            1
+                                                        1
                                                             ? "success"
                                                             : team.rankCalculatedFinal <=
                                                                 3
-                                                                ? "primary"
-                                                                : "default"
+                                                              ? "primary"
+                                                              : "default"
                                                     }
                                                     sx={{ mr: 1 }}
                                                     aria-label={`${t("pages.fantasy.columns.finalPosition")} ${team.rankCalculatedFinal}`}

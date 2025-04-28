@@ -68,8 +68,14 @@ export default function TeamSelector({
             renderOption={(props, option) => {
                 const { key, ...restProps } = props; // Exclude the key prop
                 return (
-                    <li {...restProps} role="option" aria-label={option.full_name}>
-                        <Typography variant="body1">{option.full_name}</Typography>
+                    <li
+                        {...restProps}
+                        role="option"
+                        aria-label={option.full_name}
+                    >
+                        <Typography variant="body1">
+                            {option.full_name}
+                        </Typography>
                     </li>
                 );
             }}

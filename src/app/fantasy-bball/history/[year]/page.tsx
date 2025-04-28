@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState } from "react";
 import {
     Box,
     Typography,
@@ -15,13 +15,13 @@ import {
     Paper,
     CircularProgress,
     Container,
-} from '@mui/material';
-import FantasyBasketballDropdownNav from '@/components/features/fantasy/FantasyBasketballDropdownNav';
-import { useTheme } from '@mui/material/styles';
-import { getHistoricalLeagueInfo } from '@/lib/espnService';
-import HistoryError from './HistoryError';
-import DropdownComponent from '@/components/shared/DropdownComponent';
-import { useLanguage } from '@/contexts/LanguageContext';
+} from "@mui/material";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
+import { useTheme } from "@mui/material/styles";
+import { getHistoricalLeagueInfo } from "@/lib/espnService";
+import HistoryError from "./HistoryError";
+import DropdownComponent from "@/components/shared/DropdownComponent";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HistoryPageProps {
     params: {
@@ -30,7 +30,6 @@ interface HistoryPageProps {
 }
 
 async function HistoryContent({ year }: { year: string }) {
-
     const { t } = useLanguage();
     const theme = useTheme();
     const [selectedSeason, setSelectedSeason] = useState("2025");
@@ -39,7 +38,7 @@ async function HistoryContent({ year }: { year: string }) {
     try {
         data = await getHistoricalLeagueInfo(year);
     } catch (error) {
-        console.error('Failed to fetch historical league info:', error);
+        console.error("Failed to fetch historical league info:", error);
         return <HistoryError year={year} />;
     }
 
@@ -50,7 +49,7 @@ async function HistoryContent({ year }: { year: string }) {
     return (
         <Card
             sx={{
-                backgroundColor: 'background.paper',
+                backgroundColor: "background.paper",
                 boxShadow: 3,
                 borderRadius: 2,
                 p: { xs: 2, md: 3 },
@@ -76,9 +75,7 @@ async function HistoryContent({ year }: { year: string }) {
                         },
                     ]}
                     currentSelected={selectedSeason}
-                    onChange={(value) =>
-                        handleSeasonChange(value as string)
-                    }
+                    onChange={(value) => handleSeasonChange(value as string)}
                     title={t("pages.fantasy.season")}
                     titleLocation="left"
                 />
@@ -89,8 +86,11 @@ async function HistoryContent({ year }: { year: string }) {
                     component="h2"
                     gutterBottom
                     sx={{
-                        fontWeight: 'medium',
-                        color: theme.palette.mode === 'dark' ? 'grey.300' : 'text.secondary',
+                        fontWeight: "medium",
+                        color:
+                            theme.palette.mode === "dark"
+                                ? "grey.300"
+                                : "text.secondary",
                     }}
                 >
                     Final Standings
@@ -101,7 +101,7 @@ async function HistoryContent({ year }: { year: string }) {
                         mt: 2,
                         borderRadius: 2,
                         boxShadow: 2,
-                        overflow: 'auto',
+                        overflow: "auto",
                     }}
                 >
                     <Table stickyHeader>
@@ -109,25 +109,57 @@ async function HistoryContent({ year }: { year: string }) {
                             <TableRow
                                 sx={{
                                     backgroundColor:
-                                        theme.palette.mode === 'dark' ? 'grey.800' : 'grey.200',
+                                        theme.palette.mode === "dark"
+                                            ? "grey.800"
+                                            : "grey.200",
                                 }}
                             >
-                                <TableCell sx={{ fontWeight: 'bold', color: 'inherit' }}>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
                                     Rank
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', color: 'inherit' }}>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
                                     Team
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', color: 'inherit' }}>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
                                     Owner
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', color: 'inherit' }}>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
                                     Record
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', color: 'inherit' }}>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
                                     Points For
                                 </TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', color: 'inherit' }}>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
                                     Points Against
                                 </TableCell>
                             </TableRow>
@@ -137,8 +169,10 @@ async function HistoryContent({ year }: { year: string }) {
                                 .sort((a: any, b: any) => {
                                     const aWins = a.record.overall.wins;
                                     const bWins = b.record.overall.wins;
-                                    const aPointsFor = a.record.overall.pointsFor;
-                                    const bPointsFor = b.record.overall.pointsFor;
+                                    const aPointsFor =
+                                        a.record.overall.pointsFor;
+                                    const bPointsFor =
+                                        b.record.overall.pointsFor;
 
                                     if (aWins === bWins) {
                                         return bPointsFor - aPointsFor;
@@ -165,13 +199,22 @@ async function HistoryContent({ year }: { year: string }) {
                                         <TableRow key={team.id}>
                                             <TableCell>{team.rank}</TableCell>
                                             <TableCell>{team.name}</TableCell>
-                                            <TableCell>{team.owners[0].displayName}</TableCell>
+                                            <TableCell>
+                                                {team.owners[0].displayName}
+                                            </TableCell>
                                             <TableCell>
                                                 {team.record.overall.wins}-
                                                 {team.record.overall.losses}
                                             </TableCell>
-                                            <TableCell>{team.record.overall.pointsFor}</TableCell>
-                                            <TableCell>{team.record.overall.pointsAgainst}</TableCell>
+                                            <TableCell>
+                                                {team.record.overall.pointsFor}
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    team.record.overall
+                                                        .pointsAgainst
+                                                }
+                                            </TableCell>
                                         </TableRow>
                                     )
                                 )}
@@ -190,10 +233,10 @@ export default function HistoryPage({ params }: HistoryPageProps) {
                 fallback={
                     <Box
                         sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            minHeight: '100vh',
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            minHeight: "100vh",
                         }}
                     >
                         <CircularProgress />
@@ -202,9 +245,9 @@ export default function HistoryPage({ params }: HistoryPageProps) {
             >
                 <Box
                     sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
                         mb: 2,
                     }}
                 >

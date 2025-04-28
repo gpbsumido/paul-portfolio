@@ -15,7 +15,6 @@ import InfoIcon from "@mui/icons-material/Info";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export default function MapContent({ location }: MapContentProps) {
-
     const theme = useTheme();
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
