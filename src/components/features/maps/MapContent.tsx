@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { ApiMarker, CustomMarker, MapContentProps } from "@/types/maps";
 import { MapControls } from "./controls/MapControls";
 import { CurrentLocationMarker } from "../markers/CurrentLocationMarker";
@@ -15,6 +15,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export default function MapContent({ location }: MapContentProps) {
+    const theme = useTheme();
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<maplibregl.Map | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -65,7 +66,11 @@ export default function MapContent({ location }: MapContentProps) {
                 throw new Error("Failed to load markers");
             }
 
+            console.log("response", response);
+
             const apiMarkers: ApiMarker[] = await response.json();
+
+            console.log("apiMarkers", apiMarkers);
 
             const convertedMarkers: CustomMarker[] = apiMarkers.map(
                 (marker) => ({
@@ -366,6 +371,7 @@ export default function MapContent({ location }: MapContentProps) {
                         onDelete={handleDeleteMarker}
                         deletingMarkerId={deletingMarkerId}
                         map={map.current}
+                        theme={theme.palette.mode}
                     />
                 ))}
                 <MarkerForm

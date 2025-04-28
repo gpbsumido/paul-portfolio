@@ -1,6 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+    Box,
+    Button,
+    TextField,
+    Typography,
+    Card,
+    CardContent,
+    useTheme,
+    InputLabel,
+} from "@mui/material";
 
 /**
  * EmailForm component for sending emails
@@ -12,6 +22,7 @@ export default function EmailForm() {
     const [email, setEmail] = useState("");
     const [subject, setSubject] = useState("");
     const [body, setBody] = useState("");
+    const theme = useTheme();
 
     /**
      * Handles form submission by creating a mailto link
@@ -26,78 +37,78 @@ export default function EmailForm() {
     };
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-                width: "100%",
-                maxWidth: "400px",
+        <Card
+            elevation={3}
+            sx={{
                 margin: "0 auto",
+                p: 2,
+                borderRadius: 2,
+                maxWidth: "lg",
+                width: `100%`,
+                boxShadow:
+                    theme.palette.mode === "dark"
+                        ? "0 4px 20px rgba(0, 0, 0, 0.5)"
+                        : "0 4px 20px rgba(0, 0, 0, 0.1)",
             }}
         >
-            <label>
-                Your Email:
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{
-                        width: "100%",
-                        padding: "8px",
-                        marginTop: "4px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
+            <CardContent>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 3,
                     }}
-                />
-            </label>
-            <label>
-                Subject:
-                <input
-                    type="text"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                    style={{
-                        width: "100%",
-                        padding: "8px",
-                        marginTop: "4px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                    }}
-                />
-            </label>
-            <label>
-                Body:
-                <textarea
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    required
-                    style={{
-                        width: "100%",
-                        padding: "8px",
-                        marginTop: "4px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        minHeight: "100px",
-                    }}
-                />
-            </label>
-            <button
-                type="submit"
-                style={{
-                    padding: "10px 16px",
-                    borderRadius: "4px",
-                    border: "none",
-                    background: "black",
-                    color: "white",
-                    cursor: "pointer",
-                }}
-            >
-                Send Email
-            </button>
-        </form>
+                >
+                    <Box>
+                        <InputLabel shrink>Your Email</InputLabel>
+                        <TextField
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            fullWidth
+                            variant="outlined"
+                        />
+                    </Box>
+                    <Box>
+                        <InputLabel shrink>Subject</InputLabel>
+                        <TextField
+                            type="text"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            required
+                            fullWidth
+                            variant="outlined"
+                        />
+                    </Box>
+                    <Box>
+                        <InputLabel shrink>Body</InputLabel>
+                        <TextField
+                            value={body}
+                            onChange={(e) => setBody(e.target.value)}
+                            required
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                        />
+                    </Box>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                            padding: "10px 16px",
+                            textTransform: "none",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        Send Email
+                    </Button>
+                </Box>
+            </CardContent>
+        </Card>
     );
 }

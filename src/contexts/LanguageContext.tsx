@@ -29,6 +29,7 @@ const translations = {
             designs: "Designs",
             about: "About",
             fantasybasketball: "Fantasy Basketball",
+            fantasyF1: "Fantasy F1",
         },
         about: {
             title: "About Paul",
@@ -60,6 +61,11 @@ const translations = {
                     history: "History",
                     matchups: "Matchups",
                     visualization: "Visualization",
+                    drivers: "Drivers",
+                    constructors: "Constructors",
+                    schedule: "Schedule",
+                    qualifying: "Qualifying",
+                    "fantasy-scoring": "Fantasy Scoring",
                 },
                 standingsTitle: "Standings",
                 playerStatsTitle: "Player Stats",
@@ -86,7 +92,7 @@ const translations = {
                 createPost: "Create Post",
                 createTitle: "Create New Post",
             },
-            map: {
+            maps: {
                 title: "Map",
                 subtitle: "Save locations and create routes",
             },
@@ -98,6 +104,7 @@ const translations = {
             designs: "Diseños",
             about: "Sobre mí",
             fantasybasketball: "Baloncesto de Fantasía",
+            fantasyF1: "F1 de Fantasía",
         },
         about: {
             title: "Sobre Paul",
@@ -130,6 +137,11 @@ const translations = {
                     history: "Historial",
                     matchups: "Partidos",
                     visualization: "Visualización",
+                    drivers: "Pilotos",
+                    constructors: "Constructores",
+                    schedule: "Calendario",
+                    qualifying: "Clasificación",
+                    "fantasy-scoring": "Puntuación de Fantasía",
                 },
                 standingsTitle: "Clasificaciones",
                 playerStatsTitle: "Estadísticas de Jugadores",
@@ -157,7 +169,7 @@ const translations = {
                 createPost: "Crear Post",
                 createTitle: "Crear Nuevo Post",
             },
-            map: {
+            maps: {
                 title: "Carte",
                 subtitle: "Guardar ubicaciones y crear rutas",
             },
@@ -169,6 +181,7 @@ const translations = {
             designs: "Désigns",
             about: "À propos",
             fantasybasketball: "Basketball Fantaisie",
+            fantasyF1: "F1 Fantaisie",
         },
         about: {
             title: "À propos de Paul",
@@ -202,6 +215,11 @@ const translations = {
                     history: "Historique",
                     matchups: "Matchs",
                     visualization: "Visualisation",
+                    drivers: "Pilotes",
+                    constructors: "Constructeurs",
+                    schedule: "Calendrier",
+                    qualifying: "Qualifications",
+                    "fantasy-scoring": "Scoring Fantaisie",
                 },
                 standingsTitle: "Classements",
                 playerStatsTitle: "Statistiques des Joueurs",
@@ -229,7 +247,7 @@ const translations = {
                 createPost: "Créer un Post",
                 createTitle: "Créer un Nouveau Post",
             },
-            map: {
+            maps: {
                 title: "Carte",
                 subtitle:
                     "Enregistrer des emplacements et créer des itinéraires",

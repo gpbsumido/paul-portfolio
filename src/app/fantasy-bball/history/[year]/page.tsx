@@ -1,21 +1,27 @@
-import { getHistoricalLeagueInfo } from "@/lib/espnService";
-import { Suspense } from "react";
-import HistoryError from "./HistoryError";
+"use client";
+
+import React, { Suspense, useState } from "react";
 import {
     Box,
     Typography,
-    Paper,
+    Card,
+    CardContent,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
+    Paper,
     CircularProgress,
-    Card,
-    CardContent,
+    Container,
 } from "@mui/material";
-import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
+import { useTheme } from "@mui/material/styles";
+import { getHistoricalLeagueInfo } from "@/lib/espnService";
+import HistoryError from "./HistoryError";
+import DropdownComponent from "@/components/shared/DropdownComponent";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HistoryPageProps {
     params: {
@@ -24,7 +30,11 @@ interface HistoryPageProps {
 }
 
 async function HistoryContent({ year }: { year: string }) {
+    const { t } = useLanguage();
+    const theme = useTheme();
+    const [selectedSeason, setSelectedSeason] = useState("2025");
     let data;
+
     try {
         data = await getHistoricalLeagueInfo(year);
     } catch (error) {
@@ -32,135 +42,193 @@ async function HistoryContent({ year }: { year: string }) {
         return <HistoryError year={year} />;
     }
 
-    return (
-        <Box sx={{ px: 4, py: 6 }}>
-            <Typography
-                variant="h3"
-                component="h1"
-                align="center"
-                gutterBottom
-                sx={{ fontWeight: "bold" }}
-            >
-                League History - {year}
-            </Typography>
+    const handleSeasonChange = (season: string) => {
+        setSelectedSeason(season);
+    };
 
-            <Card
+    return (
+        <Card
+            sx={{
+                backgroundColor: "background.paper",
+                boxShadow: 3,
+                borderRadius: 2,
+                p: { xs: 2, md: 3 },
+                mt: 4,
+            }}
+        >
+            <Box
                 sx={{
-                    backgroundColor: "background.paper",
-                    boxShadow: 3,
-                    borderRadius: 2,
-                    p: 3,
-                    mt: 4,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    position: "relative",
+                    minHeight: "40px",
                 }}
             >
-                <CardContent>
-                    <Typography
-                        variant="h5"
-                        component="h2"
-                        gutterBottom
-                        sx={{ fontWeight: "medium" }}
-                    >
-                        Final Standings
-                    </Typography>
-                    <TableContainer
-                        component={Paper}
-                        sx={{
-                            mt: 2,
-                            borderRadius: 2,
-                            boxShadow: 2,
-                            overflow: "hidden",
-                        }}
-                    >
-                        <Table>
-                            <TableHead>
-                                <TableRow sx={{ backgroundColor: "grey.200" }}>
-                                    <TableCell>Rank</TableCell>
-                                    <TableCell>Team</TableCell>
-                                    <TableCell>Owner</TableCell>
-                                    <TableCell>Record</TableCell>
-                                    <TableCell>Points For</TableCell>
-                                    <TableCell>Points Against</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {data.teams
-                                    .sort((a: any, b: any) => {
-                                        const aWins = a.record.overall.wins;
-                                        const bWins = b.record.overall.wins;
-                                        const aPointsFor =
-                                            a.record.overall.pointsFor;
-                                        const bPointsFor =
-                                            b.record.overall.pointsFor;
+                <DropdownComponent
+                    items={[
+                        {
+                            key: "2025",
+                            label: "2025",
+                            value: "2025",
+                        },
+                    ]}
+                    currentSelected={selectedSeason}
+                    onChange={(value) => handleSeasonChange(value as string)}
+                    title={t("pages.fantasy.season")}
+                    titleLocation="left"
+                />
+            </Box>
+            <CardContent>
+                <Typography
+                    variant="h5"
+                    component="h2"
+                    gutterBottom
+                    sx={{
+                        fontWeight: "medium",
+                        color:
+                            theme.palette.mode === "dark"
+                                ? "grey.300"
+                                : "text.secondary",
+                    }}
+                >
+                    Final Standings
+                </Typography>
+                <TableContainer
+                    component={Paper}
+                    sx={{
+                        mt: 2,
+                        borderRadius: 2,
+                        boxShadow: 2,
+                        overflow: "auto",
+                    }}
+                >
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow
+                                sx={{
+                                    backgroundColor:
+                                        theme.palette.mode === "dark"
+                                            ? "grey.800"
+                                            : "grey.200",
+                                }}
+                            >
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
+                                    Rank
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
+                                    Team
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
+                                    Owner
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
+                                    Record
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
+                                    Points For
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "inherit",
+                                    }}
+                                >
+                                    Points Against
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {data.teams
+                                .sort((a: any, b: any) => {
+                                    const aWins = a.record.overall.wins;
+                                    const bWins = b.record.overall.wins;
+                                    const aPointsFor =
+                                        a.record.overall.pointsFor;
+                                    const bPointsFor =
+                                        b.record.overall.pointsFor;
 
-                                        if (aWins === bWins) {
-                                            return bPointsFor - aPointsFor;
-                                        }
-                                        return bWins - aWins;
-                                    })
-                                    .map(
-                                        (team: {
-                                            id: number;
-                                            rank: number;
-                                            name: string;
-                                            owners: {
-                                                displayName: string;
-                                            }[];
-                                            record: {
-                                                overall: {
-                                                    wins: number;
-                                                    losses: number;
-                                                    pointsFor: number;
-                                                    pointsAgainst: number;
-                                                };
+                                    if (aWins === bWins) {
+                                        return bPointsFor - aPointsFor;
+                                    }
+                                    return bWins - aWins;
+                                })
+                                .map(
+                                    (team: {
+                                        id: number;
+                                        rank: number;
+                                        name: string;
+                                        owners: {
+                                            displayName: string;
+                                        }[];
+                                        record: {
+                                            overall: {
+                                                wins: number;
+                                                losses: number;
+                                                pointsFor: number;
+                                                pointsAgainst: number;
                                             };
-                                        }) => (
-                                            <TableRow key={team.id}>
-                                                <TableCell>
-                                                    {team.rank}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {team.name}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {team.owners[0].displayName}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {team.record.overall.wins}-
-                                                    {team.record.overall.losses}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {
-                                                        team.record.overall
-                                                            .pointsFor
-                                                    }
-                                                </TableCell>
-                                                <TableCell>
-                                                    {
-                                                        team.record.overall
-                                                            .pointsAgainst
-                                                    }
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </CardContent>
-            </Card>
-        </Box>
+                                        };
+                                    }) => (
+                                        <TableRow key={team.id}>
+                                            <TableCell>{team.rank}</TableCell>
+                                            <TableCell>{team.name}</TableCell>
+                                            <TableCell>
+                                                {team.owners[0].displayName}
+                                            </TableCell>
+                                            <TableCell>
+                                                {team.record.overall.wins}-
+                                                {team.record.overall.losses}
+                                            </TableCell>
+                                            <TableCell>
+                                                {team.record.overall.pointsFor}
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    team.record.overall
+                                                        .pointsAgainst
+                                                }
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </CardContent>
+        </Card>
     );
 }
 
 export default function HistoryPage({ params }: HistoryPageProps) {
     return (
-        <Box
-            sx={{
-                minHeight: "100vh",
-                backgroundColor: "background.default",
-                py: 2,
-            }}
-        >
+        <Container maxWidth="lg" sx={{ py: 4 }}>
             <Suspense
                 fallback={
                     <Box
@@ -180,13 +248,13 @@ export default function HistoryPage({ params }: HistoryPageProps) {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        mb: 1,
+                        mb: 2,
                     }}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <HistoryContent year={params.year} />
             </Suspense>
-        </Box>
+        </Container>
     );
 }

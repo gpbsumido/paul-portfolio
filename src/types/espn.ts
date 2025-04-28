@@ -1,8 +1,12 @@
+import { ReactNode } from "react";
+
 export interface ESPNPlayer {
+    [x: string]: ReactNode;
     stats: any;
     id: number;
     fullName: string;
     defaultPosition: string;
+    defaultPositionId: string;
     injuryStatus?: string;
 }
 

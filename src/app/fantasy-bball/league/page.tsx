@@ -17,21 +17,18 @@ import {
     TableRow,
     Paper,
     Button,
-    Menu,
-    MenuItem,
-    Portal,
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
 import { useEffect, useState } from "react";
 import { ESPNLeagueResponse } from "@/types/espn";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { useTheme } from "@mui/material/styles";
+import DropdownComponent from "@/components/shared/DropdownComponent";
 
 /**
  * League Page Component
@@ -132,7 +129,6 @@ export default function LeaguePage() {
 
     useEffect(() => {
         fetchLeagueData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedSeason]);
 
     /**
@@ -142,16 +138,8 @@ export default function LeaguePage() {
      */
     const renderContent = () => {
         return (
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 3,
-                }}
-                role="main"
-                aria-label={t("pages.fantasy.subpages.league")}
-            >
-                <Box sx={{ mb: 4 }}>
+            <Paper elevation={2} sx={{ p: 3 }}>
+                <Box sx={{ mb: 2 }}>
                     <Typography
                         variant="h4"
                         component="h1"
@@ -168,96 +156,24 @@ export default function LeaguePage() {
                             alignItems: "center",
                             width: "100%",
                             position: "relative",
-                            minHeight: "48px",
                         }}
                     >
-                        <Box sx={{ width: "200px", position: "relative" }}>
-                            <Button
-                                variant="contained"
-                                endIcon={<KeyboardArrowDownIcon />}
-                                onClick={handleClick}
-                                aria-haspopup="true"
-                                aria-expanded={open}
-                                aria-controls={open ? "season-menu" : undefined}
-                                sx={{
-                                    backgroundColor: "black",
-                                    color: "white",
-                                    "&:hover": {
-                                        backgroundColor: "black",
-                                    },
-                                    width: "100%",
-                                    border:
-                                        theme.palette.mode === "dark"
-                                            ? "1px solid rgba(255, 255, 255, 0.23)"
-                                            : "none",
-                                }}
-                            >
-                                {t("pages.fantasy.season")} {selectedSeason}
-                            </Button>
-                            {open && (
-                                <Portal>
-                                    <Menu
-                                        id="season-menu"
-                                        anchorEl={anchorEl}
-                                        open={open}
-                                        onClose={handleClose}
-                                        disableScrollLock
-                                        aria-label={t(
-                                            "pages.fantasy.selectSeason"
-                                        )}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "center",
-                                        }}
-                                        transformOrigin={{
-                                            vertical: "top",
-                                            horizontal: "center",
-                                        }}
-                                        sx={{
-                                            "& .MuiPaper-root": {
-                                                position: "fixed",
-                                                mt: 1,
-                                                backgroundColor:
-                                                    "background.paper",
-                                                border:
-                                                    theme.palette.mode ===
-                                                    "dark"
-                                                        ? "1px solid rgba(255, 255, 255, 0.12)"
-                                                        : "none",
-                                            },
-                                        }}
-                                        PaperProps={{
-                                            sx: {
-                                                minWidth: "200px",
-                                            },
-                                        }}
-                                    >
-                                        <MenuItem
-                                            onClick={() =>
-                                                handleSeasonChange(currentYear)
-                                            }
-                                            selected={
-                                                selectedSeason === currentYear
-                                            }
-                                            sx={{
-                                                "&.Mui-selected": {
-                                                    backgroundColor: "black",
-                                                    color: "white",
-                                                    "&:hover": {
-                                                        backgroundColor:
-                                                            "black",
-                                                    },
-                                                },
-                                            }}
-                                        >
-                                            <Typography variant="body1">
-                                                {currentYear}
-                                            </Typography>
-                                        </MenuItem>
-                                    </Menu>
-                                </Portal>
-                            )}
-                        </Box>
+                        <DropdownComponent
+                            title={t("pages.fantasy.season")}
+                            titleLocation="left"
+                            items={[
+                                {
+                                    key: currentYear,
+                                    label: currentYear,
+                                    value: currentYear,
+                                },
+                            ]}
+                            currentSelected={selectedSeason}
+                            onChange={(value) =>
+                                handleSeasonChange(value as string)
+                            }
+                            minWidth={"7em"}
+                        />
                     </Box>
                 </Box>
 
@@ -358,10 +274,14 @@ export default function LeaguePage() {
                                                     width: 56,
                                                     height: 56,
                                                     mr: 2,
+                                                    cursor: "pointer",
                                                 }}
                                                 alt={team.name}
                                                 src={`https://a.espncdn.com/i/teamlogos/nba/500/${team.abbrev}.png`}
                                                 role="img"
+                                                onClick={() => {
+                                                    window.location.href = `/fantasy-bball/team/${team.id}`;
+                                                }}
                                             />
                                             <Box>
                                                 <Typography
@@ -470,9 +390,11 @@ export default function LeaguePage() {
                         ))}
                     </Grid>
                 ) : null}
-            </Box>
+            </Paper>
         );
     };
+
+    // <Paper elevation={2} sx={{ p: 3 }}>
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -511,7 +433,7 @@ export default function LeaguePage() {
                         mb: 2,
                     }}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <ErrorBoundary>{renderContent()}</ErrorBoundary>
             </Box>

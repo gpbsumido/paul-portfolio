@@ -30,7 +30,7 @@ import dynamic from "next/dynamic";
  *
  * @example
  * ```tsx
- * import MapPage from "@/app/map/page";
+ * import MapPage from "@/app/maps/page";
  *
  * export default function App() {
  *   return <MapPage />;
@@ -89,14 +89,14 @@ function MapPage() {
                     gutterBottom
                     sx={{ width: "100%", textAlign: "center" }}
                 >
-                    {t("pages.map.title")}
+                    {t("pages.maps.title")}
                 </Typography>
                 <Typography
                     variant="subtitle1"
                     color="text.secondary"
                     sx={{ width: "100%", textAlign: "center" }}
                 >
-                    {t("pages.map.subtitle")}
+                    {t("pages.maps.subtitle")}
                 </Typography>
                 <MapWrapper />
             </Box>

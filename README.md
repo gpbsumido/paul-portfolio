@@ -8,12 +8,14 @@ A modern, feature-rich portfolio website built with Next.js, TypeScript, and Mat
 src/
 ├── app/                  # Next.js app directory (pages and routing)
 │   ├── page.tsx          # Home page
-│   ├── map/              # Interactive map feature
-│   ├── email/            # Contact Form prototype
-│   ├── forum/            # Discussion forum prototype
-│   ├── fantasy-bball/    # Fantasy Basketball Stats for personal league
 │   ├── designs/          # Design showcase
-│   └── gallery/          # Image gallery prototype
+│   ├── fantasy-bball/    # Fantasy Basketball Stats for personal league
+│   ├── fantasy-f1/       # Fantasy F1 Stats as well as driver/constructor championship data
+│   ├── maps/             # Interactive map feature (WORK IN PROGRESS)
+│   ├── email/            # Contact Form  (WORK IN PROGRESS)
+│   ├── forum/            # Discussion forum  (WORK IN PROGRESS)
+│   └── gallery/          # Image gallery  (WORK IN PROGRESS)
+│   ├── social-media/     # Curated Social Media timeline  (WORK IN PROGRESS)
 ├── components/           # Reusable React components
 │   ├── features/         # Feature-specific components
 │   │   └── routes/       # Route management components

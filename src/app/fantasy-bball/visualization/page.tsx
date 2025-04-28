@@ -13,16 +13,16 @@ import {
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import FantasyDropdownNav from "@/components/features/fantasy/FantasyDropdownNav";
 import { useEffect, useState } from "react";
 import { ESPNLeagueResponse, ESPNRosterEntry } from "@/types/espn";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@mui/material/styles";
 import ReactECharts from "echarts-for-react";
 import PlayerStats from "./player-stats";
 import Link from "next/link";
+import FantasyBasketballDropdownNav from "@/components/features/fantasy/FantasyBasketballDropdownNav";
+import DropdownComponent from "@/components/shared/DropdownComponent";
 
 interface WeeklyRanking {
     week: number;
@@ -106,10 +106,6 @@ export default function VisualizationPage() {
     const [selectedSeason, setSelectedSeason] = useState("2025");
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
-
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -590,7 +586,7 @@ export default function VisualizationPage() {
     };
 
     return (
-        <Container maxWidth="lg" sx={{ py: 2 }}>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
             <Box
                 sx={{
                     position: "fixed",
@@ -623,113 +619,39 @@ export default function VisualizationPage() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        mb: 1,
+                        mb: 2,
                     }}
                 >
-                    <FantasyDropdownNav />
+                    <FantasyBasketballDropdownNav />
                 </Box>
                 <Paper elevation={2} sx={{ p: 2 }}>
-                    <Box sx={{ mb: 2 }}>
-                        <Typography
-                            variant="h4"
-                            component="h1"
-                            align="center"
-                            gutterBottom
-                        >
-                            {t("pages.fantasy.subpages.visualization")}
-                        </Typography>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: "100%",
-                                position: "relative",
-                                minHeight: "40px",
-                            }}
-                        >
-                            <Box sx={{ width: "200px", position: "relative" }}>
-                                <Button
-                                    variant="contained"
-                                    endIcon={<KeyboardArrowDownIcon />}
-                                    onClick={handleClick}
-                                    aria-haspopup="true"
-                                    aria-expanded={open}
-                                    aria-controls={
-                                        open ? "season-menu" : undefined
-                                    }
-                                    sx={{
-                                        backgroundColor: "black",
-                                        color: "white",
-                                        "&:hover": {
-                                            backgroundColor: "black",
-                                        },
-                                        width: "100%",
-                                        border:
-                                            theme.palette.mode === "dark"
-                                                ? "1px solid rgba(255, 255, 255, 0.23)"
-                                                : "none",
-                                    }}
-                                >
-                                    {t("pages.fantasy.season")} {selectedSeason}
-                                </Button>
-                            </Box>
-                        </Box>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: "100%",
+                            position: "relative",
+                            minHeight: "40px",
+                            mb: 2,
+                        }}
+                    >
+                        <DropdownComponent
+                            items={[
+                                {
+                                    key: "2025",
+                                    label: "2025",
+                                    value: "2025",
+                                },
+                            ]}
+                            currentSelected={selectedSeason}
+                            onChange={(value) =>
+                                handleSeasonChange(value as string)
+                            }
+                            title={t("pages.fantasy.season")}
+                            titleLocation="left"
+                        />
                     </Box>
-                    {open && (
-                        <Portal>
-                            <Menu
-                                id="season-menu"
-                                anchorEl={anchorEl}
-                                open={open}
-                                onClose={handleClose}
-                                disableScrollLock
-                                aria-label={t("pages.fantasy.selectSeason")}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "center",
-                                }}
-                                transformOrigin={{
-                                    vertical: "top",
-                                    horizontal: "center",
-                                }}
-                                sx={{
-                                    "& .MuiPaper-root": {
-                                        position: "fixed",
-                                        mt: 1,
-                                        backgroundColor: "background.paper",
-                                        border:
-                                            theme.palette.mode === "dark"
-                                                ? "1px solid rgba(255, 255, 255, 0.12)"
-                                                : "none",
-                                    },
-                                }}
-                                PaperProps={{
-                                    sx: {
-                                        minWidth: "200px",
-                                    },
-                                }}
-                            >
-                                <MenuItem
-                                    onClick={() => handleSeasonChange("2025")}
-                                    selected={selectedSeason === "2025"}
-                                    sx={{
-                                        "&.Mui-selected": {
-                                            backgroundColor: "black",
-                                            color: "white",
-                                            "&:hover": {
-                                                backgroundColor: "black",
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <Typography variant="body1">
-                                        2025
-                                    </Typography>
-                                </MenuItem>
-                            </Menu>
-                        </Portal>
-                    )}
                     <ErrorBoundary>{renderContent()}</ErrorBoundary>
                 </Paper>
             </Box>

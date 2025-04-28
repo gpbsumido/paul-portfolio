@@ -65,11 +65,20 @@ export default function TeamSelector({
                     }}
                 />
             )}
-            renderOption={(props, option) => (
-                <li {...props} role="option" aria-label={option.full_name}>
-                    <Typography variant="body1">{option.full_name}</Typography>
-                </li>
-            )}
+            renderOption={(props, option) => {
+                const { key, ...restProps } = props; // Exclude the key prop
+                return (
+                    <li
+                        {...restProps}
+                        role="option"
+                        aria-label={option.full_name}
+                    >
+                        <Typography variant="body1">
+                            {option.full_name}
+                        </Typography>
+                    </li>
+                );
+            }}
             sx={{
                 width: "100%",
                 "& .MuiAutocomplete-listbox": {
