@@ -29,6 +29,7 @@ const translations = {
             designs: "Designs",
             about: "About",
             fantasybasketball: "Fantasy Basketball",
+            fantasyF1: "Fantasy F1",
         },
         about: {
             title: "About Paul",
@@ -103,6 +104,7 @@ const translations = {
             designs: "Diseños",
             about: "Sobre mí",
             fantasybasketball: "Baloncesto de Fantasía",
+            fantasyF1: "F1 de Fantasía",
         },
         about: {
             title: "Sobre Paul",
@@ -179,6 +181,7 @@ const translations = {
             designs: "Désigns",
             about: "À propos",
             fantasybasketball: "Basketball Fantaisie",
+            fantasyF1: "F1 Fantaisie",
         },
         about: {
             title: "À propos de Paul",
