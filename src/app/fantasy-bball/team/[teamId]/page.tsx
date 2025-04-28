@@ -1,6 +1,5 @@
 'use client'
 
-import DropdownComponent from "@/components/shared/DropdownComponent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTeamInfo } from "@/lib/espnService";
 import { ESPNRosterEntry } from "@/types/espn";

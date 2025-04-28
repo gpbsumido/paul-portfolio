@@ -26,6 +26,9 @@ import {
 import { useTheme } from '@mui/material/styles';
 import F1DropdownNav from '@/components/features/fantasy/F1DropdownNav';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { HomeButton } from '@/components/common/HomeButton';
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';
+import Link from 'next/link';
 
 interface Event {
     event: {
@@ -116,8 +119,45 @@ const FantasyScoringPage = () => {
     };
 
     return (
-        <Container sx={{ gap: 2, p: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                overflow: 'hidden',
+                py: 4,
+                margin: 'auto',
+            }}
+            maxWidth={'lg'}
+        >
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    left: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <HomeButton component={Link} href="/" />
+            </Box>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    right: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <LanguageSwitcher />
+            </Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    mb: 3,
+                }}
+            >
                 <F1DropdownNav />
             </Box>
             <Card elevation={3} sx={{ mb: 3, p: 2 }}>
@@ -391,7 +431,7 @@ const FantasyScoringPage = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Container>
+        </Box>
     );
 };
 

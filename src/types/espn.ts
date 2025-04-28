@@ -6,6 +6,7 @@ export interface ESPNPlayer {
     id: number;
     fullName: string;
     defaultPosition: string;
+    defaultPositionId: string;
     injuryStatus?: string;
 }
 

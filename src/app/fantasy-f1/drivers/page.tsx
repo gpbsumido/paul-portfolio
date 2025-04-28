@@ -215,7 +215,7 @@ const DriverStandingsPage = () => {
             >
                 <F1DropdownNav />
             </Box>
-            <Card elevation={3} sx={{ mb: 3 }}>
+            <Card elevation={3} sx={{ mb: 3, flexShrink: 0 }}>
                 <CardHeader
                     title={`F1 Driver Standings ${season ? `(${season})` : ''}`}
                     sx={{
@@ -226,8 +226,8 @@ const DriverStandingsPage = () => {
                         },
                     }}
                 />
-                <CardContent>
-                    <FormControl fullWidth sx={{ mb: 3 }}>
+                <CardContent sx={{ pb: 4 }}>
+                    <FormControl fullWidth>
                         <InputLabel id="year-selector-label">Select Year</InputLabel>
                         <Select
                             labelId="year-selector-label"
@@ -244,7 +244,7 @@ const DriverStandingsPage = () => {
                     </FormControl>
                 </CardContent>
             </Card>
-            <Box sx={{ my: 5 }}>
+            <Box sx={{ my: 5, flexShrink: 0 }}> {/* Ensure the graph does not overlap */}
                 {dataLoading ? (
                     <Skeleton variant="rectangular" height={400} />
                 ) : (
