@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { text } from "stream/consumers";
 
 type Language = "en" | "es" | "fr";
 
@@ -30,6 +31,8 @@ const translations = {
             about: "About",
             fantasybasketball: "Fantasy Basketball",
             fantasyF1: "Fantasy F1",
+            forum: "Forum",
+            maps: "Map",
         },
         about: {
             title: "About Paul",
@@ -91,6 +94,11 @@ const translations = {
                 title: "Forum",
                 createPost: "Create Post",
                 createTitle: "Create New Post",
+                cancel: "Cancel",
+                submit: "Submit",
+                text: "Text",
+                username: "Username",
+                newPostTitle: "Title",
             },
             maps: {
                 title: "Map",
@@ -105,6 +113,8 @@ const translations = {
             about: "Sobre mí",
             fantasybasketball: "Baloncesto de Fantasía",
             fantasyF1: "F1 de Fantasía",
+            forum: "Foro",
+            maps: "Mapa",
         },
         about: {
             title: "Sobre Paul",
@@ -168,6 +178,11 @@ const translations = {
                 title: "Foro",
                 createPost: "Crear Post",
                 createTitle: "Crear Nuevo Post",
+                cancel: "Cancelar",
+                submit: "Enviar",
+                text: "Texto",
+                username: "Nombre de usuario",
+                newPostTitle: "Título",
             },
             maps: {
                 title: "Carte",
@@ -182,6 +197,8 @@ const translations = {
             about: "À propos",
             fantasybasketball: "Basketball Fantaisie",
             fantasyF1: "F1 Fantaisie",
+            forum: "Forum",
+            maps: "Carte",
         },
         about: {
             title: "À propos de Paul",
@@ -246,6 +263,11 @@ const translations = {
                 title: "Forum",
                 createPost: "Créer un Post",
                 createTitle: "Créer un Nouveau Post",
+                cancel: "Annuler",
+                submit: "Soumettre",
+                text: "Texte",
+                username: "Nom d'utilisateur",
+                newPostTitle: "Titre",
             },
             maps: {
                 title: "Carte",

@@ -2,7 +2,7 @@
 
 import ClientTeamContent from "@/components/features/fantasy/ClientTeamContent";
 import { Player, Team, PlayerStatsMap } from "@/types/nba";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container, Skeleton, Typography } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
@@ -163,14 +163,6 @@ export default function NBAStatsPage() {
      * @returns {JSX.Element} The appropriate content based on loading/error state
      */
     const renderContent = () => {
-        if (isLoading) {
-            return (
-                <Typography variant="h6" align="center" color="text.secondary">
-                    {t("pages.fantasy.loading")}
-                </Typography>
-            );
-        }
-
         if (error) {
             return (
                 <Typography variant="h6" align="center" color="error">
@@ -235,7 +227,25 @@ export default function NBAStatsPage() {
                 >
                     <FantasyBasketballDropdownNav />
                 </Box>
-                <ErrorBoundary>{renderContent()}</ErrorBoundary>
+                <ErrorBoundary>
+                    {isLoading ? (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2,
+                            }}
+                        >
+                            <Typography variant="h6">
+                                <Skeleton width="60%" />
+                            </Typography>
+                            <Skeleton variant="rectangular" height={200} />
+                            <Skeleton variant="rectangular" height={200} />
+                        </Box>
+                    ) : (
+                        renderContent()
+                    )}
+                </ErrorBoundary>
             </Box>
         </Container>
     );
