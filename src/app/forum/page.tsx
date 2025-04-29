@@ -45,7 +45,7 @@ export default function ForumPage() {
         extensions: [
             StarterKit,
             TextAlign.configure({
-                types: ['heading', 'paragraph'],
+                types: ["heading", "paragraph"],
             }),
             Highlight,
             Image, // Add the image extension
@@ -57,24 +57,77 @@ export default function ForumPage() {
         if (!editor) return null;
 
         const buttons = [
-            { label: "H1", command: (editor: any) => editor.chain().toggleHeading({ level: 1 }), isActive: () => editor.isActive('heading', { level: 1 }) },
-            { label: "H2", command: (editor: any) => editor.chain().toggleHeading({ level: 2 }), isActive: () => editor.isActive('heading', { level: 2 }) },
-            { label: "H3", command: (editor: any) => editor.chain().toggleHeading({ level: 3 }), isActive: () => editor.isActive('heading', { level: 3 }) },
-            { label: "Paragraph", command: (editor: any) => editor.chain().setParagraph(), isActive: () => editor.isActive('paragraph') },
-            { label: "Bold", command: (editor: any) => editor.chain().toggleBold(), isActive: () => editor.isActive('bold') },
-            { label: "Italic", command: (editor: any) => editor.chain().toggleItalic(), isActive: () => editor.isActive('italic') },
-            { label: "Strike", command: (editor: any) => editor.chain().toggleStrike(), isActive: () => editor.isActive('strike') },
-            { label: "Highlight", command: (editor: any) => editor.chain().toggleHighlight(), isActive: () => editor.isActive('highlight') },
-            { label: "Left", command: (editor: any) => editor.chain().setTextAlign('left'), isActive: () => editor.isActive({ textAlign: 'left' }) },
-            { label: "Center", command: (editor: any) => editor.chain().setTextAlign('center'), isActive: () => editor.isActive({ textAlign: 'center' }) },
-            { label: "Right", command: (editor: any) => editor.chain().setTextAlign('right'), isActive: () => editor.isActive({ textAlign: 'right' }) },
-            { label: "Justify", command: (editor: any) => editor.chain().setTextAlign('justify'), isActive: () => editor.isActive({ textAlign: 'justify' }) },
+            {
+                label: "H1",
+                command: (editor: any) =>
+                    editor.chain().toggleHeading({ level: 1 }),
+                isActive: () => editor.isActive("heading", { level: 1 }),
+            },
+            {
+                label: "H2",
+                command: (editor: any) =>
+                    editor.chain().toggleHeading({ level: 2 }),
+                isActive: () => editor.isActive("heading", { level: 2 }),
+            },
+            {
+                label: "H3",
+                command: (editor: any) =>
+                    editor.chain().toggleHeading({ level: 3 }),
+                isActive: () => editor.isActive("heading", { level: 3 }),
+            },
+            {
+                label: "Paragraph",
+                command: (editor: any) => editor.chain().setParagraph(),
+                isActive: () => editor.isActive("paragraph"),
+            },
+            {
+                label: "Bold",
+                command: (editor: any) => editor.chain().toggleBold(),
+                isActive: () => editor.isActive("bold"),
+            },
+            {
+                label: "Italic",
+                command: (editor: any) => editor.chain().toggleItalic(),
+                isActive: () => editor.isActive("italic"),
+            },
+            {
+                label: "Strike",
+                command: (editor: any) => editor.chain().toggleStrike(),
+                isActive: () => editor.isActive("strike"),
+            },
+            {
+                label: "Highlight",
+                command: (editor: any) => editor.chain().toggleHighlight(),
+                isActive: () => editor.isActive("highlight"),
+            },
+            {
+                label: "Left",
+                command: (editor: any) => editor.chain().setTextAlign("left"),
+                isActive: () => editor.isActive({ textAlign: "left" }),
+            },
+            {
+                label: "Center",
+                command: (editor: any) => editor.chain().setTextAlign("center"),
+                isActive: () => editor.isActive({ textAlign: "center" }),
+            },
+            {
+                label: "Right",
+                command: (editor: any) => editor.chain().setTextAlign("right"),
+                isActive: () => editor.isActive({ textAlign: "right" }),
+            },
+            {
+                label: "Justify",
+                command: (editor: any) =>
+                    editor.chain().setTextAlign("justify"),
+                isActive: () => editor.isActive({ textAlign: "justify" }),
+            },
         ];
 
-        const handleButtonMouseDown = (commandFn: (editor: any) => any) => (event: React.MouseEvent) => {
-            event.preventDefault();
-            commandFn(editor).run();
-        };
+        const handleButtonMouseDown =
+            (commandFn: (editor: any) => any) => (event: React.MouseEvent) => {
+                event.preventDefault();
+                commandFn(editor).run();
+            };
 
         return (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
@@ -95,14 +148,18 @@ export default function ForumPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/postforum`);
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/postforum`
+                );
                 if (!response.ok) {
                     throw new Error("Failed to fetch posts");
                 }
                 const data = await response.json();
                 setPosts(data);
             } catch (err) {
-                setError(err instanceof Error ? err.message : "An error occurred");
+                setError(
+                    err instanceof Error ? err.message : "An error occurred"
+                );
             } finally {
                 setLoading(false);
             }
@@ -143,15 +200,18 @@ export default function ForumPage() {
             // Get the cleaned HTML
             const cleanedHtml = doc.body.innerHTML;
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/postforum`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    title: newPostTitle,
-                    text: cleanedHtml, // Use cleaned version
-                    username: newPostUsername,
-                }),
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/postforum`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        title: newPostTitle,
+                        text: cleanedHtml, // Use cleaned version
+                        username: newPostUsername,
+                    }),
+                }
+            );
             if (!response.ok) {
                 throw new Error("Failed to create post");
             }
@@ -208,18 +268,34 @@ export default function ForumPage() {
             </Box>
 
             <Box sx={{ mb: 5 }}>
-                <Typography variant="h4" component="h1" align="center" gutterBottom tabIndex={0}>
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    align="center"
+                    gutterBottom
+                    tabIndex={0}
+                >
                     {t("pages.forum.title")}
                 </Typography>
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 {loading ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        minHeight="400px"
+                    >
                         <CircularProgress />
                     </Box>
                 ) : error ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        minHeight="400px"
+                    >
                         <Typography color="error">{error}</Typography>
                     </Box>
                 ) : (
@@ -227,7 +303,12 @@ export default function ForumPage() {
                         <Paper
                             key={post.id}
                             elevation={2}
-                            sx={{ p: 3, display: "flex", flexDirection: "column", gap: 1 }}
+                            sx={{
+                                p: 3,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 1,
+                            }}
                         >
                             <Typography variant="h6" component="h2">
                                 {post.title}
@@ -240,7 +321,10 @@ export default function ForumPage() {
                                 }}
                                 dangerouslySetInnerHTML={{ __html: post.text }}
                             />
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                            >
                                 Posted by: {post.username}
                             </Typography>
                         </Paper>
@@ -257,12 +341,18 @@ export default function ForumPage() {
                     bottom: { xs: "16px", sm: "32px" },
                     right: { xs: "16px", sm: "32px" },
                     zIndex: 9999,
-                    bgcolor: (theme) => (theme.palette.mode === "dark" ? "black" : "white"),
-                    color: (theme) => (theme.palette.mode === "dark" ? "white" : "black"),
+                    bgcolor: (theme) =>
+                        theme.palette.mode === "dark" ? "black" : "white",
+                    color: (theme) =>
+                        theme.palette.mode === "dark" ? "white" : "black",
                     border: "2px solid",
-                    borderColor: (theme) => (theme.palette.mode === "dark" ? "white" : "black"),
+                    borderColor: (theme) =>
+                        theme.palette.mode === "dark" ? "white" : "black",
                     "&:hover": {
-                        bgcolor: (theme) => (theme.palette.mode === "dark" ? "grey.800" : "grey.300"),
+                        bgcolor: (theme) =>
+                            theme.palette.mode === "dark"
+                                ? "grey.800"
+                                : "grey.300",
                     },
                 }}
             >
@@ -303,7 +393,7 @@ export default function ForumPage() {
 
                     <MenuBar editor={editor} />
                     <Box
-                        id='ProseMirrorDiv'
+                        id="ProseMirrorDiv"
                         sx={{
                             border: "1px solid",
                             borderColor: "grey.400",
@@ -330,11 +420,26 @@ export default function ForumPage() {
                         fullWidth
                     />
 
-                    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
-                            Disclaimer: You can drag images into the editor, but they won't be saved due to storage costs.
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: 2,
+                        }}
+                    >
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ flexGrow: 1 }}
+                        >
+                            Disclaimer: You can drag images into the editor, but
+                            they won't be saved due to storage costs.
                         </Typography>
-                        <Button onClick={handleCloseModal} color="secondary" variant="outlined">
+                        <Button
+                            onClick={handleCloseModal}
+                            color="secondary"
+                            variant="outlined"
+                        >
                             {t("pages.forum.cancel")}
                         </Button>
                         <Button
@@ -343,7 +448,11 @@ export default function ForumPage() {
                             variant="contained"
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? <CircularProgress size={24} /> : t("pages.forum.submit")}
+                            {isSubmitting ? (
+                                <CircularProgress size={24} />
+                            ) : (
+                                t("pages.forum.submit")
+                            )}
                         </Button>
                     </Box>
                 </Box>
