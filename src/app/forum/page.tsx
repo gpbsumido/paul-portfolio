@@ -21,7 +21,9 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
-import Image from "@tiptap/extension-image"; // Import the image extension
+import Image from "@tiptap/extension-image";
+import DOMPurify from "dompurify";
+import parse from "html-react-parser"; // 👈 Add this at the top
 
 interface PostForum {
     id: number;
@@ -319,12 +321,11 @@ export default function ForumPage() {
                                     "& p": { mb: 1 },
                                     "& h1, & h2, & h3": { mt: 2, mb: 1 },
                                 }}
-                                dangerouslySetInnerHTML={{ __html: post.text }}
-                            />
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
                             >
+                                {parse(DOMPurify.sanitize(post.text))}
+                            </Box>
+
+                            <Typography variant="caption" color="text.secondary">
                                 Posted by: {post.username}
                             </Typography>
                         </Paper>
