@@ -325,7 +325,10 @@ export default function ForumPage() {
                                 {parse(DOMPurify.sanitize(post.text))}
                             </Box>
 
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                            >
                                 Posted by: {post.username}
                             </Typography>
                         </Paper>
