@@ -19,7 +19,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import React from "react";
 import _ from "lodash";
 
-
 interface ImageData {
     src: string;
     width: number;
@@ -279,7 +278,12 @@ export default function Gallery(): React.ReactElement | null {
 
     const fetchImages = useCallback(
         async (pageNumber: number) => {
-            if (isFetching || pageNumber <= lastFetchedPage.current || fetchError) return;
+            if (
+                isFetching ||
+                pageNumber <= lastFetchedPage.current ||
+                fetchError
+            )
+                return;
 
             setIsFetching(true);
             setFetchError(null);
@@ -289,7 +293,9 @@ export default function Gallery(): React.ReactElement | null {
                 );
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || "Failed to fetch images");
+                    throw new Error(
+                        errorData.error || "Failed to fetch images"
+                    );
                 }
 
                 const data = await response.json();
@@ -305,7 +311,10 @@ export default function Gallery(): React.ReactElement | null {
                                 imageUrl: string;
                                 blurDataURL?: string;
                             }) => {
-                                if (pageNumber === 1 && data.indexOf(item) < 3) {
+                                if (
+                                    pageNumber === 1 &&
+                                    data.indexOf(item) < 3
+                                ) {
                                     await preloadImage(item.imageUrl);
                                 }
                                 return {
@@ -331,7 +340,10 @@ export default function Gallery(): React.ReactElement | null {
                 setHasMore(formattedImages.length === 4);
                 lastFetchedPage.current = pageNumber;
             } catch (error: any) {
-                setFetchError(error.message || "An unexpected error occurred while fetching posts.");
+                setFetchError(
+                    error.message ||
+                        "An unexpected error occurred while fetching posts."
+                );
             } finally {
                 setIsLoading(false);
                 setIsFetching(false);
@@ -478,7 +490,10 @@ export default function Gallery(): React.ReactElement | null {
             // Remove from image cache
             delete imageCache.current[imageUrl];
         } catch (error: any) {
-            setDeleteError(error.message || "An unexpected error occurred while deleting the post.");
+            setDeleteError(
+                error.message ||
+                    "An unexpected error occurred while deleting the post."
+            );
         } finally {
             setDeletingImageId(null);
         }
@@ -588,8 +603,7 @@ export default function Gallery(): React.ReactElement | null {
                                             )
                                         } // Ensure correct ID and URL are passed
                                         disabled={
-                                            deletingImageId ===
-                                            imageData?.id
+                                            deletingImageId === imageData?.id
                                         }
                                         sx={{
                                             position: "absolute",
@@ -599,8 +613,7 @@ export default function Gallery(): React.ReactElement | null {
                                                 "rgba(0, 0, 0, 0.5)",
                                             color: "white",
                                             opacity: 0,
-                                            transition:
-                                                "opacity 0.2s ease",
+                                            transition: "opacity 0.2s ease",
                                             zIndex: 3,
                                             "&:hover": {
                                                 backgroundColor:
@@ -608,8 +621,7 @@ export default function Gallery(): React.ReactElement | null {
                                             },
                                         }}
                                     >
-                                        {deletingImageId ===
-                                            imageData?.id ? (
+                                        {deletingImageId === imageData?.id ? (
                                             <CircularProgress
                                                 size={24}
                                                 color="inherit"
@@ -618,26 +630,27 @@ export default function Gallery(): React.ReactElement | null {
                                             <DeleteIcon />
                                         )}
                                     </IconButton>
-                                    {deleteError && deletingImageId === imageData?.id && (
-                                        <Box
-                                            sx={{
-                                                position: "absolute",
-                                                top: "100%",
-                                                left: 0,
-                                                right: 0,
-                                                bgcolor: "error.light",
-                                                color: "error.contrastText",
-                                                p: 1,
-                                                borderRadius: 1,
-                                                mt: 1,
-                                                zIndex: 4,
-                                            }}
-                                        >
-                                            <Typography variant="body2">
-                                                {deleteError}
-                                            </Typography>
-                                        </Box>
-                                    )}
+                                    {deleteError &&
+                                        deletingImageId === imageData?.id && (
+                                            <Box
+                                                sx={{
+                                                    position: "absolute",
+                                                    top: "100%",
+                                                    left: 0,
+                                                    right: 0,
+                                                    bgcolor: "error.light",
+                                                    color: "error.contrastText",
+                                                    p: 1,
+                                                    borderRadius: 1,
+                                                    mt: 1,
+                                                    zIndex: 4,
+                                                }}
+                                            >
+                                                <Typography variant="body2">
+                                                    {deleteError}
+                                                </Typography>
+                                            </Box>
+                                        )}
                                     <ImageComponent
                                         image={image}
                                         width={containerWidth}
@@ -651,67 +664,64 @@ export default function Gallery(): React.ReactElement | null {
                                     {(imageData?.text ||
                                         imageData?.description ||
                                         imageData?.date) && (
-                                            <Box
-                                                className="image-data"
-                                                sx={{
-                                                    position: "absolute",
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    bgcolor:
-                                                        "rgba(0,0,0,0.6)",
-                                                    color: "#fff",
-                                                    p: 2,
-                                                    zIndex: 2,
-                                                    opacity: 0,
-                                                    transition:
-                                                        "opacity 0.3s ease",
-                                                }}
-                                            >
-                                                {imageData?.text && (
-                                                    <Typography
-                                                        variant="subtitle1"
-                                                        sx={{
-                                                            fontWeight:
-                                                                "bold",
-                                                        }}
-                                                    >
-                                                        {imageData.text}
-                                                    </Typography>
-                                                )}
-                                                {imageData?.description && (
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{ mt: 1 }}
-                                                    >
-                                                        {imageData.description}
-                                                    </Typography>
-                                                )}
-                                                {imageData?.date && (
-                                                    <Typography
-                                                        variant="caption"
-                                                        sx={{
-                                                            display: "block",
-                                                            mt: 1,
-                                                            opacity: 0.7,
-                                                        }}
-                                                    >
-                                                        {new Date(
-                                                            imageData.date
-                                                        ).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                year: "numeric",
-                                                                month: "short",
-                                                                day: "numeric",
-                                                                hour: "2-digit",
-                                                                minute: "2-digit",
-                                                            }
-                                                        )}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        )}
+                                        <Box
+                                            className="image-data"
+                                            sx={{
+                                                position: "absolute",
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                bgcolor: "rgba(0,0,0,0.6)",
+                                                color: "#fff",
+                                                p: 2,
+                                                zIndex: 2,
+                                                opacity: 0,
+                                                transition: "opacity 0.3s ease",
+                                            }}
+                                        >
+                                            {imageData?.text && (
+                                                <Typography
+                                                    variant="subtitle1"
+                                                    sx={{
+                                                        fontWeight: "bold",
+                                                    }}
+                                                >
+                                                    {imageData.text}
+                                                </Typography>
+                                            )}
+                                            {imageData?.description && (
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{ mt: 1 }}
+                                                >
+                                                    {imageData.description}
+                                                </Typography>
+                                            )}
+                                            {imageData?.date && (
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        display: "block",
+                                                        mt: 1,
+                                                        opacity: 0.7,
+                                                    }}
+                                                >
+                                                    {new Date(
+                                                        imageData.date
+                                                    ).toLocaleString(
+                                                        undefined,
+                                                        {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        }
+                                                    )}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    )}
                                 </Box>
                             </Box>
                         );
@@ -742,9 +752,9 @@ export default function Gallery(): React.ReactElement | null {
                         borderRadius: 1,
                         mb: 2,
                         boxShadow: 2,
-                        width: 'fit-content',
-                        margin: '0 auto',
-                        maxWidth: '90%',
+                        width: "fit-content",
+                        margin: "0 auto",
+                        maxWidth: "90%",
                     }}
                 >
                     <Box
@@ -903,7 +913,9 @@ export default function Gallery(): React.ReactElement | null {
                             >
                                 Error:
                             </Typography>
-                            <Typography variant="body2">{uploadError}</Typography>
+                            <Typography variant="body2">
+                                {uploadError}
+                            </Typography>
                         </Box>
                     )}
                     <Box
