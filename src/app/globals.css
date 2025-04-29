@@ -44,3 +44,13 @@ a {
         color-scheme: dark;
     }
 }
+
+.tiptap.ProseMirror,
+#ProseMirrorDiv > div {
+    flex-grow: 1;
+    height: 100%;
+    overflow-y: auto;
+    display: block;
+    outline: none;
+    min-height: 150px;
+}
