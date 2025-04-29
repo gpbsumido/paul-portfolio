@@ -47,7 +47,6 @@
         "react-dom": "^18.2.0",
         "react-leaflet": "^5.0.0",
         "react-tooltip": "^5.28.1",
-        "react-window": "^1.8.11",
         "recharts": "^2.15.2",
         "zustand": "^4.5.0"
     },
@@ -61,7 +60,6 @@
         "@types/pretty-hrtime": "^1.0.3",
         "@types/react": "^18",
         "@types/react-dom": "^18",
-        "@types/react-window": "^1.8.8",
         "critters": "^0.0.25",
         "eslint": "^8.56.0",
         "eslint-config-next": "14.1.0",

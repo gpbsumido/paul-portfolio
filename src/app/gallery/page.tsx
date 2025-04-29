@@ -14,7 +14,7 @@ import {
     IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState, useRef, useCallback } from "react";
 import React from "react";
 
@@ -45,7 +45,9 @@ export default function Gallery(): React.ReactElement | null {
     const [fetchedImages, setFetchedImages] = useState<any[]>([]);
     const [isFetching, setIsFetching] = useState(false);
     const observer = useRef<IntersectionObserver | null>(null);
-    const imageCache = useRef<Record<string, { element: HTMLImageElement; loaded: boolean }>>({});
+    const imageCache = useRef<
+        Record<string, { element: HTMLImageElement; loaded: boolean }>
+    >({});
     const lastFetchedPage = useRef<number>(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
@@ -61,165 +63,189 @@ export default function Gallery(): React.ReactElement | null {
             const img = new Image();
             img.src = src;
             img.onload = () => resolve();
-            img.onerror = () => reject(new Error(`Failed to preload image: ${src}`));
+            img.onerror = () =>
+                reject(new Error(`Failed to preload image: ${src}`));
         });
     };
 
-    const loadImage = useCallback((src: string, width: number, height: number): Promise<HTMLImageElement> => {
-        return new Promise((resolve, reject) => {
-            if (imageCache.current[src]?.loaded) {
-                resolve(imageCache.current[src].element);
-                return;
-            }
-
-            if (imageCache.current[src]) {
-                const checkLoaded = () => {
-                    if (imageCache.current[src]?.loaded) {
-                        resolve(imageCache.current[src].element);
-                    } else {
-                        setTimeout(checkLoaded, 100);
-                    }
-                };
-                checkLoaded();
-                return;
-            }
-
-            const img = document.createElement('img') as HTMLImageElement;
-            img.src = src;
-            img.width = width;
-            img.height = height;
-
-            imageCache.current[src] = { element: img, loaded: false };
-
-            img.onload = () => {
-                imageCache.current[src].loaded = true;
-                resolve(img);
-            };
-
-            img.onerror = () => {
-                delete imageCache.current[src];
-                reject(new Error('Failed to load image'));
-            };
-        });
-    }, []);
-
-    const ImageComponent = useCallback(({ image, width, height, index }: { image: ImageData; width: number; height: number; index: number }) => {
-        const [isLoaded, setIsLoaded] = useState(false);
-        const [isVisible, setIsVisible] = useState(index < 3); // Always visible for first 3 images
-        const containerRef = useRef<HTMLDivElement>(null);
-        const imgRef = useRef<HTMLImageElement | null>(null);
-
-        useEffect(() => {
-            if (index < 3) return; // Skip intersection observer for first 3 images
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting) {
-                        setIsVisible(true);
-                        observer.disconnect();
-                    }
-                },
-                {
-                    threshold: 0.1,
-                    rootMargin: index < 6 ? '200px' : '50px' // Larger margin for top images
-                }
-            );
-
-            if (containerRef.current) {
-                observer.observe(containerRef.current);
-            }
-
-            return () => observer.disconnect();
-        }, [index]);
-
-        useEffect(() => {
-            if (!isVisible) return;
-
-            const load = async () => {
-                if (imageCache.current[image.src]?.loaded) {
-                    setIsLoaded(true);
+    const loadImage = useCallback(
+        (
+            src: string,
+            width: number,
+            height: number
+        ): Promise<HTMLImageElement> => {
+            return new Promise((resolve, reject) => {
+                if (imageCache.current[src]?.loaded) {
+                    resolve(imageCache.current[src].element);
                     return;
                 }
 
-                try {
-                    const img = new Image();
-                    img.src = image.src;
-
-                    img.onload = () => {
-                        imageCache.current[image.src] = { element: img, loaded: true };
-                        setIsLoaded(true);
+                if (imageCache.current[src]) {
+                    const checkLoaded = () => {
+                        if (imageCache.current[src]?.loaded) {
+                            resolve(imageCache.current[src].element);
+                        } else {
+                            setTimeout(checkLoaded, 100);
+                        }
                     };
-
-                    img.onerror = () => {
-                        console.error('Error loading image:', image.src);
-                        delete imageCache.current[image.src];
-                    };
-                } catch (error) {
-                    console.error('Error loading image:', error);
+                    checkLoaded();
+                    return;
                 }
-            };
 
-            load();
-        }, [image.src, isVisible]);
+                const img = document.createElement("img") as HTMLImageElement;
+                img.src = src;
+                img.width = width;
+                img.height = height;
 
-        return (
-            <div
-                ref={containerRef}
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    backgroundColor: '#111',
-                }}
-            >
-                {isVisible && (
-                    <>
-                        {image.blurDataURL && !isLoaded && (
+                imageCache.current[src] = { element: img, loaded: false };
+
+                img.onload = () => {
+                    imageCache.current[src].loaded = true;
+                    resolve(img);
+                };
+
+                img.onerror = () => {
+                    delete imageCache.current[src];
+                    reject(new Error("Failed to load image"));
+                };
+            });
+        },
+        []
+    );
+
+    const ImageComponent = useCallback(
+        ({
+            image,
+            width,
+            height,
+            index,
+        }: {
+            image: ImageData;
+            width: number;
+            height: number;
+            index: number;
+        }) => {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [isVisible, setIsVisible] = useState(index < 3); // Always visible for first 3 images
+            const containerRef = useRef<HTMLDivElement>(null);
+            const imgRef = useRef<HTMLImageElement | null>(null);
+
+            useEffect(() => {
+                if (index < 3) return; // Skip intersection observer for first 3 images
+
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (entry.isIntersecting) {
+                            setIsVisible(true);
+                            observer.disconnect();
+                        }
+                    },
+                    {
+                        threshold: 0.1,
+                        rootMargin: index < 6 ? "200px" : "50px", // Larger margin for top images
+                    }
+                );
+
+                if (containerRef.current) {
+                    observer.observe(containerRef.current);
+                }
+
+                return () => observer.disconnect();
+            }, [index]);
+
+            useEffect(() => {
+                if (!isVisible) return;
+
+                const load = async () => {
+                    if (imageCache.current[image.src]?.loaded) {
+                        setIsLoaded(true);
+                        return;
+                    }
+
+                    try {
+                        const img = new Image();
+                        img.src = image.src;
+
+                        img.onload = () => {
+                            imageCache.current[image.src] = {
+                                element: img,
+                                loaded: true,
+                            };
+                            setIsLoaded(true);
+                        };
+
+                        img.onerror = () => {
+                            console.error("Error loading image:", image.src);
+                            delete imageCache.current[image.src];
+                        };
+                    } catch (error) {
+                        console.error("Error loading image:", error);
+                    }
+                };
+
+                load();
+            }, [image.src, isVisible]);
+
+            return (
+                <div
+                    ref={containerRef}
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        position: "relative",
+                        overflow: "hidden",
+                        backgroundColor: "#111",
+                    }}
+                >
+                    {isVisible && (
+                        <>
+                            {image.blurDataURL && !isLoaded && (
+                                <img
+                                    src={image.blurDataURL}
+                                    alt=""
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        filter: "blur(20px)",
+                                        transform: "scale(1.1)",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            )}
                             <img
-                                src={image.blurDataURL}
-                                alt=""
+                                ref={imgRef}
+                                src={image.src}
+                                alt="Gallery image"
                                 style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    filter: 'blur(20px)',
-                                    transform: 'scale(1.1)',
-                                    objectFit: 'cover',
+                                    objectFit: "contain",
+                                    width: "100%",
+                                    height: "100%",
+                                    opacity: isLoaded ? 1 : 0,
+                                    transition: "opacity 0.3s ease",
+                                    pointerEvents: "none",
+                                    willChange: "transform",
                                 }}
+                                loading={index < 6 ? "eager" : "lazy"}
                             />
-                        )}
-                        <img
-                            ref={imgRef}
-                            src={image.src}
-                            alt="Gallery image"
+                        </>
+                    )}
+                    {!isLoaded && !image.blurDataURL && (
+                        <div
                             style={{
-                                objectFit: "contain",
-                                width: '100%',
-                                height: '100%',
-                                opacity: isLoaded ? 1 : 0,
-                                transition: "opacity 0.3s ease",
-                                pointerEvents: 'none',
-                                willChange: 'transform',
+                                position: "absolute",
+                                inset: 0,
+                                backgroundColor: "#111",
                             }}
-                            loading={index < 6 ? "eager" : "lazy"}
                         />
-                    </>
-                )}
-                {!isLoaded && !image.blurDataURL && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            backgroundColor: '#111',
-                        }}
-                    />
-                )}
-            </div>
-        );
-    }, []);
+                    )}
+                </div>
+            );
+        },
+        []
+    );
 
     const updateWidth = useCallback(() => {
         if (typeof window === "undefined") return;
@@ -246,50 +272,67 @@ export default function Gallery(): React.ReactElement | null {
         }
     }, [updateWidth]);
 
-    const fetchImages = useCallback(async (pageNumber: number) => {
-        if (isFetching || pageNumber <= lastFetchedPage.current) return;
+    const fetchImages = useCallback(
+        async (pageNumber: number) => {
+            if (isFetching || pageNumber <= lastFetchedPage.current) return;
 
-        setIsFetching(true);
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=20`
-            );
-            if (!response.ok) throw new Error("Failed to fetch images");
+            setIsFetching(true);
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=20`
+                );
+                if (!response.ok) throw new Error("Failed to fetch images");
 
-            const data = await response.json();
-            const formattedImages = await Promise.all(
-                data
-                    .filter((item: { imageUrl: string }) => !item.imageUrl.toLowerCase().endsWith(".heic")) // Skip .HEIC images
-                    .map(async (item: { key: string; imageUrl: string; blurDataURL?: string }) => {
-                        if (pageNumber === 1 && data.indexOf(item) < 3) {
-                            await preloadImage(item.imageUrl); // Preload the first 3 images
-                        }
-                        return {
-                            src: item.imageUrl,
-                            width: 0,
-                            height: 0,
-                            originalWidth: 0,
-                            originalHeight: 0,
-                            blurDataURL: item.blurDataURL,
-                        };
-                    })
-            );
+                const data = await response.json();
+                const formattedImages = await Promise.all(
+                    data
+                        .filter(
+                            (item: { imageUrl: string }) =>
+                                !item.imageUrl.toLowerCase().endsWith(".heic")
+                        ) // Skip .HEIC images
+                        .map(
+                            async (item: {
+                                key: string;
+                                imageUrl: string;
+                                blurDataURL?: string;
+                            }) => {
+                                if (
+                                    pageNumber === 1 &&
+                                    data.indexOf(item) < 3
+                                ) {
+                                    await preloadImage(item.imageUrl); // Preload the first 3 images
+                                }
+                                return {
+                                    src: item.imageUrl,
+                                    width: 0,
+                                    height: 0,
+                                    originalWidth: 0,
+                                    originalHeight: 0,
+                                    blurDataURL: item.blurDataURL,
+                                };
+                            }
+                        )
+                );
 
-            setImages((prev) => {
-                const existingUrls = new Set(prev.map((img) => img.src));
-                const uniqueImages = formattedImages.filter((img) => !existingUrls.has(img.src));
-                return [...prev, ...uniqueImages];
-            });
-            setFetchedImages((prev) => [...prev, ...data]);
-            setHasMore(formattedImages.length === 20);
-            lastFetchedPage.current = pageNumber;
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
-        }
-    }, [isFetching]);
+                setImages((prev) => {
+                    const existingUrls = new Set(prev.map((img) => img.src));
+                    const uniqueImages = formattedImages.filter(
+                        (img) => !existingUrls.has(img.src)
+                    );
+                    return [...prev, ...uniqueImages];
+                });
+                setFetchedImages((prev) => [...prev, ...data]);
+                setHasMore(formattedImages.length === 20);
+                lastFetchedPage.current = pageNumber;
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+                setIsFetching(false);
+            }
+        },
+        [isFetching]
+    );
 
     useEffect(() => {
         fetchImages(page);
@@ -301,7 +344,7 @@ export default function Gallery(): React.ReactElement | null {
         const options = {
             root: null,
             rootMargin: "100px",
-            threshold: 0.1
+            threshold: 0.1,
         };
 
         observer.current = new IntersectionObserver((entries) => {
@@ -348,10 +391,13 @@ export default function Gallery(): React.ReactElement | null {
         formData.append("date", currentDate.toISOString());
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
-                method: "POST",
-                body: formData,
-            });
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/gallery`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
 
             if (!res.ok) throw new Error("Upload failed");
 
@@ -384,15 +430,14 @@ export default function Gallery(): React.ReactElement | null {
             };
 
             // Add the new image to both states
-            setImages(prev => [newImage, ...prev]);
-            setFetchedImages(prev => [newImageData, ...prev]);
+            setImages((prev) => [newImage, ...prev]);
+            setFetchedImages((prev) => [newImageData, ...prev]);
 
             // Reset form states and close modal
             setText("");
             setDescription("");
             setImageFile(null);
             handleCloseModal();
-
         } catch (err) {
             console.error("Upload error:", err);
             setUploading(false);
@@ -405,20 +450,25 @@ export default function Gallery(): React.ReactElement | null {
 
         setDeletingImageId(imageId);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${imageId}`, {
-                method: 'DELETE',
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${imageId}`,
+                {
+                    method: "DELETE",
+                }
+            );
 
-            if (!response.ok) throw new Error('Failed to delete image');
+            if (!response.ok) throw new Error("Failed to delete image");
 
             // Remove the image from both states
             setImages((prev) => prev.filter((img) => img.src !== imageUrl));
-            setFetchedImages((prev) => prev.filter((img) => img.id !== imageId));
+            setFetchedImages((prev) =>
+                prev.filter((img) => img.id !== imageId)
+            );
 
             // Remove from image cache
             delete imageCache.current[imageUrl];
         } catch (error) {
-            console.error('Error deleting image:', error);
+            console.error("Error deleting image:", error);
         } finally {
             setDeletingImageId(null);
         }
@@ -514,18 +564,20 @@ export default function Gallery(): React.ReactElement | null {
             >
                 <Box ref={containerRef}>
                     {images.map((image, index) => {
-                        const imageData = fetchedImages.find((item) => item.imageUrl === image.src);
+                        const imageData = fetchedImages.find(
+                            (item) => item.imageUrl === image.src
+                        );
 
                         return (
                             <Box
                                 key={image.src}
                                 sx={{
-                                    width: '100%',
+                                    width: "100%",
                                     mb: 3,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    position: 'relative',
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    position: "relative",
                                 }}
                             >
                                 <Box
@@ -537,34 +589,46 @@ export default function Gallery(): React.ReactElement | null {
                                         backgroundColor: "#111",
                                         borderRadius: 2,
                                         boxShadow: 2,
-                                        '&:hover .delete-button': {
+                                        "&:hover .delete-button": {
                                             opacity: 1,
                                         },
-                                        '&:hover .image-data': {
+                                        "&:hover .image-data": {
                                             opacity: 1,
                                         },
                                     }}
                                 >
                                     <IconButton
                                         className="delete-button"
-                                        onClick={() => handleDeleteImage(imageData.id, image.src)} // Ensure correct ID and URL are passed
-                                        disabled={deletingImageId === imageData?.id}
+                                        onClick={() =>
+                                            handleDeleteImage(
+                                                imageData.id,
+                                                image.src
+                                            )
+                                        } // Ensure correct ID and URL are passed
+                                        disabled={
+                                            deletingImageId === imageData?.id
+                                        }
                                         sx={{
-                                            position: 'absolute',
+                                            position: "absolute",
                                             top: 8,
                                             right: 8,
-                                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                            color: 'white',
+                                            backgroundColor:
+                                                "rgba(0, 0, 0, 0.5)",
+                                            color: "white",
                                             opacity: 0,
-                                            transition: 'opacity 0.2s ease',
+                                            transition: "opacity 0.2s ease",
                                             zIndex: 3,
-                                            '&:hover': {
-                                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                            "&:hover": {
+                                                backgroundColor:
+                                                    "rgba(0, 0, 0, 0.7)",
                                             },
                                         }}
                                     >
                                         {deletingImageId === imageData?.id ? (
-                                            <CircularProgress size={24} color="inherit" />
+                                            <CircularProgress
+                                                size={24}
+                                                color="inherit"
+                                            />
                                         ) : (
                                             <DeleteIcon />
                                         )}
@@ -572,10 +636,16 @@ export default function Gallery(): React.ReactElement | null {
                                     <ImageComponent
                                         image={image}
                                         width={containerWidth}
-                                        height={containerWidth * (image.originalHeight / image.originalWidth)}
+                                        height={
+                                            containerWidth *
+                                            (image.originalHeight /
+                                                image.originalWidth)
+                                        }
                                         index={index}
                                     />
-                                    {(imageData?.text || imageData?.description || imageData?.date) && (
+                                    {(imageData?.text ||
+                                        imageData?.description ||
+                                        imageData?.date) && (
                                         <Box
                                             className="image-data"
                                             sx={{
@@ -592,24 +662,42 @@ export default function Gallery(): React.ReactElement | null {
                                             }}
                                         >
                                             {imageData?.text && (
-                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                <Typography
+                                                    variant="subtitle1"
+                                                    sx={{ fontWeight: "bold" }}
+                                                >
                                                     {imageData.text}
                                                 </Typography>
                                             )}
                                             {imageData?.description && (
-                                                <Typography variant="body2" sx={{ mt: 1 }}>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{ mt: 1 }}
+                                                >
                                                     {imageData.description}
                                                 </Typography>
                                             )}
                                             {imageData?.date && (
-                                                <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.7 }}>
-                                                    {new Date(imageData.date).toLocaleString(undefined, {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        display: "block",
+                                                        mt: 1,
+                                                        opacity: 0.7,
+                                                    }}
+                                                >
+                                                    {new Date(
+                                                        imageData.date
+                                                    ).toLocaleString(
+                                                        undefined,
+                                                        {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        }
+                                                    )}
                                                 </Typography>
                                             )}
                                         </Box>
@@ -621,7 +709,13 @@ export default function Gallery(): React.ReactElement | null {
                 </Box>
 
                 {hasMore && (
-                    <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            my: 4,
+                        }}
+                    >
                         <CircularProgress />
                     </Box>
                 )}
@@ -662,7 +756,11 @@ export default function Gallery(): React.ReactElement | null {
                         gap: 2,
                     }}
                 >
-                    <Typography variant="h6" component="h2" id="upload-modal-title">
+                    <Typography
+                        variant="h6"
+                        component="h2"
+                        id="upload-modal-title"
+                    >
                         Upload Image
                     </Typography>
                     <TextField
@@ -706,7 +804,11 @@ export default function Gallery(): React.ReactElement | null {
                             variant="contained"
                             disabled={uploading}
                         >
-                            {uploading ? <CircularProgress size={24} /> : "Submit"}
+                            {uploading ? (
+                                <CircularProgress size={24} />
+                            ) : (
+                                "Submit"
+                            )}
                         </Button>
                     </Box>
                 </Box>

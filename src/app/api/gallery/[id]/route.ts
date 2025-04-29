@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { deleteObject } from '@aws-sdk/client-s3';
-import { s3Client } from '@/lib/s3';
+import { NextResponse } from "next/server";
+import { deleteObject } from "@aws-sdk/client-s3";
+import { s3Client } from "@/lib/s3";
 
 export async function DELETE(
     request: Request,
@@ -10,9 +10,11 @@ export async function DELETE(
         const { id } = params;
 
         // Get the image URL from the database
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`
+        );
         if (!response.ok) {
-            throw new Error('Failed to fetch image details');
+            throw new Error("Failed to fetch image details");
         }
         const image = await response.json();
 
@@ -29,20 +31,23 @@ export async function DELETE(
         );
 
         // Delete from database
-        const deleteResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, {
-            method: 'DELETE',
-        });
+        const deleteResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`,
+            {
+                method: "DELETE",
+            }
+        );
 
         if (!deleteResponse.ok) {
-            throw new Error('Failed to delete image from database');
+            throw new Error("Failed to delete image from database");
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error deleting image:', error);
+        console.error("Error deleting image:", error);
         return NextResponse.json(
-            { error: 'Failed to delete image' },
+            { error: "Failed to delete image" },
             { status: 500 }
         );
     }
-} 
+}
