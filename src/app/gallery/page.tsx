@@ -17,6 +17,8 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState, useRef, useCallback } from "react";
 import React from "react";
+import _ from "lodash";
+
 
 interface ImageData {
     src: string;
@@ -51,6 +53,9 @@ export default function Gallery(): React.ReactElement | null {
     const lastFetchedPage = useRef<number>(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+    const [uploadError, setUploadError] = useState<string | null>(null); // State to track upload errors
+    const [deleteError, setDeleteError] = useState<string | null>(null); // State to track delete errors
+    const [fetchError, setFetchError] = useState<string | null>(null); // State to track fetch errors
 
     const preloadImage = (src: string): Promise<void> => {
         // Skip preloading for unsupported formats like .HEIC
@@ -274,14 +279,18 @@ export default function Gallery(): React.ReactElement | null {
 
     const fetchImages = useCallback(
         async (pageNumber: number) => {
-            if (isFetching || pageNumber <= lastFetchedPage.current) return;
+            if (isFetching || pageNumber <= lastFetchedPage.current || fetchError) return;
 
             setIsFetching(true);
+            setFetchError(null);
             try {
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=20`
+                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`
                 );
-                if (!response.ok) throw new Error("Failed to fetch images");
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Failed to fetch images");
+                }
 
                 const data = await response.json();
                 const formattedImages = await Promise.all(
@@ -289,18 +298,15 @@ export default function Gallery(): React.ReactElement | null {
                         .filter(
                             (item: { imageUrl: string }) =>
                                 !item.imageUrl.toLowerCase().endsWith(".heic")
-                        ) // Skip .HEIC images
+                        )
                         .map(
                             async (item: {
                                 key: string;
                                 imageUrl: string;
                                 blurDataURL?: string;
                             }) => {
-                                if (
-                                    pageNumber === 1 &&
-                                    data.indexOf(item) < 3
-                                ) {
-                                    await preloadImage(item.imageUrl); // Preload the first 3 images
+                                if (pageNumber === 1 && data.indexOf(item) < 3) {
+                                    await preloadImage(item.imageUrl);
                                 }
                                 return {
                                     src: item.imageUrl,
@@ -322,16 +328,16 @@ export default function Gallery(): React.ReactElement | null {
                     return [...prev, ...uniqueImages];
                 });
                 setFetchedImages((prev) => [...prev, ...data]);
-                setHasMore(formattedImages.length === 20);
+                setHasMore(formattedImages.length === 4);
                 lastFetchedPage.current = pageNumber;
-            } catch (error) {
-                console.error(error);
+            } catch (error: any) {
+                setFetchError(error.message || "An unexpected error occurred while fetching posts.");
             } finally {
                 setIsLoading(false);
                 setIsFetching(false);
             }
         },
-        [isFetching]
+        [isFetching, fetchError]
     );
 
     useEffect(() => {
@@ -382,6 +388,7 @@ export default function Gallery(): React.ReactElement | null {
     const handleSubmit = async () => {
         if (!imageFile) return;
         setUploading(true);
+        setUploadError(null);
 
         const currentDate = new Date();
         const formData = new FormData();
@@ -399,7 +406,10 @@ export default function Gallery(): React.ReactElement | null {
                 }
             );
 
-            if (!res.ok) throw new Error("Upload failed");
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Upload failed");
+            }
 
             const result = await res.json();
 
@@ -407,7 +417,6 @@ export default function Gallery(): React.ReactElement | null {
                 throw new Error("No image URL in response");
             }
 
-            // Create the new image object with all necessary data
             const newImage = {
                 src: result.image_url,
                 width: 0,
@@ -417,7 +426,6 @@ export default function Gallery(): React.ReactElement | null {
                 blurDataURL: result.blurDataURL,
             };
 
-            // Create the full image data object
             const newImageData = {
                 id: result.id,
                 imageUrl: result.image_url,
@@ -429,26 +437,25 @@ export default function Gallery(): React.ReactElement | null {
                 blurDataURL: result.blurDataURL,
             };
 
-            // Add the new image to both states
             setImages((prev) => [newImage, ...prev]);
             setFetchedImages((prev) => [newImageData, ...prev]);
 
-            // Reset form states and close modal
             setText("");
             setDescription("");
             setImageFile(null);
             handleCloseModal();
-        } catch (err) {
-            console.error("Upload error:", err);
+        } catch (err: any) {
+            setUploadError(err.message || "An unexpected error occurred");
+        } finally {
             setUploading(false);
         }
     };
 
     const handleDeleteImage = async (imageId: string, imageUrl: string) => {
-        console.log("Deleting image with ID:", imageId);
         if (deletingImageId) return; // Prevent multiple delete attempts
 
         setDeletingImageId(imageId);
+        setDeleteError(null); // Reset delete error state
         try {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${imageId}`,
@@ -457,7 +464,10 @@ export default function Gallery(): React.ReactElement | null {
                 }
             );
 
-            if (!response.ok) throw new Error("Failed to delete image");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to delete image");
+            }
 
             // Remove the image from both states
             setImages((prev) => prev.filter((img) => img.src !== imageUrl));
@@ -467,67 +477,12 @@ export default function Gallery(): React.ReactElement | null {
 
             // Remove from image cache
             delete imageCache.current[imageUrl];
-        } catch (error) {
-            console.error("Error deleting image:", error);
+        } catch (error: any) {
+            setDeleteError(error.message || "An unexpected error occurred while deleting the post.");
         } finally {
             setDeletingImageId(null);
         }
     };
-
-    if (isLoading) {
-        return (
-            <Box
-                sx={{
-                    padding: "20px",
-                    width: "100%",
-                    minHeight: "100vh",
-                    maxWidth: "1200px",
-                    margin: "0 auto",
-                    boxSizing: "border-box",
-                }}
-            >
-                {[...Array(3)].map((_, rowIndex) => (
-                    <Box
-                        key={rowIndex}
-                        sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: 3,
-                            mb: 3,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                position: "relative",
-                                width: "100%",
-                                aspectRatio: "16 / 9",
-                                backgroundColor: "#111",
-                                borderRadius: 2,
-                                boxShadow: 2,
-                            }}
-                        />
-                        <Box
-                            sx={{
-                                width: "60%",
-                                height: "20px",
-                                backgroundColor: "#333",
-                                borderRadius: 1,
-                            }}
-                        />
-                        <Box
-                            sx={{
-                                width: "80%",
-                                height: "16px",
-                                backgroundColor: "#333",
-                                borderRadius: 1,
-                            }}
-                        />
-                    </Box>
-                ))}
-            </Box>
-        );
-    }
 
     return (
         <Box
@@ -552,6 +507,33 @@ export default function Gallery(): React.ReactElement | null {
             >
                 Gallery
             </Typography>
+            {!images.length && !isLoading && (
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "50vh",
+                        textAlign: "center",
+                        color: "text.secondary",
+                    }}
+                >
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                        No posts yet.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 3 }}>
+                        Be the first to share an image with the community!
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenModal}
+                    >
+                        Upload Image
+                    </Button>
+                </Box>
+            )}
 
             <Container
                 maxWidth="sm"
@@ -606,7 +588,8 @@ export default function Gallery(): React.ReactElement | null {
                                             )
                                         } // Ensure correct ID and URL are passed
                                         disabled={
-                                            deletingImageId === imageData?.id
+                                            deletingImageId ===
+                                            imageData?.id
                                         }
                                         sx={{
                                             position: "absolute",
@@ -616,7 +599,8 @@ export default function Gallery(): React.ReactElement | null {
                                                 "rgba(0, 0, 0, 0.5)",
                                             color: "white",
                                             opacity: 0,
-                                            transition: "opacity 0.2s ease",
+                                            transition:
+                                                "opacity 0.2s ease",
                                             zIndex: 3,
                                             "&:hover": {
                                                 backgroundColor:
@@ -624,7 +608,8 @@ export default function Gallery(): React.ReactElement | null {
                                             },
                                         }}
                                     >
-                                        {deletingImageId === imageData?.id ? (
+                                        {deletingImageId ===
+                                            imageData?.id ? (
                                             <CircularProgress
                                                 size={24}
                                                 color="inherit"
@@ -633,6 +618,26 @@ export default function Gallery(): React.ReactElement | null {
                                             <DeleteIcon />
                                         )}
                                     </IconButton>
+                                    {deleteError && deletingImageId === imageData?.id && (
+                                        <Box
+                                            sx={{
+                                                position: "absolute",
+                                                top: "100%",
+                                                left: 0,
+                                                right: 0,
+                                                bgcolor: "error.light",
+                                                color: "error.contrastText",
+                                                p: 1,
+                                                borderRadius: 1,
+                                                mt: 1,
+                                                zIndex: 4,
+                                            }}
+                                        >
+                                            <Typography variant="body2">
+                                                {deleteError}
+                                            </Typography>
+                                        </Box>
+                                    )}
                                     <ImageComponent
                                         image={image}
                                         width={containerWidth}
@@ -646,69 +651,74 @@ export default function Gallery(): React.ReactElement | null {
                                     {(imageData?.text ||
                                         imageData?.description ||
                                         imageData?.date) && (
-                                        <Box
-                                            className="image-data"
-                                            sx={{
-                                                position: "absolute",
-                                                bottom: 0,
-                                                left: 0,
-                                                right: 0,
-                                                bgcolor: "rgba(0,0,0,0.6)",
-                                                color: "#fff",
-                                                p: 2,
-                                                zIndex: 2,
-                                                opacity: 0,
-                                                transition: "opacity 0.3s ease",
-                                            }}
-                                        >
-                                            {imageData?.text && (
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    sx={{ fontWeight: "bold" }}
-                                                >
-                                                    {imageData.text}
-                                                </Typography>
-                                            )}
-                                            {imageData?.description && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ mt: 1 }}
-                                                >
-                                                    {imageData.description}
-                                                </Typography>
-                                            )}
-                                            {imageData?.date && (
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        display: "block",
-                                                        mt: 1,
-                                                        opacity: 0.7,
-                                                    }}
-                                                >
-                                                    {new Date(
-                                                        imageData.date
-                                                    ).toLocaleString(
-                                                        undefined,
-                                                        {
-                                                            year: "numeric",
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        }
-                                                    )}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    )}
+                                            <Box
+                                                className="image-data"
+                                                sx={{
+                                                    position: "absolute",
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bgcolor:
+                                                        "rgba(0,0,0,0.6)",
+                                                    color: "#fff",
+                                                    p: 2,
+                                                    zIndex: 2,
+                                                    opacity: 0,
+                                                    transition:
+                                                        "opacity 0.3s ease",
+                                                }}
+                                            >
+                                                {imageData?.text && (
+                                                    <Typography
+                                                        variant="subtitle1"
+                                                        sx={{
+                                                            fontWeight:
+                                                                "bold",
+                                                        }}
+                                                    >
+                                                        {imageData.text}
+                                                    </Typography>
+                                                )}
+                                                {imageData?.description && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{ mt: 1 }}
+                                                    >
+                                                        {imageData.description}
+                                                    </Typography>
+                                                )}
+                                                {imageData?.date && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            display: "block",
+                                                            mt: 1,
+                                                            opacity: 0.7,
+                                                        }}
+                                                    >
+                                                        {new Date(
+                                                            imageData.date
+                                                        ).toLocaleString(
+                                                            undefined,
+                                                            {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            }
+                                                        )}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        )}
                                 </Box>
                             </Box>
                         );
                     })}
                 </Box>
 
-                {hasMore && (
+                {!fetchError && hasMore && (
                     <Box
                         sx={{
                             display: "flex",
@@ -721,6 +731,53 @@ export default function Gallery(): React.ReactElement | null {
                 )}
             </Container>
 
+            {fetchError && (
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        bgcolor: "error.light",
+                        color: "error.contrastText",
+                        p: 2,
+                        borderRadius: 1,
+                        mb: 2,
+                        boxShadow: 2,
+                        width: 'fit-content',
+                        margin: '0 auto',
+                        maxWidth: '90%',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            mr: 2,
+                        }}
+                    >
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    display: "inline-block",
+                                    marginRight: "8px",
+                                }}
+                            >
+                                ⚠️
+                            </span>
+                            Error
+                        </Typography>
+                    </Box>
+                    <Typography variant="body2">{fetchError}</Typography>
+                </Box>
+            )}
+
             <Fab
                 color="primary"
                 aria-label="add"
@@ -730,11 +787,11 @@ export default function Gallery(): React.ReactElement | null {
                     bottom: { xs: "16px", sm: "32px" },
                     right: { xs: "16px", sm: "32px" },
                     zIndex: 9999,
+                    display: !_.isEmpty(images) ? "flex" : "none",
                 }}
             >
                 <AddIcon />
             </Fab>
-
             <Modal
                 open={isModalOpen}
                 onClose={handleCloseModal}
@@ -753,27 +810,64 @@ export default function Gallery(): React.ReactElement | null {
                         borderRadius: 2,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 2,
+                        gap: 3,
                     }}
                 >
                     <Typography
                         variant="h6"
                         component="h2"
                         id="upload-modal-title"
+                        sx={{ textAlign: "center", fontWeight: "bold" }}
                     >
                         Upload Image
                     </Typography>
+                    {imageFile && (
+                        <Box
+                            sx={{
+                                width: "100%",
+                                height: "200px",
+                                borderRadius: 2,
+                                overflow: "hidden",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                border: "1px solid",
+                                borderColor: "divider",
+                                mb: 2,
+                            }}
+                        >
+                            <img
+                                src={URL.createObjectURL(imageFile)}
+                                alt="Preview"
+                                style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                }}
+                            />
+                        </Box>
+                    )}
                     <TextField
                         type="file"
                         inputProps={{ accept: "image/*" }}
                         onChange={handleFileChange}
                         fullWidth
+                        sx={{
+                            "& .MuiInputBase-root": {
+                                borderRadius: 2,
+                            },
+                        }}
                     />
                     <TextField
-                        label="Text"
+                        label="Title"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         fullWidth
+                        sx={{
+                            "& .MuiInputBase-root": {
+                                borderRadius: 2,
+                            },
+                        }}
                     />
                     <TextField
                         label="Description"
@@ -782,7 +876,36 @@ export default function Gallery(): React.ReactElement | null {
                         fullWidth
                         multiline
                         rows={4}
+                        sx={{
+                            "& .MuiInputBase-root": {
+                                borderRadius: 2,
+                            },
+                        }}
                     />
+                    {uploadError && (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                p: 2,
+                                borderRadius: 2,
+                                bgcolor: "error.light",
+                                color: "error.contrastText",
+                                boxShadow: 1,
+                            }}
+                        >
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontWeight: "bold",
+                                }}
+                            >
+                                Error:
+                            </Typography>
+                            <Typography variant="body2">{uploadError}</Typography>
+                        </Box>
+                    )}
                     <Box
                         sx={{
                             display: "flex",
@@ -795,6 +918,10 @@ export default function Gallery(): React.ReactElement | null {
                             color="secondary"
                             variant="outlined"
                             disabled={uploading}
+                            sx={{
+                                borderRadius: 2,
+                                textTransform: "none",
+                            }}
                         >
                             Cancel
                         </Button>
@@ -803,6 +930,10 @@ export default function Gallery(): React.ReactElement | null {
                             color="primary"
                             variant="contained"
                             disabled={uploading}
+                            sx={{
+                                borderRadius: 2,
+                                textTransform: "none",
+                            }}
                         >
                             {uploading ? (
                                 <CircularProgress size={24} />
