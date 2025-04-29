@@ -1,148 +1,320 @@
 "use client";
 
-import { Box } from "@mui/material";
-import { useState, useEffect } from "react";
-import React from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { SkeletonLoader } from "@/components/common/SkeletonLoader";
-import BrushIcon from "@mui/icons-material/Brush";
-import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
-import SportsMotorsportsIcon from "@mui/icons-material/SportsMotorsports";
-import MapIcon from "@mui/icons-material/Map";
-import ForumIcon from "@mui/icons-material/Forum";
-import { HoverableSection } from "@/components/common/HoverableSection";
-import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import { AboutSection } from "@/components/features/home/AboutSection";
+import { Box, Typography, Container, useTheme, useMediaQuery, IconButton, Avatar, Link } from "@mui/material";
+import { useRouter } from "next/navigation";
+import GitHubIcon from '@mui/icons-material/GitHub';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import EmailIcon from '@mui/icons-material/Email';
+import { SOCIAL_LINKS } from "@/constants/social_links";
+import { useState } from "react";
+import paulImage from "@/assets/paul.jpeg";
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
+import SportsBasketballIcon from '@mui/icons-material/SportsBasketball';
+import SportsMotorsportsIcon from '@mui/icons-material/SportsMotorsports';
+import MapIcon from '@mui/icons-material/Map';
+import SmartphoneIcon from '@mui/icons-material/Smartphone';
+import BrushIcon from '@mui/icons-material/Brush';
 
-/**
- * Home component - Main landing page
- * @component
- * @description The main landing page component that displays the about section and links to other sections
- * @returns {JSX.Element} Home page with about section and links
- */
-export default function Home(): React.ReactElement {
-    const designsIcons = [BrushIcon];
-    const fantasyBasketballIcons = [SportsBasketballIcon];
-    const fantasyF1Icons = [SportsMotorsportsIcon];
-    const mapsIcons = [MapIcon];
-    const forumIcons = [ForumIcon];
+const sections = [
+  {
+    title: "Gallery",
+    description: "Photography & Visual Work",
+    path: "/gallery",
+    icon: <PhotoLibraryIcon fontSize="large" />,
+    bgImage: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1638&q=80"
+  },
+  {
+    title: "Fantasy Basketball",
+    description: "Stats & Analysis",
+    path: "/fantasy-bball",
+    icon: <SportsBasketballIcon fontSize="large" />,
+    bgImage: "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+  },
+  {
+    title: "Fantasy F1",
+    description: "Racing Analytics",
+    path: "/fantasy-f1",
+    icon: <SportsMotorsportsIcon fontSize="large" />,
+    bgImage: "https://images.unsplash.com/photo-1568219656418-15c329312bf1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+  },
+  {
+    title: "Interactive Map",
+    description: "Location Explorer",
+    path: "/map",
+    icon: <MapIcon fontSize="large" />,
+    bgImage: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1650&q=80"
+  },
+  {
+    title: "Social Media",
+    description: "Content Curation (WIP)",
+    path: "/social-media",
+    icon: <SmartphoneIcon fontSize="large" />,
+    bgImage: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80"
+  },
+  {
+    title: "Design Showcase",
+    description: "Projects & Work",
+    path: "/designs",
+    icon: <BrushIcon fontSize="large" />,
+    bgImage: "https://images.unsplash.com/photo-1558655146-9f40138edfeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1664&q=80"
+  }
+];
 
-    const [hoveredSection, setHoveredSection] = useState<string | null>(null);
-    const { t } = useLanguage();
+export default function Home() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const router = useRouter();
+  const [hoveredSection, setHoveredSection] = useState<number | null>(null);
 
-    const [isLoading, setIsLoading] = useState(true);
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "#ffffff",
+        position: "relative",
+        overflow: "hidden"
+      }}
+    >
+      {/* Dynamic Background */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: "40%",
+          height: "100%",
+          background: hoveredSection !== null
+            ? `url(${sections[hoveredSection].bgImage})`
+            : "gray", // Default background set to gray
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          clipPath: "polygon(100% 0, 100% 100%, 0 100%, 30% 0)",
+          zIndex: 0,
+          transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease", // Updated transition
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(255, 255, 255, 0.3)", // Further reduced opacity
+            transition: "background 0.4s ease"
+          }
+        }}
+      />
 
-    useEffect(() => {
-        // Simulate loading state
-        const timer = setTimeout(() => setIsLoading(false), 50);
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (isLoading) {
-        return (
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    height: "100vh",
-                    width: "100vw",
-                    overflow: "auto",
-                }}
-            >
-                <SkeletonLoader
-                    width={{ xs: "100%", md: "50%" }}
-                    minHeight={{ xs: "50vh", md: "100vh" }}
-                    bgcolor="black"
-                    circularSize={200}
-                    textWidths={[200, 300]}
-                />
-                <SkeletonLoader
-                    width={{ xs: "100%", md: "50%" }}
-                    minHeight={{ xs: "50vh", md: "100vh" }}
-                    bgcolor="white"
-                    circularSize={64}
-                    textWidths={[150]}
-                />
-            </Box>
-        );
-    }
-
-    return (
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
+        {/* Profile Section */}
         <Box
-            sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                height: "100vh",
-                width: "100vw",
-                overflow: "auto",
-            }}
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "center",
+            gap: { xs: 3, md: 6 },
+            py: { xs: 4, md: 8 },
+            position: "relative"
+          }}
         >
-            <Box
-                sx={{
-                    position: "fixed",
-                    top: { xs: "8px", sm: "16px" },
-                    right: { xs: "8px", sm: "16px" },
-                    zIndex: 9999,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "48px",
-                    overflow: "visible",
-                }}
-            >
-                <LanguageSwitcher />
-            </Box>
+          <Box
+            sx={{
+              position: "relative",
+              borderRadius: "50%",
+              overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "scale(1.02)",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.15)"
+              }
+            }}
+          >
+            <Avatar
+              src={paulImage.src} // Use the src property of the imported asset
+              sx={{
+                width: { xs: 150, md: 200 },
+                height: { xs: 150, md: 200 },
+                border: "none",
+                transition: "transform 0.3s ease"
+              }}
+            />
+          </Box>
 
-            <AboutSection />
-            <Box
-                sx={{
-                    width: { xs: "100%", md: "50%" },
-                    height: { xs: "100vh", md: "100vh" },
-                    display: "flex",
-                    flexDirection: "column",
-                }}
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: "bold",
+                mb: 2,
+                fontSize: { xs: "2.5rem", md: "3.5rem" },
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -5,
+                  left: 0,
+                  width: "100%",
+                  height: "3px",
+                  background: "#000",
+                  transform: "scaleX(0)",
+                  transformOrigin: "left",
+                  transition: "transform 0.3s ease"
+                },
+                "&:hover::after": {
+                  transform: "scaleX(1)"
+                }
+              }}
             >
-                <HoverableSection
-                    id="designsbox"
-                    href="/designs"
-                    icon={designsIcons[0]}
-                    label={t("navigation.designs")}
-                    hoveredSection={hoveredSection}
-                    setHoveredSection={setHoveredSection}
-                />
-                <HoverableSection
-                    id="fantasybballbox"
-                    href="/fantasy-bball"
-                    icon={fantasyBasketballIcons[0]}
-                    label={t("navigation.fantasybasketball")}
-                    hoveredSection={hoveredSection}
-                    setHoveredSection={setHoveredSection}
-                />
-                <HoverableSection
-                    id="fantasyf1box"
-                    href="/fantasy-f1"
-                    icon={fantasyF1Icons[0]}
-                    label={t("navigation.fantasyF1")}
-                    hoveredSection={hoveredSection}
-                    setHoveredSection={setHoveredSection}
-                />
-                <HoverableSection
-                    id="mapsbox"
-                    href="/maps"
-                    icon={mapsIcons[0]}
-                    label={t("navigation.maps")}
-                    hoveredSection={hoveredSection}
-                    setHoveredSection={setHoveredSection}
-                />
-                <HoverableSection
-                    id="forumbox"
-                    href="/forum"
-                    icon={forumIcons[0]}
-                    label={t("navigation.forum")}
-                    hoveredSection={hoveredSection}
-                    setHoveredSection={setHoveredSection}
-                />
+              Paul Sumido
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                color: "text.secondary",
+                mb: 3,
+                maxWidth: "600px",
+                fontStyle: "italic"
+              }}
+            >
+              Full Stack Developer & Designer passionate about creating intuitive and beautiful digital experiences.
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                "& .MuiIconButton-root": {
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    color: "#666"
+                  }
+                }
+              }}
+            >
+              <IconButton
+                href={SOCIAL_LINKS[0].href}
+                target="_blank"
+                sx={{ color: "#000" }}
+              >
+                <GitHubIcon />
+              </IconButton>
+              <IconButton
+                href={SOCIAL_LINKS[1].href}
+                target="_blank"
+                sx={{ color: "#000" }}
+              >
+                <LinkedInIcon />
+              </IconButton>
+              <IconButton
+                href={SOCIAL_LINKS[2].href}
+                sx={{ color: "#000" }}
+              >
+                <EmailIcon />
+              </IconButton>
             </Box>
+          </Box>
         </Box>
-    );
+
+        {/* Projects Grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+            gap: 3,
+            py: 4
+          }}
+        >
+          {sections.map((section, index) => (
+            <Box
+              key={section.path}
+              onClick={() => router.push(section.path)}
+              onMouseEnter={() => setHoveredSection(index)}
+              onMouseLeave={() => setHoveredSection(null)}
+              sx={{
+                position: "relative",
+                cursor: "pointer",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "#f5f5f5", // Consistent background for all sections
+                  transform: "scale(0.95)",
+                  transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease", // Updated transition
+                  zIndex: -1
+                },
+                "&:hover::before": {
+                  transform: "scale(1)",
+                  background: "#f0f0f0" // Consistent hover effect for all sections
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  p: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  position: "relative",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-5px)"
+                  }
+                }}
+              >
+                <Typography
+                  variant="h2"
+                  sx={{
+                    fontSize: "3rem",
+                    mb: 2,
+                    transition: "transform 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.1)"
+                    }
+                  }}
+                >
+                  {section.icon}
+                </Typography>
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  sx={{
+                    fontWeight: "bold",
+                    mb: 1,
+                    position: "relative",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      bottom: -2,
+                      left: "50%",
+                      width: 0,
+                      height: "2px",
+                      background: "#000",
+                      transition: "all 0.3s ease",
+                      transform: "translateX(-50%)"
+                    }
+                  }}
+                >
+                  {section.title}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{
+                    opacity: 0.8
+                  }}
+                >
+                  {section.description}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Container>
+    </Box>
+  );
 }
