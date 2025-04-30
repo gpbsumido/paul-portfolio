@@ -43,7 +43,7 @@ const translations = {
             title: "Designs",
             viewDesign: "View {name} Design",
             subtitle: "Implemented and Designed",
-            explore: "Explore"
+            explore: "Explore",
         },
         pages: {
             error: "Error",
@@ -131,7 +131,7 @@ const translations = {
             title: "Diseños",
             viewDesign: "Ver diseño de {name}",
             subtitle: "Implementado y Diseñado",
-            explore: "Explorar"
+            explore: "Explorar",
         },
         pages: {
             error: "Error",
@@ -221,7 +221,7 @@ const translations = {
             title: "Designs",
             viewDesign: "Voir le design {name}",
             subtitle: "Implémenté et Conçu",
-            explore: "Explorer"
+            explore: "Explorer",
         },
         pages: {
             error: "Erreur",
