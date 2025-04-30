@@ -107,7 +107,7 @@ const translations = {
             gallery: {
                 title: "Gallery",
                 subtitle: "Photography & Visual Work",
-            }
+            },
         },
     },
     es: {
@@ -195,7 +195,7 @@ const translations = {
             gallery: {
                 title: "Galería",
                 subtitle: "Fotografía y Trabajo Visual",
-            }
+            },
         },
     },
     fr: {
@@ -285,7 +285,7 @@ const translations = {
             gallery: {
                 title: "Galerie",
                 subtitle: "Photographie et Travail Visuel",
-            }
+            },
         },
     },
 } satisfies Record<Language, TranslationValue>;
