@@ -117,10 +117,40 @@ export default function Designs(): React.ReactElement {
         };
     }, []);
 
-    const designNames = ["Sunbow", "RoyaltiesFi", "CoinFX"];
+    const designNames = ["CoinFX", "Sunbow", "RoyaltiesFi"];
 
     return (
         <>
+            {/* Fixed Language Switcher and Home Button */}
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    right: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "48px",
+                }}
+            >
+                <LanguageSwitcher />
+            </Box>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    left: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "48px",
+                }}
+            >
+                <HomeButton component={Link} href="/" />
+            </Box>
+
             {/* Hero Section */}
             <Box
                 id="hero-section"
@@ -231,38 +261,9 @@ export default function Designs(): React.ReactElement {
                         gap: { xs: "2em" },
                         padding: { xs: "2em" },
                         mb: "3em",
+                        zIndex: 9999,
                     }}
                 >
-                    {/* Language Switcher and Home Button */}
-                    <Box
-                        sx={{
-                            position: "fixed",
-                            top: { xs: "8px", sm: "16px" },
-                            right: { xs: "8px", sm: "16px" },
-                            zIndex: 9999,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "48px",
-                        }}
-                    >
-                        <LanguageSwitcher />
-                    </Box>
-                    <Box
-                        sx={{
-                            position: "fixed",
-                            top: { xs: "8px", sm: "16px" },
-                            left: { xs: "8px", sm: "16px" },
-                            zIndex: 9999,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "48px",
-                        }}
-                    >
-                        <HomeButton component={Link} href="/" />
-                    </Box>
-
                     {/* Mosaic Gallery Section */}
                     <Card
                         sx={{

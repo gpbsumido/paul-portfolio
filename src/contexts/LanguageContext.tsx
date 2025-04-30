@@ -1,5 +1,6 @@
 "use client";
 
+import { title } from "process";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { text } from "stream/consumers";
 
@@ -40,7 +41,7 @@ const translations = {
                 "I'm a passionate developer and designer with a love for creating beautiful, functional experiences.",
         },
         designs: {
-            title: "Designs",
+            title: "Design Showcase",
             viewDesign: "View {name} Design",
             subtitle: "Implemented and Designed",
             explore: "Explore",
@@ -128,7 +129,7 @@ const translations = {
                 "Soy un desarrollador y diseñador apasionado con amor por crear experiencias hermosas y funcionales.",
         },
         designs: {
-            title: "Diseños",
+            title: "Galería de Diseños",
             viewDesign: "Ver diseño de {name}",
             subtitle: "Implementado y Diseñado",
             explore: "Explorar",
@@ -218,7 +219,7 @@ const translations = {
                 "Je suis un développeur et designer passionné qui aime créer des expériences belles et fonctionnelles.",
         },
         designs: {
-            title: "Designs",
+            title: "Vitrine de Design",
             viewDesign: "Voir le design {name}",
             subtitle: "Implémenté et Conçu",
             explore: "Explorer",
