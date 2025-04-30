@@ -104,6 +104,10 @@ const translations = {
                 title: "Map",
                 subtitle: "Save locations and create routes",
             },
+            gallery: {
+                title: "Gallery",
+                subtitle: "Photography & Visual Work",
+            },
         },
     },
     es: {
@@ -187,6 +191,10 @@ const translations = {
             maps: {
                 title: "Carte",
                 subtitle: "Guardar ubicaciones y crear rutas",
+            },
+            gallery: {
+                title: "Galería",
+                subtitle: "Fotografía y Trabajo Visual",
             },
         },
     },
@@ -273,6 +281,10 @@ const translations = {
                 title: "Carte",
                 subtitle:
                     "Enregistrer des emplacements et créer des itinéraires",
+            },
+            gallery: {
+                title: "Galerie",
+                subtitle: "Photographie et Travail Visuel",
             },
         },
     },

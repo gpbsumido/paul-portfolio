@@ -21,6 +21,7 @@ import _ from "lodash";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { HomeButton } from "@/components/common/HomeButton";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ImageData {
     src: string;
@@ -32,8 +33,9 @@ interface ImageData {
 }
 
 export default function Gallery(): React.ReactElement | null {
+    const { t } = useLanguage();
+
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const [images, setImages] = useState<ImageData[]>([]);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -479,17 +481,25 @@ export default function Gallery(): React.ReactElement | null {
             >
                 <LanguageSwitcher />
             </Box>
-            <Typography
-                variant="h1"
-                sx={{
-                    fontSize: "2rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                    textAlign: "center",
-                }}
+            <Box
+                sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 4 }}
             >
-                Gallery
-            </Typography>
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    gutterBottom
+                    sx={{ width: "100%", textAlign: "center" }}
+                >
+                    {t("pages.gallery.title")}
+                </Typography>
+                <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
+                    sx={{ width: "100%", textAlign: "center" }}
+                >
+                    {t("pages.gallery.subtitle")}
+                </Typography>
+            </Box>
             {!images.length && !isLoading && (
                 <Box
                     sx={{

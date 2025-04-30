@@ -16,86 +16,40 @@ import EmailIcon from "@mui/icons-material/Email";
 import { SOCIAL_LINKS } from "@/constants/social_links";
 import { useState, useEffect } from "react";
 import paulImage from "@/assets/paul.jpeg";
-import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
-import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
-import SportsMotorsportsIcon from "@mui/icons-material/SportsMotorsports";
-import MapIcon from "@mui/icons-material/Map";
-import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import BrushIcon from "@mui/icons-material/Brush";
-
-const sections = [
-    {
-        title: "Gallery",
-        description: "Photography & Visual Work",
-        path: "/gallery",
-        icon: <PhotoLibraryIcon fontSize="large" />,
-        bgImage:
-            "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1638&q=80",
-    },
-    {
-        title: "Fantasy Basketball",
-        description: "Stats & Analysis",
-        path: "/fantasy-bball",
-        icon: <SportsBasketballIcon fontSize="large" />,
-        bgImage:
-            "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80",
-    },
-    {
-        title: "Fantasy F1",
-        description: "Racing Analytics",
-        path: "/fantasy-f1",
-        icon: <SportsMotorsportsIcon fontSize="large" />,
-        bgImage:
-            "https://images.unsplash.com/photo-1568219656418-15c329312bf1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80",
-    },
-    {
-        title: "Interactive Map",
-        description: "Location Explorer",
-        path: "/maps",
-        icon: <MapIcon fontSize="large" />,
-        bgImage:
-            "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80",
-    },
-    {
-        title: "Forum",
-        description: "Community Discussions/Logbook",
-        path: "/forum",
-        icon: <SmartphoneIcon fontSize="large" />,
-        bgImage:
-            "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1674&q=80",
-    },
-    {
-        title: "Design Showcase",
-        description: "Projects & Work",
-        path: "/designs",
-        icon: <BrushIcon fontSize="large" />,
-        bgImage:
-            "https://images.unsplash.com/photo-1558655146-9f40138edfeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1664&q=80",
-    },
-];
+import { HOME_PAGE_SECTIONS } from "@/constants/constants";
+import { getShapeProps } from "@/utils/background";
 
 export default function Home() {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const router = useRouter();
     const [hoveredSection, setHoveredSection] = useState<number | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+    const activeIndex =
+        hoveredSection !== null ? hoveredSection : currentImageIndex;
+    const transitionDuration = "0.8s ease-in-out";
+
     useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
-        if (hoveredSection === null) {
-            interval = setInterval(() => {
-                setCurrentImageIndex(
-                    (prevIndex) => (prevIndex + 1) % sections.length
-                );
-            }, 2000);
-        }
-        return () => {
-            if (interval) {
-                clearInterval(interval);
-            }
-        };
+        if (hoveredSection !== null) return;
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex(
+                (prevIndex) => (prevIndex + 1) % HOME_PAGE_SECTIONS.length
+            );
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, [hoveredSection]);
+
+    useEffect(() => {
+        const preloadImages = () => {
+            HOME_PAGE_SECTIONS.forEach((section) => {
+                const img = new Image();
+                img.src = section.bgImage;
+            });
+        };
+        preloadImages();
+    }, []);
 
     return (
         <Box
@@ -106,41 +60,46 @@ export default function Home() {
                 overflow: "hidden",
             }}
         >
-            <Box
-                key={
-                    hoveredSection !== null ? hoveredSection : currentImageIndex
-                }
-                sx={{
-                    position: "absolute",
-                    top: 0,
-                    right: 0,
-                    width: "40%",
-                    height: "100%",
-                    background: `url(${hoveredSection !== null ? sections[hoveredSection].bgImage : sections[currentImageIndex].bgImage})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    clipPath: "polygon(100% 0, 100% 100%, 0 100%, 30% 0)",
-                    zIndex: 0,
-                    transition:
-                        "opacity 1.5s ease-in-out, transform 1.5s ease-in-out", // Added zoom-in effect
-                    opacity: 1,
-                    transform: "scale(1.1)", // Slight zoom-in effect
-                    "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background:
-                            theme.palette.mode === "dark"
-                                ? "rgba(0, 0, 0, 0.5)"
-                                : "rgba(255, 255, 255, 0.3)",
-                        transition: "background 0.4s ease",
-                    },
-                }}
-            />
-            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
+            {HOME_PAGE_SECTIONS.map((section, index) => {
+                const isActive = index === activeIndex;
+                const shapeProps = getShapeProps(index);
+
+                return (
+                    <Box
+                        key={index}
+                        sx={{
+                            position: "absolute",
+                            top: 0,
+                            height: "100%",
+                            background: `url(${section.bgImage})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            zIndex: isActive ? 1 : 0,
+                            opacity: isActive ? 1 : 0,
+                            pointerEvents: isActive ? "auto" : "none",
+                            filter: isActive ? "blur(0px)" : "blur(20px)",
+                            transform: "scale(1.05)",
+                            willChange: "opacity, filter, transform",
+                            transition: `opacity ${transitionDuration}, filter ${transitionDuration}, transform ${transitionDuration}`,
+                            "&::before": {
+                                content: '""',
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background:
+                                    theme.palette.mode === "dark"
+                                        ? "rgba(0, 0, 0, 0.5)"
+                                        : "rgba(255, 255, 255, 0.3)",
+                                transition: "background 0.4s ease",
+                            },
+                            ...shapeProps,
+                        }}
+                    />
+                );
+            })}
+            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
                 <Box
                     sx={{
                         display: "flex",
@@ -189,6 +148,16 @@ export default function Home() {
                                 position: "relative",
                                 display: "inline-block",
                                 color: theme.palette.text.primary,
+                                textShadow:
+                                    theme.palette.mode === "dark"
+                                        ? "2px 2px 4px rgba(255, 255, 255, 0.7)"
+                                        : "2px 2px 4px rgba(0, 0, 0, 0.7)",
+                                background:
+                                    theme.palette.mode === "dark"
+                                        ? "rgba(0, 0, 0, 0.8)"
+                                        : "rgba(255, 255, 255, 0.8)",
+                                padding: "0.5rem 1rem",
+                                borderRadius: "8px",
                                 "&::after": {
                                     content: '""',
                                     position: "absolute",
@@ -209,10 +178,19 @@ export default function Home() {
                         <Typography
                             variant="h5"
                             sx={{
-                                color: theme.palette.text.secondary,
+                                color: theme.palette.text.primary,
                                 mb: 3,
                                 maxWidth: "600px",
-                                fontStyle: "italic",
+                                textShadow:
+                                    theme.palette.mode === "dark"
+                                        ? "2px 2px 4px rgba(255, 255, 255, 0.7)"
+                                        : "2px 2px 4px rgba(0, 0, 0, 0.7)",
+                                background:
+                                    theme.palette.mode === "dark"
+                                        ? "rgba(0, 0, 0, 0.8)"
+                                        : "rgba(255, 255, 255, 0.8)",
+                                padding: "0.5rem 1rem",
+                                borderRadius: "8px",
                             }}
                         >
                             Full Stack Developer & Designer passionate about
@@ -263,93 +241,125 @@ export default function Home() {
                         py: 4,
                     }}
                 >
-                    {sections.map((section, index) => (
-                        <Box
-                            key={section.path}
-                            onClick={() => router.push(section.path)}
-                            onMouseEnter={() => setHoveredSection(index)}
-                            onMouseLeave={() => setHoveredSection(null)}
-                            sx={{
-                                position: "relative",
-                                cursor: "pointer",
-                                "&::before": {
-                                    content: '""',
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    background: theme.palette.background.paper,
-                                    transform: "scale(0.95)",
-                                    transition:
-                                        "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease",
-                                    zIndex: -1,
-                                },
-                                "&:hover::before": {
-                                    transform: "scale(1)",
-                                    background: theme.palette.action.hover,
-                                },
-                            }}
-                        >
+                    {HOME_PAGE_SECTIONS.map((section, index) => {
+                        const isActive = index === activeIndex;
+
+                        return (
                             <Box
+                                key={section.path}
+                                onClick={() => router.push(section.path)}
+                                onMouseEnter={() => setHoveredSection(index)}
+                                onMouseLeave={() => setHoveredSection(null)}
                                 sx={{
-                                    p: 3,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    textAlign: "center",
-                                    transition: "all 0.3s ease",
-                                    "&:hover": {
-                                        transform: "translateY(-5px)",
+                                    position: "relative",
+                                    cursor: "pointer",
+                                    transform: isActive
+                                        ? "scale(1.05)"
+                                        : "scale(1)",
+                                    boxShadow: isActive
+                                        ? theme.palette.mode === "dark"
+                                            ? "0 8px 20px rgba(255, 255, 255, 0.2)"
+                                            : "0 8px 20px rgba(0, 0, 0, 0.2)"
+                                        : "none",
+                                    transition:
+                                        "transform 0.3s ease, box-shadow 0.3s ease",
+                                    "&::before": {
+                                        content: '""',
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        background:
+                                            theme.palette.background.paper,
+                                        transform: "scale(0.95)",
+                                        transition:
+                                            "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease",
+                                        zIndex: -1,
+                                    },
+                                    "&:hover::before": {
+                                        transform: "scale(1)",
+                                        background: theme.palette.action.hover,
                                     },
                                 }}
                             >
-                                <Typography
-                                    variant="h2"
+                                <Box
                                     sx={{
-                                        fontSize: "3rem",
-                                        mb: 2,
-                                        color: theme.palette.text.primary,
-                                        transition: "transform 0.3s ease",
-                                        "&:hover": { transform: "scale(1.1)" },
-                                    }}
-                                >
-                                    {section.icon}
-                                </Typography>
-                                <Typography
-                                    variant="h5"
-                                    component="h2"
-                                    sx={{
-                                        fontWeight: "bold",
-                                        mb: 1,
-                                        color: theme.palette.text.primary,
-                                        position: "relative",
-                                        "&::after": {
-                                            content: '""',
-                                            position: "absolute",
-                                            bottom: -2,
-                                            left: "50%",
-                                            width: 0,
-                                            height: "2px",
+                                        p: 3,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        textAlign: "center",
+                                        transition: "all 0.3s ease",
+                                        background:
+                                            theme.palette.mode === "light"
+                                                ? "rgba(255, 255, 255, 0.9)"
+                                                : theme.palette.background
+                                                      .paper,
+                                        boxShadow:
+                                            theme.palette.mode === "light"
+                                                ? "0 4px 10px rgba(0, 0, 0, 0.1)"
+                                                : "none",
+                                        borderRadius: "8px",
+                                        "&:hover": {
+                                            transform: "translateY(-5px)",
                                             background:
-                                                theme.palette.text.primary,
-                                            transition: "all 0.3s ease",
-                                            transform: "translateX(-50%)",
+                                                theme.palette.mode === "light"
+                                                    ? "rgba(245, 245, 245, 1)"
+                                                    : theme.palette.action
+                                                          .hover,
                                         },
                                     }}
                                 >
-                                    {section.title}
-                                </Typography>
-                                <Typography
-                                    variant="body1"
-                                    color="text.secondary"
-                                    sx={{ opacity: 0.8 }}
-                                >
-                                    {section.description}
-                                </Typography>
+                                    <Typography
+                                        variant="h2"
+                                        sx={{
+                                            fontSize: "3rem",
+                                            mb: 2,
+                                            color: theme.palette.text.primary,
+                                            transition: "transform 0.3s ease",
+                                            "&:hover": {
+                                                transform: "scale(1.1)",
+                                            },
+                                        }}
+                                    >
+                                        {<section.icon fontSize="large" />}
+                                    </Typography>
+                                    <Typography
+                                        variant="h5"
+                                        component="h2"
+                                        sx={{
+                                            fontWeight: "bold",
+                                            mb: 1,
+                                            color: theme.palette.text.primary,
+                                            position: "relative",
+                                            "&::after": {
+                                                content: '""',
+                                                position: "absolute",
+                                                bottom: -2,
+                                                left: "50%",
+                                                width: 0,
+                                                height: "2px",
+                                                background:
+                                                    theme.palette.text.primary,
+                                                transition: "all 0.3s ease",
+                                                transform: "translateX(-50%)",
+                                            },
+                                        }}
+                                    >
+                                        {section.title}
+                                    </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        color={theme.palette.text.secondary}
+                                        sx={{ opacity: 0.9 }}
+                                    >
+                                        {section.description}
+                                    </Typography>
+                                </Box>
                             </Box>
-                        </Box>
-                    ))}
+                        );
+                    })}
                 </Box>
             </Container>
         </Box>
