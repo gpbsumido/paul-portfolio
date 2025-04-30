@@ -1,6 +1,14 @@
 "use client";
 
-import { Box } from "@mui/material";
+import {
+    Box,
+    Typography,
+    Button,
+    Card,
+    CardMedia,
+    CardContent,
+    Modal,
+} from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import Footer from "../../components/layout/Footer";
@@ -19,18 +27,32 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 export default function Designs(): React.ReactElement {
     const { t } = useLanguage();
-    const [activeIframes, setActiveIframes] = useState([false, false, false]);
-    const [currentPortalImage, setCurrentPortalImage] = useState(0);
-    const [currentUAImage, setCurrentUAImage] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [openModal, setOpenModal] = useState(false);
+    const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
+    const [heroBackground, setHeroBackground] = useState<string | null>(null);
+    const [isHeroSticky, setIsHeroSticky] = useState(true); // State to control hero stickiness
+    const [heroHeight, setHeroHeight] = useState(0);
+    const [scrollProgress, setScrollProgress] = useState(0);
+    const [figmaRect, setFigmaRect] = useState({ top: 0 });
 
-    const handleTextClick = useCallback((index: number) => {
-        setActiveIframes((prev) => {
-            const updated = [...prev];
-            updated[index] = true;
-            return updated;
-        });
-    }, []);
+    const handleOpenModal = (design: string) => {
+        setSelectedDesign(design);
+        setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedDesign(null);
+        setOpenModal(false);
+    };
+
+    const handleMouseEnter = (image: string) => {
+        setHeroBackground(image);
+    };
+
+    const handleMouseLeave = () => {
+        setHeroBackground(null);
+    };
 
     useEffect(() => {
         const loadImages = async () => {
@@ -60,183 +82,400 @@ export default function Designs(): React.ReactElement {
     }, []);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentPortalImage(
-                (prev) => (prev + 1) % HELIKA_PORTAL_IMAGES.length
-            );
-            setCurrentUAImage((prev) => (prev + 1) % HELIKA_UA_IMAGES.length);
-        }, 5000);
+        const heroSection = document.getElementById("hero-section");
+        if (heroSection) {
+            setHeroHeight(heroSection.offsetHeight);
+        }
+    }, []);
 
-        return () => clearInterval(interval);
+    useEffect(() => {
+        let ticking = false;
+
+        const handleScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const figmaSection = document.getElementById("figma-section");
+                    const heroSection = document.getElementById("hero-section");
+
+                    if (figmaSection && heroSection) {
+                        const figmaRect = figmaSection.getBoundingClientRect();
+                        const heroRect = heroSection.getBoundingClientRect();
+
+                        setFigmaRect(figmaRect);
+
+                        // Ensure the hero stops being sticky when its bottom aligns with the Figma section's top
+                        if (figmaRect.top <= heroRect.bottom) {
+                            setIsHeroSticky(false);
+                        } else {
+                            setIsHeroSticky(true);
+                        }
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const designNames = ["Sunbow", "RoyaltiesFi", "CoinFX"];
 
     return (
         <>
+            {/* Hero Section */}
             <Box
+                id="hero-section"
                 sx={{
-                    height: "fit-content",
-                    width: "100vw",
-                    background: "var(--background)",
-                    color: "var(--foreground)",
+                    height: { xs: "50vh", sm: "60vh" },
+                    width: "100%",
+                    position: "fixed",
+                    top: isHeroSticky ? 0 : figmaRect.top - heroHeight,
+                    zIndex: 1000,
+                    background: heroBackground
+                        ? `url(${heroBackground}) center/contain no-repeat`
+                        : (theme: { palette: { mode: string } }) =>
+                            theme.palette.mode === "dark"
+                                ? "linear-gradient(135deg, #2c3e50, #34495e, #4a69bd, #6a89cc)"
+                                : "linear-gradient(135deg, #f8b195, #f67280, #c06c84, #6c5b7b, #355c7d)",
+                    backgroundColor: heroBackground
+                        ? (theme: { palette: { mode: string } }) =>
+                            theme.palette.mode === "dark" ? "#000000" : "#ffffff"
+                        : "transparent",
+                    backgroundSize: heroBackground ? "contain" : "400% 400%",
+                    animation: heroBackground
+                        ? undefined
+                        : (theme: { palette: { mode: string } }) =>
+                            theme.palette.mode === "dark"
+                                ? "darkGradient 10s ease infinite"
+                                : "pastelGradient 10s ease infinite",
                     display: "flex",
                     flexDirection: "column",
-                    scrollSnapType: { xs: "none", sm: "y mandatory" },
-                    overflowY: "scroll",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: (theme: { palette: { mode: string } }) =>
+                        theme.palette.mode === "dark" ? "#ecf0f1" : "#fff",
+                    textAlign: "center",
+                    padding: "2em",
+                    overflow: "hidden",
+                    transition: "none",
+                    "&::before": heroBackground
+                        ? undefined
+                        : (theme: { palette: { mode: string } }) =>
+                            theme.palette.mode === "dark"
+                                ? {
+                                    content: '""',
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    width: "200%",
+                                    height: "200%",
+                                    background:
+                                        "radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 70%)",
+                                    animation: "waveEffect 6s infinite linear",
+                                    transform: "translate(-50%, -50%)",
+                                }
+                                : {
+                                    content: '""',
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    width: "200%",
+                                    height: "200%",
+                                    background:
+                                        "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
+                                    animation: "waveEffect 6s infinite linear",
+                                    transform: "translate(-50%, -50%)",
+                                },
+                    "@keyframes waveEffect": {
+                        "0%": {
+                            transform: "translate(-50%, -50%) rotate(0deg)",
+                        },
+                        "100%": {
+                            transform: "translate(-50%, -50%) rotate(360deg)",
+                        },
+                    },
+                    "@keyframes pastelGradient": {
+                        "0%": { backgroundPosition: "0% 50%" },
+                        "50%": { backgroundPosition: "100% 50%" },
+                        "100%": { backgroundPosition: "0% 50%" },
+                    },
+                    "@keyframes darkGradient": {
+                        "0%": { backgroundPosition: "0% 50%" },
+                        "50%": { backgroundPosition: "100% 50%" },
+                        "100%": { backgroundPosition: "0% 50%" },
+                    },
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
                 }}
             >
                 <Box
                     sx={{
-                        position: "fixed",
-                        top: { xs: "8px", sm: "16px" },
-                        right: { xs: "8px", sm: "16px" },
-                        zIndex: 9999,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "48px",
+                        opacity: heroBackground ? 0 : 1, // Hide text when an image is displayed
+                        transition: "opacity 0.3s ease",
                     }}
                 >
-                    <LanguageSwitcher />
+                    <Typography variant="h2" sx={{ fontWeight: "bold", mb: 2 }}>
+                        {t("designs.title")}
+                    </Typography>
+                    <Typography variant="h6" sx={{ maxWidth: "600px", mb: 4 }}>
+                        {t("designs.subtitle")}
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        size="large"
+                        sx={{ textTransform: "none", borderRadius: "8px" }}
+                        href="#designs"
+                    >
+                        {t("designs.explore")}
+                    </Button>
                 </Box>
+            </Box>
+
+            {/* Main Content Container */}
+            <Box
+                id="main-content"
+                sx={{
+                    position: "relative",
+                    zIndex: 1,
+                }}
+            >
+                {/* Placeholder to prevent layout shift */}
                 <Box
                     sx={{
-                        position: "fixed",
-                        top: { xs: "8px", sm: "16px" },
-                        left: { xs: "8px", sm: "16px" },
-                        zIndex: 9999,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "48px",
+                        height: { xs: "50vh", sm: "60vh" },
+                        width: "100%",
                     }}
-                >
-                    <HomeButton component={Link} href="/" />
-                </Box>
+                />
 
                 <Box
+                    id="designs"
                     sx={{
+                        width: "100%",
+                        background: "var(--background)",
+                        color: "var(--foreground)",
                         display: "flex",
                         flexDirection: "column",
-                        gap: { xs: "2em", sm: "4em" },
-                        paddingBottom: { xs: "2em", sm: "4em" },
+                        gap: { xs: "2em" },
+                        padding: { xs: "2em" },
+                        mb: "3em",
                     }}
                 >
-                    <CarouselSection
-                        images={HELIKA_PORTAL_IMAGES}
-                        currentIndex={currentPortalImage}
-                        onIndexChange={setCurrentPortalImage}
-                        title="Helika Portal"
-                        textColor="var(--foreground)"
-                        isLoading={isLoading}
-                        maxWidth="90vw"
-                        sx={{ marginBottom: { xs: "4em", sm: "6em" } }}
-                    />
+                    {/* Language Switcher and Home Button */}
+                    <Box
+                        sx={{
+                            position: "fixed",
+                            top: { xs: "8px", sm: "16px" },
+                            right: { xs: "8px", sm: "16px" },
+                            zIndex: 9999,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "48px",
+                        }}
+                    >
+                        <LanguageSwitcher />
+                    </Box>
+                    <Box
+                        sx={{
+                            position: "fixed",
+                            top: { xs: "8px", sm: "16px" },
+                            left: { xs: "8px", sm: "16px" },
+                            zIndex: 9999,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "48px",
+                        }}
+                    >
+                        <HomeButton component={Link} href="/" />
+                    </Box>
 
-                    <CarouselSection
-                        images={HELIKA_UA_IMAGES}
-                        currentIndex={currentUAImage}
-                        onIndexChange={setCurrentUAImage}
-                        title="Helika UA"
-                        textColor="var(--foreground)"
-                        isLoading={isLoading}
-                        maxWidth="90vw"
-                        sx={{ marginBottom: { xs: "4em", sm: "6em" } }}
-                    />
-
-                    {[...Array(3)].map((_, index) => (
-                        <Box
-                            key={index}
-                            sx={{
-                                marginBottom: { xs: "4em", sm: "6em" },
-                            }}
-                        >
-                            <Box
-                                id="design-product"
-                                sx={{
-                                    height: {
-                                        xs: "calc(100dvh - 120px)",
-                                        sm: "calc(100vh - 120px)",
-                                    },
-                                    width: "100%",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    color: "var(--foreground)",
-                                    padding: { xs: "2em 0", sm: "0" },
-                                    minHeight: {
-                                        xs: "calc(100dvh - 120px)",
-                                        sm: "calc(100vh - 120px)",
-                                    },
-                                }}
-                            >
+                    {/* Mosaic Gallery Section */}
+                    <Card
+                        sx={{
+                            p: 2,
+                            borderRadius: "0.5em",
+                        }}
+                    >
+                        Helika WebApp
+                    </Card>
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns:
+                                "repeat(auto-fit, minmax(250px, 1fr))", // Uniform size for grid items
+                            gap: "1em",
+                            marginBottom: "-4em",
+                        }}
+                    >
+                        {[...HELIKA_PORTAL_IMAGES, ...HELIKA_UA_IMAGES].map(
+                            (image, index) => (
                                 <Box
+                                    key={index}
+                                    onMouseEnter={() =>
+                                        handleMouseEnter(
+                                            typeof image === "string"
+                                                ? image
+                                                : image.src
+                                        )
+                                    }
+                                    onMouseLeave={handleMouseLeave}
                                     sx={{
-                                        height: "100%",
-                                        width: "100%",
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        gap: { xs: "0.5em", sm: "1em" },
-                                        padding: { xs: "1em", sm: "0" },
-                                        minHeight: "100%",
+                                        position: "relative",
+                                        overflow: "hidden",
+                                        borderRadius: "8px",
+                                        cursor: "pointer",
+                                        height: "150px", // Uniform height for all images
+                                        transition: "transform 0.3s ease",
+                                        "&:hover": {
+                                            transform: "scale(1.1)",
+                                            zIndex: 1,
+                                        },
                                     }}
                                 >
-                                    {activeIframes[index] ? (
-                                        <iframe
-                                            src={figmaDesigns[index]}
-                                            style={{
-                                                width: "90%",
-                                                height: "90%",
-                                                border: "none",
-                                            }}
-                                        />
-                                    ) : (
-                                        <Box
-                                            sx={{
-                                                cursor: "pointer",
-                                                textDecoration: "underline",
-                                                fontSize: {
-                                                    xs: "1rem",
-                                                    sm: "1.5rem",
-                                                },
-                                                fontWeight: "bold",
-                                                display: "flex",
-                                                flexDirection: "column",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                gap: {
-                                                    xs: "0.25em",
-                                                    sm: "0.5em",
-                                                },
-                                            }}
-                                            onClick={() =>
-                                                handleTextClick(index)
-                                            }
+                                    <Image
+                                        src={
+                                            typeof image === "string"
+                                                ? image
+                                                : image.src
+                                        }
+                                        alt={`Gallery Image ${index + 1}`}
+                                        layout="fill"
+                                        objectFit="cover" // Ensure the image fills the container
+                                    />
+                                </Box>
+                            )
+                        )}
+                    </Box>
+
+                    <Box
+                        id="figma-section"
+                        sx={{
+                            pt: "5em", gap: "2em", display: 'flex', flexDirection: 'column',
+                        }}
+                    >
+                        {/* Figma Designs Section */}
+                        <Card
+                            sx={{
+                                p: 2,
+                                borderRadius: "0.5em",
+                            }}
+                        >
+                            Figmas
+                        </Card>
+                        <Box
+                            sx={{
+                                display: "grid",
+                                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" },
+                                gap: "2em",
+                            }}
+                        >
+                            {figmaDesigns.map((design, index) => (
+                                <Card
+                                    key={index}
+                                    sx={{
+                                        borderRadius: "16px",
+                                        boxShadow: 3,
+                                        overflow: "hidden",
+                                        transition: "transform 0.3s ease",
+                                        "&:hover": {
+                                            transform: "scale(1.05)",
+                                        },
+                                    }}
+                                >
+                                    <CardMedia
+                                        component="img"
+                                        image={
+                                            typeof figmaImages[index] === "string"
+                                                ? figmaImages[index]
+                                                : figmaImages[index].src
+                                        }
+                                        alt={`Project ${designNames[index]}`}
+                                        sx={{ height: "200px", objectFit: "cover" }}
+                                    />
+                                    <CardContent>
+                                        <Typography
+                                            variant="h6"
+                                            sx={{ fontWeight: "bold", mb: 1 }}
                                         >
-                                            <Image
-                                                src={figmaImages[index]}
-                                                alt={`Project ${designNames[index]}`}
-                                                style={{
-                                                    width: "80%",
-                                                    height: "auto",
-                                                    objectFit: "contain",
-                                                }}
-                                                loading="lazy"
-                                            />
+                                            {designNames[index]}
+                                        </Typography>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => handleOpenModal(design)}
+                                            sx={{
+                                                textTransform: "none",
+                                                borderRadius: "8px",
+                                            }}
+                                        >
                                             {t("designs.viewDesign", {
                                                 name: designNames[index],
                                             })}
-                                        </Box>
-                                    )}
-                                </Box>
-                            </Box>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
                         </Box>
-                    ))}
+                    </Box>
                 </Box>
             </Box>
+
+            {/* Modal */}
+            <Modal
+                open={openModal}
+                onClose={handleCloseModal}
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <Box
+                    sx={{
+                        width: "90%",
+                        height: "90%",
+                        backgroundColor: (theme) =>
+                            theme.palette.mode === "dark" ? "#2c3e50" : "white",
+                        color: (theme) =>
+                            theme.palette.mode === "dark" ? "#ecf0f1" : "black",
+                        borderRadius: "16px",
+                        overflow: "hidden",
+                        boxShadow: 24,
+                        padding: "1em",
+                        position: "relative",
+                    }}
+                >
+                    <Button
+                        onClick={handleCloseModal}
+                        sx={{
+                            position: "absolute",
+                            top: "16px",
+                            right: "16px",
+                            zIndex: 10,
+                            color: (theme) =>
+                                theme.palette.mode === "dark"
+                                    ? "#ecf0f1"
+                                    : "black",
+                        }}
+                    >
+                        Close
+                    </Button>
+                    {selectedDesign && (
+                        <iframe
+                            src={selectedDesign}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                            }}
+                        />
+                    )}
+                </Box>
+            </Modal>
+
             <Footer />
         </>
     );
