@@ -21,6 +21,7 @@ import _ from "lodash";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { HomeButton } from "@/components/common/HomeButton";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ImageData {
     src: string;
@@ -32,8 +33,10 @@ interface ImageData {
 }
 
 export default function Gallery(): React.ReactElement | null {
+
+    const { t } = useLanguage();
+
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const [images, setImages] = useState<ImageData[]>([]);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -300,7 +303,7 @@ export default function Gallery(): React.ReactElement | null {
             } catch (error: any) {
                 setFetchError(
                     error.message ||
-                        "An unexpected error occurred while fetching posts."
+                    "An unexpected error occurred while fetching posts."
                 );
             } finally {
                 setIsLoading(false);
@@ -450,7 +453,7 @@ export default function Gallery(): React.ReactElement | null {
         } catch (error: any) {
             setDeleteError(
                 error.message ||
-                    "An unexpected error occurred while deleting the post."
+                "An unexpected error occurred while deleting the post."
             );
         } finally {
             setDeletingImageId(null);
@@ -479,17 +482,23 @@ export default function Gallery(): React.ReactElement | null {
             >
                 <LanguageSwitcher />
             </Box>
-            <Typography
-                variant="h1"
-                sx={{
-                    fontSize: "2rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                    textAlign: "center",
-                }}
-            >
-                Gallery
-            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 4 }}>
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    gutterBottom
+                    sx={{ width: "100%", textAlign: "center" }}
+                >
+                    {t("pages.gallery.title")}
+                </Typography>
+                <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
+                    sx={{ width: "100%", textAlign: "center" }}
+                >
+                    {t("pages.gallery.subtitle")}
+                </Typography>
+            </Box>
             {!images.length && !isLoading && (
                 <Box
                     sx={{
@@ -632,64 +641,64 @@ export default function Gallery(): React.ReactElement | null {
                                     {(imageData?.text ||
                                         imageData?.description ||
                                         imageData?.date) && (
-                                        <Box
-                                            className="image-data"
-                                            sx={{
-                                                position: "absolute",
-                                                bottom: 0,
-                                                left: 0,
-                                                right: 0,
-                                                bgcolor: "rgba(0,0,0,0.6)",
-                                                color: "#fff",
-                                                p: 2,
-                                                zIndex: 2,
-                                                opacity: 0,
-                                                transition: "opacity 0.3s ease",
-                                            }}
-                                        >
-                                            {imageData?.text && (
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    sx={{
-                                                        fontWeight: "bold",
-                                                    }}
-                                                >
-                                                    {imageData.text}
-                                                </Typography>
-                                            )}
-                                            {imageData?.description && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ mt: 1 }}
-                                                >
-                                                    {imageData.description}
-                                                </Typography>
-                                            )}
-                                            {imageData?.date && (
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        display: "block",
-                                                        mt: 1,
-                                                        opacity: 0.7,
-                                                    }}
-                                                >
-                                                    {new Date(
-                                                        imageData.date
-                                                    ).toLocaleString(
-                                                        undefined,
-                                                        {
-                                                            year: "numeric",
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        }
-                                                    )}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    )}
+                                            <Box
+                                                className="image-data"
+                                                sx={{
+                                                    position: "absolute",
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bgcolor: "rgba(0,0,0,0.6)",
+                                                    color: "#fff",
+                                                    p: 2,
+                                                    zIndex: 2,
+                                                    opacity: 0,
+                                                    transition: "opacity 0.3s ease",
+                                                }}
+                                            >
+                                                {imageData?.text && (
+                                                    <Typography
+                                                        variant="subtitle1"
+                                                        sx={{
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    >
+                                                        {imageData.text}
+                                                    </Typography>
+                                                )}
+                                                {imageData?.description && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{ mt: 1 }}
+                                                    >
+                                                        {imageData.description}
+                                                    </Typography>
+                                                )}
+                                                {imageData?.date && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            display: "block",
+                                                            mt: 1,
+                                                            opacity: 0.7,
+                                                        }}
+                                                    >
+                                                        {new Date(
+                                                            imageData.date
+                                                        ).toLocaleString(
+                                                            undefined,
+                                                            {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            }
+                                                        )}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        )}
                                 </Box>
                             </Box>
                         );
