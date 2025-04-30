@@ -34,3 +34,61 @@ export const HELIKA_PORTAL_IMAGES = [
 ];
 
 export const HELIKA_UA_IMAGES = [ua, ua1, ua2, ua3, ua4, ua5];
+
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
+import SportsMotorsportsIcon from "@mui/icons-material/SportsMotorsports";
+import MapIcon from "@mui/icons-material/Map";
+import SmartphoneIcon from "@mui/icons-material/Smartphone";
+import BrushIcon from "@mui/icons-material/Brush";
+
+export const HOME_PAGE_SECTIONS = [
+    {
+        title: "Gallery",
+        description: "Photography & Visual Work",
+        path: "/gallery",
+        icon: PhotoLibraryIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1638&q=80",
+    },
+    {
+        title: "Fantasy Basketball",
+        description: "Stats & Analysis",
+        path: "/fantasy-bball",
+        icon: SportsBasketballIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=3890&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+        title: "Fantasy F1",
+        description: "Racing Analytics",
+        path: "/fantasy-f1",
+        icon: SportsMotorsportsIcon,
+        bgImage:
+            "https://plus.unsplash.com/premium_photo-1677993185885-985af6b425c4?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+        title: "Interactive Map",
+        description: "Location Explorer",
+        path: "/maps",
+        icon: MapIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1448518340475-e3c680e9b4be?q=80&w=3200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+        title: "Forum",
+        description: "Community Discussions/Logbook",
+        path: "/forum",
+        icon: SmartphoneIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1741636174266-a090f9427ec0?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+        title: "Design Showcase",
+        description: "Projects & Work",
+        path: "/designs",
+        icon: BrushIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1558655146-9f40138edfeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1664&q=80",
+    },
+];
