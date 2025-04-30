@@ -18,6 +18,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState, useRef, useCallback } from "react";
 import React from "react";
 import _ from "lodash";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { HomeButton } from "@/components/common/HomeButton";
+import Link from "next/link";
 
 interface ImageData {
     src: string;
@@ -71,51 +74,6 @@ export default function Gallery(): React.ReactElement | null {
                 reject(new Error(`Failed to preload image: ${src}`));
         });
     };
-
-    const loadImage = useCallback(
-        (
-            src: string,
-            width: number,
-            height: number
-        ): Promise<HTMLImageElement> => {
-            return new Promise((resolve, reject) => {
-                if (imageCache.current[src]?.loaded) {
-                    resolve(imageCache.current[src].element);
-                    return;
-                }
-
-                if (imageCache.current[src]) {
-                    const checkLoaded = () => {
-                        if (imageCache.current[src]?.loaded) {
-                            resolve(imageCache.current[src].element);
-                        } else {
-                            setTimeout(checkLoaded, 100);
-                        }
-                    };
-                    checkLoaded();
-                    return;
-                }
-
-                const img = document.createElement("img") as HTMLImageElement;
-                img.src = src;
-                img.width = width;
-                img.height = height;
-
-                imageCache.current[src] = { element: img, loaded: false };
-
-                img.onload = () => {
-                    imageCache.current[src].loaded = true;
-                    resolve(img);
-                };
-
-                img.onerror = () => {
-                    delete imageCache.current[src];
-                    reject(new Error("Failed to load image"));
-                };
-            });
-        },
-        []
-    );
 
     const ImageComponent = useCallback(
         ({
@@ -500,17 +458,27 @@ export default function Gallery(): React.ReactElement | null {
     };
 
     return (
-        <Box
-            component="main"
-            sx={{
-                padding: "20px",
-                width: "100%",
-                minHeight: "100vh",
-                maxWidth: "1200px",
-                margin: "0 auto",
-                boxSizing: "border-box",
-            }}
-        >
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    left: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <HomeButton component={Link} href="/" />
+            </Box>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    right: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <LanguageSwitcher />
+            </Box>
             <Typography
                 variant="h1"
                 sx={{
@@ -956,6 +924,6 @@ export default function Gallery(): React.ReactElement | null {
                     </Box>
                 </Box>
             </Modal>
-        </Box>
+        </Container>
     );
 }
