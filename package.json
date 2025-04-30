@@ -39,6 +39,7 @@
         "framer-motion": "^11.0.0",
         "html-react-parser": "^5.2.3",
         "leaflet": "^1.9.4",
+        "lodash": "^4.17.21",
         "maplibre-gl": "^5.3.1",
         "next": "14.1.0",
         "next-themes": "^0.2.1",
@@ -48,6 +49,7 @@
         "react-leaflet": "^5.0.0",
         "react-tooltip": "^5.28.1",
         "recharts": "^2.15.2",
+        "sharp": "^0.34.1",
         "zustand": "^4.5.0"
     },
     "devDependencies": {
@@ -56,6 +58,7 @@
         "@testing-library/jest-dom": "^6.0.0",
         "@testing-library/react": "^14.0.0",
         "@types/leaflet": "^1.9.17",
+        "@types/lodash": "^4.17.16",
         "@types/node": "^20",
         "@types/pretty-hrtime": "^1.0.3",
         "@types/react": "^18",
