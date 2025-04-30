@@ -90,15 +90,18 @@ export default function Designs(): React.ReactElement {
         const handleScroll = () => {
             const figmaSection = document.getElementById("figma-section");
             const heroSection = document.getElementById("hero-section");
-            
+
             if (figmaSection && heroSection) {
                 const figmaRect = figmaSection.getBoundingClientRect();
                 const heroRect = heroSection.getBoundingClientRect();
                 setFigmaRect(figmaRect);
 
                 // Calculate the visible height of the hero section
-                const visibleHeroHeight = Math.min(heroRect.height, window.innerHeight - heroRect.top);
-                
+                const visibleHeroHeight = Math.min(
+                    heroRect.height,
+                    window.innerHeight - heroRect.top
+                );
+
                 // Hero should be fixed if the Figma section is above the visible part of the hero
                 setIsHeroSticky(figmaRect.top > visibleHeroHeight);
             }
@@ -130,22 +133,22 @@ export default function Designs(): React.ReactElement {
                     background: heroBackground
                         ? `url(${heroBackground}) center/contain no-repeat`
                         : (theme: { palette: { mode: string } }) =>
-                            theme.palette.mode === "dark"
-                                ? "linear-gradient(135deg, #2c3e50, #34495e, #4a69bd, #6a89cc)"
-                                : "linear-gradient(135deg, #f8b195, #f67280, #c06c84, #6c5b7b, #355c7d)",
+                              theme.palette.mode === "dark"
+                                  ? "linear-gradient(135deg, #2c3e50, #34495e, #4a69bd, #6a89cc)"
+                                  : "linear-gradient(135deg, #f8b195, #f67280, #c06c84, #6c5b7b, #355c7d)",
                     backgroundColor: heroBackground
                         ? (theme: { palette: { mode: string } }) =>
-                            theme.palette.mode === "dark"
-                                ? "#000000"
-                                : "#ffffff"
+                              theme.palette.mode === "dark"
+                                  ? "#000000"
+                                  : "#ffffff"
                         : "transparent",
                     backgroundSize: heroBackground ? "contain" : "400% 400%",
                     animation: heroBackground
                         ? undefined
                         : (theme: { palette: { mode: string } }) =>
-                            theme.palette.mode === "dark"
-                                ? "darkGradient 10s ease infinite"
-                                : "pastelGradient 10s ease infinite",
+                              theme.palette.mode === "dark"
+                                  ? "darkGradient 10s ease infinite"
+                                  : "pastelGradient 10s ease infinite",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
@@ -159,33 +162,33 @@ export default function Designs(): React.ReactElement {
                     "&::before": heroBackground
                         ? undefined
                         : (theme: { palette: { mode: string } }) =>
-                            theme.palette.mode === "dark"
-                                ? {
-                                    content: '""',
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "200%",
-                                    height: "200%",
-                                    background:
-                                        "radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 70%)",
-                                    animation:
-                                        "waveEffect 6s infinite linear",
-                                    transform: "translate(-50%, -50%)",
-                                }
-                                : {
-                                    content: '""',
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "200%",
-                                    height: "200%",
-                                    background:
-                                        "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
-                                    animation:
-                                        "waveEffect 6s infinite linear",
-                                    transform: "translate(-50%, -50%)",
-                                },
+                              theme.palette.mode === "dark"
+                                  ? {
+                                        content: '""',
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "200%",
+                                        height: "200%",
+                                        background:
+                                            "radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 70%)",
+                                        animation:
+                                            "waveEffect 6s infinite linear",
+                                        transform: "translate(-50%, -50%)",
+                                    }
+                                  : {
+                                        content: '""',
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "200%",
+                                        height: "200%",
+                                        background:
+                                            "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
+                                        animation:
+                                            "waveEffect 6s infinite linear",
+                                        transform: "translate(-50%, -50%)",
+                                    },
                     "@keyframes waveEffect": {
                         "0%": {
                             transform: "translate(-50%, -50%) rotate(0deg)",
@@ -393,7 +396,7 @@ export default function Designs(): React.ReactElement {
                                         component="img"
                                         image={
                                             typeof figmaImages[index] ===
-                                                "string"
+                                            "string"
                                                 ? figmaImages[index]
                                                 : figmaImages[index].src
                                         }
