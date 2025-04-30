@@ -183,17 +183,17 @@ export default function Designs(): React.ReactElement {
                     "&::before": heroBackground
                         ? undefined
                         : {
-                              content: '""',
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "200%",
-                              height: "200%",
-                              background:
-                                  "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
-                              animation: "waveEffect 6s infinite linear",
-                              transform: "translate(-50%, -50%)",
-                          },
+                            content: '""',
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "200%",
+                            height: "200%",
+                            background:
+                                "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
+                            animation: "waveEffect 6s infinite linear",
+                            transform: "translate(-50%, -50%)",
+                        },
                     "@keyframes waveEffect": {
                         "0%": {
                             transform: "translate(-50%, -50%) rotate(0deg)",
@@ -221,15 +221,6 @@ export default function Designs(): React.ReactElement {
                     <Typography variant="h6" sx={{ maxWidth: "600px", mb: 4 }}>
                         {t("designs.subtitle")}
                     </Typography>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        size="large"
-                        sx={{ textTransform: "none", borderRadius: "8px" }}
-                        href="#designs"
-                    >
-                        {t("designs.explore")}
-                    </Button>
                 </Box>
             </Box>
 
@@ -373,7 +364,7 @@ export default function Designs(): React.ReactElement {
                                         component="img"
                                         image={
                                             typeof figmaImages[index] ===
-                                            "string"
+                                                "string"
                                                 ? figmaImages[index]
                                                 : figmaImages[index].src
                                         }
