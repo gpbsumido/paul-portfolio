@@ -148,14 +148,10 @@ export default function Home() {
                                 position: "relative",
                                 display: "inline-block",
                                 color: theme.palette.text.primary,
-                                textShadow:
-                                    theme.palette.mode === "dark"
-                                        ? "2px 2px 4px rgba(255, 255, 255, 0.7)"
-                                        : "2px 2px 4px rgba(0, 0, 0, 0.7)",
                                 background:
                                     theme.palette.mode === "dark"
-                                        ? "rgba(0, 0, 0, 0.8)"
-                                        : "rgba(255, 255, 255, 0.8)",
+                                        ? "rgba(0, 0, 0, 0.5)"
+                                        : "rgba(255, 255, 255, 0.5)",
                                 padding: "0.5rem 1rem",
                                 borderRadius: "8px",
                                 "&::after": {
@@ -181,14 +177,10 @@ export default function Home() {
                                 color: theme.palette.text.primary,
                                 mb: 3,
                                 maxWidth: "600px",
-                                textShadow:
-                                    theme.palette.mode === "dark"
-                                        ? "2px 2px 4px rgba(255, 255, 255, 0.7)"
-                                        : "2px 2px 4px rgba(0, 0, 0, 0.7)",
                                 background:
                                     theme.palette.mode === "dark"
-                                        ? "rgba(0, 0, 0, 0.8)"
-                                        : "rgba(255, 255, 255, 0.8)",
+                                        ? "rgba(0, 0, 0, 0.5)"
+                                        : "rgba(255, 255, 255, 0.5)",
                                 padding: "0.5rem 1rem",
                                 borderRadius: "8px",
                             }}
