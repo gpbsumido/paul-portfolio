@@ -48,10 +48,9 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SchoolIcon from "@mui/icons-material/School";
-import DropdownComponent from "@/components/shared/DropdownComponent";
-import { v4 as uuidv4 } from "uuid";
 import Alert from "@mui/material/Alert";
-import Skeleton from "@mui/material/Skeleton";
+
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface LearningEntry {
     id: string;
@@ -127,6 +126,15 @@ const LOCATIONS = [
 
 export default function MedicalJournalPage() {
     const theme = useTheme();
+    const {
+        user,
+        isAuthenticated,
+        isLoading,
+        loginWithRedirect,
+        logout,
+        getAccessTokenSilently,
+    } = useAuth0();
+
     const { t } = useLanguage();
     const [entries, setEntries] = useState<LearningEntry[]>([]);
     const [currentEntry, setCurrentEntry] = useState<LearningEntry>({
@@ -138,8 +146,8 @@ export default function MedicalJournalPage() {
         rotation: "",
         date: new Date().toISOString().split("T")[0],
         location: "",
-        hospital: "", // Reset hospital
-        doctor: "", // Reset doctor
+        hospital: "",
+        doctor: "",
     });
     const [editingEntry, setEditingEntry] = useState<string | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -155,10 +163,10 @@ export default function MedicalJournalPage() {
         location?: string;
     }>({});
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [isFetching, setIsFetching] = useState(false); // Add fetching state
+    const [isFetching, setIsFetching] = useState(false);
 
-    const [page, setPage] = useState(1); // Current page
-    const [limit, setLimit] = useState(5); // Number of entries per page
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(5);
 
     const handleSort = (field: keyof LearningEntry) => {
         if (sortField === field) {
@@ -221,11 +229,23 @@ export default function MedicalJournalPage() {
         try {
             if (!validateFields()) return;
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/save-entry`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(currentEntry),
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
             });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/save-entry`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(currentEntry),
+                }
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to save the entry.");
@@ -267,9 +287,21 @@ export default function MedicalJournalPage() {
 
     const handleDeleteEntry = async (id: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/delete-entry/${id}`, {
-                method: "DELETE",
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
             });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/delete-entry/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to delete the entry.");
@@ -287,7 +319,21 @@ export default function MedicalJournalPage() {
         try {
             setIsFetching(true);
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}`);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
             if (!response.ok) {
                 throw new Error("Failed to fetch entries.");
             }
@@ -305,7 +351,21 @@ export default function MedicalJournalPage() {
 
     const handleEditEntry = async (id: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/edit-entry/${id}`);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/edit-entry/${id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
             if (!response.ok) {
                 throw new Error("Failed to fetch the entry for editing.");
             }
@@ -315,12 +375,14 @@ export default function MedicalJournalPage() {
 
             setCurrentEntry({
                 id: entry.id || "",
-                patientsetting: entry.patientsetting || "", // Map to correct key
+                patientsetting: entry.patientsetting || "",
                 interaction: entry.interaction || "",
-                canmedsroles: entry.canmedsroles || [], // Map to correct key
-                learningObjectives: entry.learningobjectives || [], // Map to correct key
+                canmedsroles: entry.canmedsroles || [],
+                learningObjectives: entry.learningobjectives || [],
                 rotation: entry.rotation || "",
-                date: entry.date ? new Date(entry.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0], // Format date
+                date: entry.date
+                    ? new Date(entry.date).toISOString().split("T")[0]
+                    : new Date().toISOString().split("T")[0],
                 location: entry.location || "",
                 hospital: entry.hospital || "",
                 doctor: entry.doctor || "",
@@ -335,10 +397,9 @@ export default function MedicalJournalPage() {
     };
 
     useEffect(() => {
-        handleFetchEntries(); // Ensure this is called only after the component has mounted
-    }, [page, limit]);
-
-    console.log("paginatedEntries:", paginatedEntries); // Debugging line
+        if (isLoading || !isAuthenticated) return;
+        handleFetchEntries();
+    }, [page, limit, isLoading, isAuthenticated]);
 
     const handleCloseEditDialog = () => {
         setIsEditDialogOpen(false);
@@ -352,8 +413,8 @@ export default function MedicalJournalPage() {
             rotation: "",
             date: new Date().toISOString().split("T")[0],
             location: "",
-            hospital: "", // Reset hospital
-            doctor: "", // Reset doctor
+            hospital: "",
+            doctor: "",
         });
     };
 
@@ -374,20 +435,21 @@ export default function MedicalJournalPage() {
         setPage(value);
     };
 
-    const handleTabChange = (_: React.ChangeEvent<unknown>, newValue: number) => {
-        setActiveTab(newValue); // Move state updates out of rendering
+    const handleTabChange = (
+        _: React.ChangeEvent<unknown>,
+        newValue: number
+    ) => {
+        setActiveTab(newValue);
     };
 
     return (
         <Container maxWidth="lg">
-            {/* Error Message */}
             {errorMessage && (
                 <Alert severity="error" sx={{ mb: 2 }}>
                     {errorMessage}
                 </Alert>
             )}
 
-            {/* Fixed Language Switcher and Home Button */}
             <Box
                 sx={{
                     position: "fixed",
@@ -428,8 +490,8 @@ export default function MedicalJournalPage() {
                 }}
             >
                 <Typography
-                    variant="h3" // Change this to a top-level heading like h1
-                    component="h1" // Ensure this is the top-level heading
+                    variant="h3"
+                    component="h1"
                     gutterBottom
                     align="center"
                     sx={{
@@ -444,7 +506,7 @@ export default function MedicalJournalPage() {
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
                     <Tabs
                         value={activeTab}
-                        onChange={handleTabChange} // Use the handler to update state
+                        onChange={handleTabChange}
                         sx={{
                             "& .MuiTab-root": {
                                 minWidth: 120,
@@ -457,13 +519,88 @@ export default function MedicalJournalPage() {
                             label="Objectives"
                             iconPosition="start"
                         />
-                        <Tab
-                            icon={<TimelineIcon />}
-                            label="Encounters"
-                            iconPosition="start"
-                        />
+                        {isAuthenticated && user && (
+                            <Tab
+                                icon={<TimelineIcon />}
+                                label="Encounters"
+                                iconPosition="start"
+                            />
+                        )}
                     </Tabs>
                 </Box>
+                {!isLoading && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            mt: 4,
+                        }}
+                    >
+                        {isAuthenticated ? (
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    gap: 2,
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        fontWeight: 500,
+                                        color: theme.palette.text.primary,
+                                    }}
+                                >
+                                    Welcome, {user?.name || "User"}!
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={() =>
+                                        logout({
+                                            logoutParams: {
+                                                returnTo: `${window.location.origin}/medical-journal`,
+                                            },
+                                        })
+                                    }
+                                    sx={{
+                                        textTransform: "none",
+                                        fontWeight: 500,
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    Logout
+                                </Button>
+                            </Box>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() =>
+                                    loginWithRedirect({
+                                        appState: {
+                                            returnTo: "/medical-journal",
+                                        },
+                                        authorizationParams: {
+                                            audience:
+                                                process.env
+                                                    .NEXT_PUBLIC_AUTH0_AUDIENCE,
+                                            prompt: "consent",
+                                        },
+                                    })
+                                }
+                                sx={{
+                                    textTransform: "none",
+                                    fontWeight: 500,
+                                    borderRadius: 2,
+                                    px: 3,
+                                }}
+                            >
+                                Log In
+                            </Button>
+                        )}
+                    </Box>
+                )}
             </Box>
 
             <Fade in={activeTab === 0}>
@@ -518,8 +655,8 @@ export default function MedicalJournalPage() {
                                                 />
                                             )}
                                             <Typography
-                                                variant="h6" // Ensure this is a subheading
-                                                component="h2" // Use h2 for proper nesting under h1
+                                                variant="h6"
+                                                component="h2"
                                                 sx={{ fontWeight: 600 }}
                                             >
                                                 {category.category}
@@ -591,12 +728,13 @@ export default function MedicalJournalPage() {
                                 Add Entry
                             </Button>
                         </Box>
-                        <TableContainer sx={{ overflowX: "auto" }}> {/* Enable horizontal scrolling */}
+                        <TableContainer sx={{ overflowX: "auto" }}>
+                            {" "}
                             <Table>
                                 <TableHead>
                                     <TableRow
                                         sx={{
-                                            borderBottom: `2px solid ${theme.palette.divider}`, // Add bottom border for header
+                                            borderBottom: `2px solid ${theme.palette.divider}`,
                                         }}
                                     >
                                         <TableCell
@@ -605,7 +743,11 @@ export default function MedicalJournalPage() {
                                                 whiteSpace: "nowrap",
                                             }}
                                         >
-                                            Date {sortField === "date" && (sortOrder === "asc" ? "↑" : "↓")}
+                                            Date{" "}
+                                            {sortField === "date" &&
+                                                (sortOrder === "asc"
+                                                    ? "↑"
+                                                    : "↓")}
                                         </TableCell>
                                         <TableCell
                                             sx={{
@@ -613,20 +755,40 @@ export default function MedicalJournalPage() {
                                                 whiteSpace: "nowrap",
                                             }}
                                         >
-                                            Rotation {sortField === "rotation" && (sortOrder === "asc" ? "↑" : "↓")}
+                                            Rotation{" "}
+                                            {sortField === "rotation" &&
+                                                (sortOrder === "asc"
+                                                    ? "↑"
+                                                    : "↓")}
                                         </TableCell>
-                                        <TableCell sx={{ minWidth: 200 }}> {/* Adjust width for better display */}
+                                        <TableCell sx={{ minWidth: 200 }}>
+                                            {" "}
                                             Patient/Setting
                                         </TableCell>
-                                        <TableCell sx={{ minWidth: 200 }}> {/* Adjust width for better display */}
+                                        <TableCell sx={{ minWidth: 200 }}>
+                                            {" "}
                                             Interaction
                                         </TableCell>
-                                        <TableCell sx={{ whiteSpace: "nowrap" }}>Hospital</TableCell>
-                                        <TableCell sx={{ whiteSpace: "nowrap" }}>Doctor</TableCell>
-                                        <TableCell sx={{ minWidth: 250 }}> {/* Adjust width for better display */}
+                                        <TableCell
+                                            sx={{ whiteSpace: "nowrap" }}
+                                        >
+                                            Hospital
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{ whiteSpace: "nowrap" }}
+                                        >
+                                            Doctor
+                                        </TableCell>
+                                        <TableCell sx={{ minWidth: 250 }}>
+                                            {" "}
                                             CanMEDS Roles
                                         </TableCell>
-                                        <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Actions</TableCell>
+                                        <TableCell
+                                            align="right"
+                                            sx={{ whiteSpace: "nowrap" }}
+                                        >
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -634,20 +796,19 @@ export default function MedicalJournalPage() {
                                         <TableRow
                                             key={entry.id}
                                             sx={{
-                                                borderBottom: `1px solid ${theme.palette.divider}`, // Add bottom border for rows
+                                                borderBottom: `1px solid ${theme.palette.divider}`,
                                                 "&:hover": {
-                                                    backgroundColor:
-                                                        alpha(
-                                                            theme.palette
-                                                                .primary.main,
-                                                            0.04
-                                                        ),
+                                                    backgroundColor: alpha(
+                                                        theme.palette.primary
+                                                            .main,
+                                                        0.04
+                                                    ),
                                                 },
                                             }}
                                         >
                                             <TableCell
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    verticalAlign: "middle",
                                                 }}
                                             >
                                                 {new Date(
@@ -656,20 +817,18 @@ export default function MedicalJournalPage() {
                                             </TableCell>
                                             <TableCell
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    verticalAlign: "middle",
                                                 }}
                                             >
                                                 <Chip
                                                     label={entry.rotation}
                                                     size="small"
                                                     sx={{
-                                                        backgroundColor:
-                                                            alpha(
-                                                                theme.palette
-                                                                    .primary
-                                                                    .main,
-                                                                0.1
-                                                            ),
+                                                        backgroundColor: alpha(
+                                                            theme.palette
+                                                                .primary.main,
+                                                            0.1
+                                                        ),
                                                         color: theme.palette
                                                             .primary.main,
                                                         fontWeight: 500,
@@ -678,53 +837,58 @@ export default function MedicalJournalPage() {
                                             </TableCell>
                                             <TableCell
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
-                                                    height: "100%", // Allow height to adjust
+                                                    verticalAlign: "middle",
+                                                    height: "100%",
                                                 }}
                                             >
                                                 <Box
                                                     sx={{
                                                         overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        display: "-webkit-box", // Use -webkit-box for multiline ellipsis
-                                                        WebkitLineClamp: 5, // Limit to 5 lines
-                                                        WebkitBoxOrient: "vertical", // Set box orientation to vertical
+                                                        textOverflow:
+                                                            "ellipsis",
+                                                        display: "-webkit-box",
+                                                        WebkitLineClamp: 5,
+                                                        WebkitBoxOrient:
+                                                            "vertical",
                                                         whiteSpace: "normal",
                                                     }}
                                                 >
-                                                    {entry.patientsetting || "N/A"} {/* Ensure fallback value */}
+                                                    {entry.patientsetting ||
+                                                        "N/A"}{" "}
                                                 </Box>
                                             </TableCell>
                                             <TableCell
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
-                                                    height: "100%", // Allow height to adjust
+                                                    verticalAlign: "middle",
+                                                    height: "100%",
                                                 }}
                                             >
                                                 <Box
                                                     sx={{
                                                         overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        display: "-webkit-box", // Use -webkit-box for multiline ellipsis
-                                                        WebkitLineClamp: 5, // Limit to 5 lines
-                                                        WebkitBoxOrient: "vertical", // Set box orientation to vertical
+                                                        textOverflow:
+                                                            "ellipsis",
+                                                        display: "-webkit-box",
+                                                        WebkitLineClamp: 5,
+                                                        WebkitBoxOrient:
+                                                            "vertical",
                                                         whiteSpace: "normal",
                                                     }}
                                                 >
-                                                    {entry.interaction || "N/A"} {/* Ensure fallback value */}
+                                                    {entry.interaction ||
+                                                        "N/A"}{" "}
                                                 </Box>
                                             </TableCell>
                                             <TableCell
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    verticalAlign: "middle",
                                                 }}
                                             >
-                                                {entry.hospital ||
-                                                    "N/A"}
+                                                {entry.hospital || "N/A"}
                                             </TableCell>
                                             <TableCell
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    verticalAlign: "middle",
                                                 }}
                                             >
                                                 {entry.doctor || "N/A"}
@@ -739,31 +903,43 @@ export default function MedicalJournalPage() {
                                                 <Box
                                                     sx={{
                                                         display: "flex",
-                                                        flexWrap:
-                                                            "wrap",
+                                                        flexWrap: "wrap",
                                                         gap: 0.5,
                                                     }}
                                                 >
-                                                    {entry.canmedsroles?.length > 0
-                                                        ? entry.canmedsroles.map((role) => (
-                                                            <Chip
-                                                                key={role}
-                                                                label={role}
-                                                                size="small"
-                                                                sx={{
-                                                                    backgroundColor: alpha(getCanMEDSColor(role), 0.1),
-                                                                    color: getCanMEDSColor(role),
-                                                                    fontWeight: 500,
-                                                                }}
-                                                            />
-                                                        ))
-                                                        : "N/A"} {/* Ensure fallback value */}
+                                                    {entry.canmedsroles
+                                                        ?.length > 0
+                                                        ? entry.canmedsroles.map(
+                                                              (role) => (
+                                                                  <Chip
+                                                                      key={role}
+                                                                      label={
+                                                                          role
+                                                                      }
+                                                                      size="small"
+                                                                      sx={{
+                                                                          backgroundColor:
+                                                                              alpha(
+                                                                                  getCanMEDSColor(
+                                                                                      role
+                                                                                  ),
+                                                                                  0.1
+                                                                              ),
+                                                                          color: getCanMEDSColor(
+                                                                              role
+                                                                          ),
+                                                                          fontWeight: 500,
+                                                                      }}
+                                                                  />
+                                                              )
+                                                          )
+                                                        : "N/A"}{" "}
                                                 </Box>
                                             </TableCell>
                                             <TableCell
                                                 align="right"
                                                 sx={{
-                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    verticalAlign: "middle",
                                                 }}
                                             >
                                                 <Box
@@ -787,8 +963,7 @@ export default function MedicalJournalPage() {
                                                                     .palette
                                                                     .primary
                                                                     .main,
-                                                                "&:hover":
-                                                                {
+                                                                "&:hover": {
                                                                     backgroundColor:
                                                                         alpha(
                                                                             theme
@@ -814,10 +989,8 @@ export default function MedicalJournalPage() {
                                                             sx={{
                                                                 color: theme
                                                                     .palette
-                                                                    .error
-                                                                    .main,
-                                                                "&:hover":
-                                                                {
+                                                                    .error.main,
+                                                                "&:hover": {
                                                                     backgroundColor:
                                                                         alpha(
                                                                             theme
@@ -847,8 +1020,7 @@ export default function MedicalJournalPage() {
                             >
                                 <Pagination
                                     count={Math.ceil(
-                                        filteredAndSortedEntries.length /
-                                        limit
+                                        filteredAndSortedEntries.length / limit
                                     )}
                                     page={page}
                                     onChange={handlePageChange}
@@ -874,7 +1046,7 @@ export default function MedicalJournalPage() {
                 }}
             >
                 <DialogTitle
-                    component="div" // Change to div to avoid improper heading nesting
+                    component="div"
                     sx={{
                         background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                         py: 2,
@@ -883,7 +1055,7 @@ export default function MedicalJournalPage() {
                 >
                     <Typography
                         variant="h6"
-                        component="h3" // Keep h3 for proper semantic structure
+                        component="h3"
                         sx={{ fontWeight: 600 }}
                     >
                         {editingEntry ? "Edit Entry" : "Add New Entry"}
@@ -987,7 +1159,7 @@ export default function MedicalJournalPage() {
                             <FormControl fullWidth>
                                 <Select
                                     multiple
-                                    value={currentEntry.canmedsroles || []} // Ensure value is always an array
+                                    value={currentEntry.canmedsroles || []}
                                     onChange={(e) =>
                                         handleInputChange(
                                             "canmedsroles",
@@ -1130,7 +1302,9 @@ export default function MedicalJournalPage() {
                             <FormControl fullWidth>
                                 <Select
                                     multiple
-                                    value={currentEntry.learningObjectives || []} // Ensure value is always an array
+                                    value={
+                                        currentEntry.learningObjectives || []
+                                    }
                                     onChange={(e) =>
                                         handleInputChange(
                                             "learningObjectives",
