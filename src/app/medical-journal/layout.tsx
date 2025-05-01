@@ -28,14 +28,17 @@ export default function RootLayout({
                     typeof window !== "undefined"
                         ? `${window.location.origin}/medical-journal`
                         : "",
+                audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
             }}
             onRedirectCallback={(appState) => {
                 window.history.replaceState(
                     {},
                     document.title,
-                    appState?.returnTo || "/"
+                    appState?.returnTo || "/medical-journal"
                 );
             }}
+            useRefreshTokens={true}
+            cacheLocation="localstorage"
         >
             {children}
         </Auth0Provider>

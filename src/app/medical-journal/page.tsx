@@ -397,9 +397,10 @@ export default function MedicalJournalPage() {
     };
 
     useEffect(() => {
-        if (isLoading || !isAuthenticated) return;
+        //require logged in and verified user
+        if (isLoading || !isAuthenticated || !user?.email_verified) return;
         handleFetchEntries();
-    }, [page, limit, isLoading, isAuthenticated]);
+    }, [page, limit, isLoading, isAuthenticated, user?.email_verified]);
 
     const handleCloseEditDialog = () => {
         setIsEditDialogOpen(false);
