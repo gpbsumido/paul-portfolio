@@ -921,29 +921,29 @@ export default function MedicalJournalPage() {
                                                     {entry.canmedsroles
                                                         ?.length > 0
                                                         ? entry.canmedsroles.map(
-                                                            (role) => (
-                                                                <Chip
-                                                                    key={role}
-                                                                    label={
-                                                                        role
-                                                                    }
-                                                                    size="small"
-                                                                    sx={{
-                                                                        backgroundColor:
-                                                                            alpha(
-                                                                                getCanMEDSColor(
-                                                                                    role
-                                                                                ),
-                                                                                0.1
-                                                                            ),
-                                                                        color: getCanMEDSColor(
-                                                                            role
-                                                                        ),
-                                                                        fontWeight: 500,
-                                                                    }}
-                                                                />
-                                                            )
-                                                        )
+                                                              (role) => (
+                                                                  <Chip
+                                                                      key={role}
+                                                                      label={
+                                                                          role
+                                                                      }
+                                                                      size="small"
+                                                                      sx={{
+                                                                          backgroundColor:
+                                                                              alpha(
+                                                                                  getCanMEDSColor(
+                                                                                      role
+                                                                                  ),
+                                                                                  0.1
+                                                                              ),
+                                                                          color: getCanMEDSColor(
+                                                                              role
+                                                                          ),
+                                                                          fontWeight: 500,
+                                                                      }}
+                                                                  />
+                                                              )
+                                                          )
                                                         : "N/A"}{" "}
                                                 </Box>
                                             </TableCell>

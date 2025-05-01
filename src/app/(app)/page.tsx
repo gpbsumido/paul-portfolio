@@ -27,8 +27,7 @@ export default function Home() {
     const [hoveredSection, setHoveredSection] = useState<number | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const { isLoading, loginWithRedirect, logout } =
-        useAuth0();
+    const { isLoading, loginWithRedirect, logout } = useAuth0();
 
     const activeIndex =
         hoveredSection !== null ? hoveredSection : currentImageIndex;
@@ -132,7 +131,14 @@ export default function Home() {
                     />
                 );
             })}
-            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2, paddingTop: { xs: '2em', md: 0 } }}>
+            <Container
+                maxWidth="lg"
+                sx={{
+                    position: "relative",
+                    zIndex: 2,
+                    paddingTop: { xs: "2em", md: 0 },
+                }}
+            >
                 <Box
                     sx={{
                         display: "flex",
@@ -328,7 +334,7 @@ export default function Home() {
                                             theme.palette.mode === "light"
                                                 ? "rgba(255, 255, 255, 0.9)"
                                                 : theme.palette.background
-                                                    .paper,
+                                                      .paper,
                                         boxShadow:
                                             theme.palette.mode === "light"
                                                 ? "0 4px 10px rgba(0, 0, 0, 0.1)"
@@ -340,7 +346,7 @@ export default function Home() {
                                                 theme.palette.mode === "light"
                                                     ? "rgba(245, 245, 245, 1)"
                                                     : theme.palette.action
-                                                        .hover,
+                                                          .hover,
                                         },
                                     }}
                                 >

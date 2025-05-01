@@ -3,7 +3,11 @@
 import { Box, Typography, Button, useTheme } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
 
-export default function FloatingPill({ redirectUrl }: { redirectUrl?: string }) {
+export default function FloatingPill({
+    redirectUrl,
+}: {
+    redirectUrl?: string;
+}) {
     const theme = useTheme();
     const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
         useAuth0();
@@ -16,9 +20,10 @@ export default function FloatingPill({ redirectUrl }: { redirectUrl?: string }) 
                 left: "50%",
                 transform: "translateX(-50%)", // Center horizontally
                 zIndex: 9999,
-                background: theme.palette.mode === "dark"
-                    ? "rgba(15, 23, 42, 0.95)" // Dark blue pastel
-                    : "rgba(30, 58, 138, 0.95)", // Lighter blue pastel
+                background:
+                    theme.palette.mode === "dark"
+                        ? "rgba(15, 23, 42, 0.95)" // Dark blue pastel
+                        : "rgba(30, 58, 138, 0.95)", // Lighter blue pastel
                 boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
                 borderRadius: "20px", // Pill shape
                 padding: "8px 16px",
@@ -64,7 +69,8 @@ export default function FloatingPill({ redirectUrl }: { redirectUrl?: string }) 
                         onClick={() =>
                             logout({
                                 logoutParams: {
-                                    returnTo: redirectUrl || window.location.href, // Return to the provided redirect URL or current location
+                                    returnTo:
+                                        redirectUrl || window.location.href, // Return to the provided redirect URL or current location
                                 },
                             })
                         }
