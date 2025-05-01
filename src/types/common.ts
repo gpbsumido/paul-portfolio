@@ -20,4 +20,5 @@ export interface DropdownComponentProps {
     minWidth?: number | string;
     title?: string;
     titleLocation?: "above" | "left";
+    defaultLabel?: string;
 }

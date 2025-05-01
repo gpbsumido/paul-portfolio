@@ -41,6 +41,7 @@ import SportsMotorsportsIcon from "@mui/icons-material/SportsMotorsports";
 import MapIcon from "@mui/icons-material/Map";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import BrushIcon from "@mui/icons-material/Brush";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 
 export const HOME_PAGE_SECTIONS = [
     {
@@ -74,6 +75,14 @@ export const HOME_PAGE_SECTIONS = [
         icon: MapIcon,
         bgImage:
             "https://images.unsplash.com/photo-1448518340475-e3c680e9b4be?q=80&w=3200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+        title: "Medical Journal",
+        description: "Clerkship Reflections & Documentation",
+        path: "/medical-journal",
+        icon: MedicalServicesIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     },
     {
         title: "Forum",
