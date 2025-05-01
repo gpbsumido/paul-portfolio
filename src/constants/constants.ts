@@ -69,12 +69,12 @@ export const HOME_PAGE_SECTIONS = [
             "https://plus.unsplash.com/premium_photo-1677993185885-985af6b425c4?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     },
     {
-        title: "Interactive Map",
-        description: "Location Explorer",
-        path: "/maps",
-        icon: MapIcon,
+        title: "Design Showcase",
+        description: "Projects & Work",
+        path: "/designs",
+        icon: BrushIcon,
         bgImage:
-            "https://images.unsplash.com/photo-1448518340475-e3c680e9b4be?q=80&w=3200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "https://images.unsplash.com/photo-1558655146-9f40138edfeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1664&q=80",
     },
     {
         title: "Medical Journal",
@@ -85,19 +85,19 @@ export const HOME_PAGE_SECTIONS = [
             "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     },
     {
+        title: "Interactive Map",
+        description: "Location Explorer",
+        path: "/maps",
+        icon: MapIcon,
+        bgImage:
+            "https://images.unsplash.com/photo-1448518340475-e3c680e9b4be?q=80&w=3200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
         title: "Forum",
         description: "Community Discussions/Logbook",
         path: "/forum",
         icon: SmartphoneIcon,
         bgImage:
             "https://images.unsplash.com/photo-1741636174266-a090f9427ec0?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-        title: "Design Showcase",
-        description: "Projects & Work",
-        path: "/designs",
-        icon: BrushIcon,
-        bgImage:
-            "https://images.unsplash.com/photo-1558655146-9f40138edfeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1664&q=80",
     },
 ];

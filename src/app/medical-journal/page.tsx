@@ -479,7 +479,6 @@ export default function MedicalJournalPage() {
             >
                 <HomeButton component={Link} href="/" />
             </Box>
-
             <Box
                 sx={{
                     mt: 8,
@@ -500,6 +499,10 @@ export default function MedicalJournalPage() {
                         background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
+                        minHeight: "3rem", // Ensure consistent height
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                     }}
                 >
                     {t("medicalJournal.title")}
@@ -625,16 +628,18 @@ export default function MedicalJournalPage() {
                     </Box>
                 )}
             </Box>
-
             <Fade in={activeTab === 0}>
                 <Box sx={{ display: activeTab === 0 ? "block" : "none" }}>
                     {/* Learning Objectives Section */}
                     <Grid container spacing={3}>
                         {LEARNING_OBJECTIVES.map((category, index) => (
-                            <Grid item xs={12} md={4} key={index}>
+                            <Grid item xs={12} sm={6} md={4} key={index}>
                                 <Card
                                     sx={{
                                         height: "100%",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "space-between",
                                         transition: "transform 0.2s",
                                         "&:hover": {
                                             transform: "translateY(-4px)",
@@ -642,12 +647,24 @@ export default function MedicalJournalPage() {
                                         },
                                     }}
                                 >
-                                    <CardContent>
+                                    <CardContent
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "space-between",
+                                            height: "100%",
+                                        }}
+                                    >
                                         <Box
                                             sx={{
                                                 display: "flex",
                                                 alignItems: "center",
                                                 mb: 2,
+                                                minHeight: {
+                                                    xs: "3rem",
+                                                    sm: "4rem",
+                                                },
+                                                gap: 2,
                                             }}
                                         >
                                             {index === 0 && (
@@ -680,17 +697,26 @@ export default function MedicalJournalPage() {
                                             <Typography
                                                 variant="h6"
                                                 component="h2"
-                                                sx={{ fontWeight: 600 }}
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    fontSize: "1.25rem",
+                                                    flex: 1,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                }}
                                             >
-                                                {t(
-                                                    `medicalJournal.category.${category.category}`
-                                                )}
+                                                {category.category}
                                             </Typography>
                                         </Box>
                                         <Divider sx={{ mb: 2 }} />
                                         <Box
                                             component="ul"
-                                            sx={{ pl: 2, m: 0 }}
+                                            sx={{
+                                                pl: 2,
+                                                m: 0,
+                                                listStyle: "none",
+                                                flexGrow: 1,
+                                            }}
                                         >
                                             {category.objectives.map(
                                                 (objective, objIndex) => (
@@ -701,11 +727,11 @@ export default function MedicalJournalPage() {
                                                             mb: 1.5,
                                                             color: theme.palette
                                                                 .text.secondary,
+                                                            fontSize:
+                                                                "0.875rem",
                                                         }}
                                                     >
-                                                        {t(
-                                                            `medicalJournal.objective.${objective}`
-                                                        )}
+                                                        {objective}
                                                     </Box>
                                                 )
                                             )}
