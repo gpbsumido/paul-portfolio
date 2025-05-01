@@ -132,7 +132,7 @@ export default function Home() {
                     />
                 );
             })}
-            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
+            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2, paddingTop: { xs: '2em', md: 0 } }}>
                 <Box
                     sx={{
                         display: "flex",
