@@ -10,10 +10,8 @@ import {
     Button,
     Grid,
     FormControl,
-    InputLabel,
     Select,
     MenuItem,
-    Paper,
     IconButton,
     Tooltip,
     Table,
@@ -35,12 +33,13 @@ import {
     Tabs,
     Fade,
     Badge,
+    Pagination,
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -50,12 +49,15 @@ import TimelineIcon from "@mui/icons-material/Timeline";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SchoolIcon from "@mui/icons-material/School";
 import DropdownComponent from "@/components/shared/DropdownComponent";
+import { v4 as uuidv4 } from "uuid";
+import Alert from "@mui/material/Alert";
+import Skeleton from "@mui/material/Skeleton";
 
 interface LearningEntry {
     id: string;
-    patientSetting: string;
+    patientsetting: string;
     interaction: string;
-    canmedsRoles: string[];
+    canmedsroles: string[];
     learningObjectives: string[];
     rotation: string;
     date: string;
@@ -129,9 +131,9 @@ export default function MedicalJournalPage() {
     const [entries, setEntries] = useState<LearningEntry[]>([]);
     const [currentEntry, setCurrentEntry] = useState<LearningEntry>({
         id: "",
-        patientSetting: "",
+        patientsetting: "",
         interaction: "",
-        canmedsRoles: [],
+        canmedsroles: [],
         learningObjectives: [],
         rotation: "",
         date: new Date().toISOString().split("T")[0],
@@ -152,6 +154,11 @@ export default function MedicalJournalPage() {
         rotation?: string;
         location?: string;
     }>({});
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [isFetching, setIsFetching] = useState(false); // Add fetching state
+
+    const [page, setPage] = useState(1); // Current page
+    const [limit, setLimit] = useState(5); // Number of entries per page
 
     const handleSort = (field: keyof LearningEntry) => {
         if (sortField === field) {
@@ -187,6 +194,11 @@ export default function MedicalJournalPage() {
             }
         });
 
+    const paginatedEntries = filteredAndSortedEntries.slice(
+        (page - 1) * limit,
+        page * limit
+    );
+
     const handleInputChange = (field: keyof LearningEntry, value: any) => {
         setCurrentEntry((prev) => ({
             ...prev,
@@ -199,61 +211,143 @@ export default function MedicalJournalPage() {
         if (!currentEntry.date) newErrors.date = true;
         if (!currentEntry.rotation) newErrors.rotation = true;
         if (!currentEntry.location) newErrors.location = true;
-        if (!currentEntry.patientSetting) newErrors.patientSetting = true;
+        if (!currentEntry.patientsetting) newErrors.patientsetting = true;
         if (!currentEntry.interaction) newErrors.interaction = true;
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSaveEntry = () => {
-        if (!validateFields()) return;
-        if (editingEntry) {
-            setEntries((prev) =>
-                prev.map((entry) =>
-                    entry.id === editingEntry ? { ...currentEntry } : entry
-                )
-            );
-            setEditingEntry(null);
-        } else {
-            const newEntry = {
-                ...currentEntry,
-                id: Date.now().toString(),
-            };
-            setEntries((prev) => [...prev, newEntry]);
+    const handleSaveEntry = async () => {
+        try {
+            if (!validateFields()) return;
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/save-entry`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(currentEntry),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to save the entry.");
+            }
+
+            const data = await response.json();
+            const savedEntry = data.entry;
+
+            if (editingEntry) {
+                setEntries((prev) =>
+                    prev.map((entry) =>
+                        entry.id === editingEntry ? savedEntry : entry
+                    )
+                );
+                setEditingEntry(null);
+            } else {
+                setEntries((prev) => [...prev, savedEntry]);
+            }
+
+            setCurrentEntry({
+                id: "",
+                patientsetting: "",
+                interaction: "",
+                canmedsroles: [],
+                learningObjectives: [],
+                rotation: "",
+                date: new Date().toISOString().split("T")[0],
+                location: "",
+                hospital: "",
+                doctor: "",
+            });
+            setIsEditDialogOpen(false);
+            setErrorMessage(null);
+        } catch (error) {
+            console.error(error);
+            setErrorMessage("Failed to save the entry.");
         }
-        setCurrentEntry({
-            id: "",
-            patientSetting: "",
-            interaction: "",
-            canmedsRoles: [],
-            learningObjectives: [],
-            rotation: "",
-            date: new Date().toISOString().split("T")[0],
-            location: "",
-            hospital: "", // Reset hospital
-            doctor: "", // Reset doctor
-        });
-        setIsEditDialogOpen(false);
     };
 
-    const handleDeleteEntry = (id: string) => {
-        setEntries((prev) => prev.filter((entry) => entry.id !== id));
+    const handleDeleteEntry = async (id: string) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/delete-entry/${id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete the entry.");
+            }
+
+            setEntries((prev) => prev.filter((entry) => entry.id !== id));
+            setErrorMessage(null);
+        } catch (error) {
+            console.error(error);
+            setErrorMessage("Failed to delete the entry.");
+        }
     };
 
-    const handleEditEntry = (entry: LearningEntry) => {
-        setCurrentEntry(entry);
-        setEditingEntry(entry.id);
-        setIsEditDialogOpen(true);
+    const handleFetchEntries = async () => {
+        try {
+            setIsFetching(true);
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch entries.");
+            }
+
+            const data = await response.json();
+            setEntries(data.entries);
+            setErrorMessage(null);
+        } catch (error) {
+            console.error(error);
+            setErrorMessage("Failed to fetch entries.");
+        } finally {
+            setIsFetching(false);
+        }
     };
+
+    const handleEditEntry = async (id: string) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/edit-entry/${id}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch the entry for editing.");
+            }
+
+            const data = await response.json();
+            const entry = data.entry;
+
+            setCurrentEntry({
+                id: entry.id || "",
+                patientsetting: entry.patientsetting || "", // Map to correct key
+                interaction: entry.interaction || "",
+                canmedsroles: entry.canmedsroles || [], // Map to correct key
+                learningObjectives: entry.learningobjectives || [], // Map to correct key
+                rotation: entry.rotation || "",
+                date: entry.date ? new Date(entry.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0], // Format date
+                location: entry.location || "",
+                hospital: entry.hospital || "",
+                doctor: entry.doctor || "",
+            });
+
+            setEditingEntry(entry.id);
+            setIsEditDialogOpen(true);
+        } catch (error) {
+            console.error(error);
+            setErrorMessage("Failed to fetch the entry for editing.");
+        }
+    };
+
+    useEffect(() => {
+        handleFetchEntries(); // Ensure this is called only after the component has mounted
+    }, [page, limit]);
+
+    console.log("paginatedEntries:", paginatedEntries); // Debugging line
 
     const handleCloseEditDialog = () => {
         setIsEditDialogOpen(false);
         setEditingEntry(null);
         setCurrentEntry({
             id: "",
-            patientSetting: "",
+            patientsetting: "",
             interaction: "",
-            canmedsRoles: [],
+            canmedsroles: [],
             learningObjectives: [],
             rotation: "",
             date: new Date().toISOString().split("T")[0],
@@ -276,8 +370,23 @@ export default function MedicalJournalPage() {
         return colors[role] || theme.palette.grey[500];
     };
 
+    const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
+
+    const handleTabChange = (_: React.ChangeEvent<unknown>, newValue: number) => {
+        setActiveTab(newValue); // Move state updates out of rendering
+    };
+
     return (
         <Container maxWidth="lg">
+            {/* Error Message */}
+            {errorMessage && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {errorMessage}
+                </Alert>
+            )}
+
             {/* Fixed Language Switcher and Home Button */}
             <Box
                 sx={{
@@ -319,8 +428,8 @@ export default function MedicalJournalPage() {
                 }}
             >
                 <Typography
-                    variant="h3"
-                    component="h1"
+                    variant="h3" // Change this to a top-level heading like h1
+                    component="h1" // Ensure this is the top-level heading
                     gutterBottom
                     align="center"
                     sx={{
@@ -335,7 +444,7 @@ export default function MedicalJournalPage() {
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
                     <Tabs
                         value={activeTab}
-                        onChange={(_, newValue) => setActiveTab(newValue)}
+                        onChange={handleTabChange} // Use the handler to update state
                         sx={{
                             "& .MuiTab-root": {
                                 minWidth: 120,
@@ -409,7 +518,8 @@ export default function MedicalJournalPage() {
                                                 />
                                             )}
                                             <Typography
-                                                variant="h6"
+                                                variant="h6" // Ensure this is a subheading
+                                                component="h2" // Use h2 for proper nesting under h1
                                                 sx={{ fontWeight: 600 }}
                                             >
                                                 {category.category}
@@ -481,198 +591,181 @@ export default function MedicalJournalPage() {
                                 Add Entry
                             </Button>
                         </Box>
-                        <TableContainer>
-                            <Box sx={{ p: 2, display: "flex", gap: 2 }}>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        minWidth: 200,
-                                    }}
-                                >
-                                    <FormControl size="small">
-                                        <DropdownComponent
-                                            currentSelected={
-                                                filters.rotation || ""
-                                            }
-                                            onChange={(value) =>
-                                                handleFilterChange(
-                                                    "rotation",
-                                                    value
-                                                )
-                                            }
-                                            items={[
-                                                {
-                                                    key: "all",
-                                                    label: "All",
-                                                    value: "",
-                                                },
-                                                ...ROTATIONS.map(
-                                                    (rotation) => ({
-                                                        key: rotation,
-                                                        label: rotation,
-                                                        value: rotation,
-                                                    })
-                                                ),
-                                            ]}
-                                            title="Rotation"
-                                            titleLocation="left"
-                                        />
-                                    </FormControl>
-                                </Box>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        minWidth: 200,
-                                    }}
-                                >
-                                    <FormControl size="small">
-                                        <DropdownComponent
-                                            currentSelected={
-                                                filters.location || ""
-                                            }
-                                            onChange={(value) =>
-                                                handleFilterChange(
-                                                    "location",
-                                                    value
-                                                )
-                                            }
-                                            items={[
-                                                {
-                                                    key: "all",
-                                                    label: "All",
-                                                    value: "",
-                                                },
-                                                ...LOCATIONS.map(
-                                                    (location) => ({
-                                                        key: location,
-                                                        label: location,
-                                                        value: location,
-                                                    })
-                                                ),
-                                            ]}
-                                            title="Location"
-                                            titleLocation="left"
-                                        />
-                                    </FormControl>
-                                </Box>
-                            </Box>
+                        <TableContainer sx={{ overflowX: "auto" }}> {/* Enable horizontal scrolling */}
                             <Table>
                                 <TableHead>
-                                    <TableRow>
+                                    <TableRow
+                                        sx={{
+                                            borderBottom: `2px solid ${theme.palette.divider}`, // Add bottom border for header
+                                        }}
+                                    >
                                         <TableCell
-                                            onClick={() => handleSort("date")}
-                                            sx={{ cursor: "pointer" }}
+                                            sx={{
+                                                cursor: "pointer",
+                                                whiteSpace: "nowrap",
+                                            }}
                                         >
-                                            Date{" "}
-                                            {sortField === "date" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
+                                            Date {sortField === "date" && (sortOrder === "asc" ? "↑" : "↓")}
                                         </TableCell>
                                         <TableCell
-                                            onClick={() =>
-                                                handleSort("rotation")
-                                            }
-                                            sx={{ cursor: "pointer" }}
+                                            sx={{
+                                                cursor: "pointer",
+                                                whiteSpace: "nowrap",
+                                            }}
                                         >
-                                            Rotation{" "}
-                                            {sortField === "rotation" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
+                                            Rotation {sortField === "rotation" && (sortOrder === "asc" ? "↑" : "↓")}
                                         </TableCell>
-                                        <TableCell>Patient/Setting</TableCell>
-                                        <TableCell>Interaction</TableCell>
-                                        <TableCell>Hospital</TableCell>
-                                        <TableCell>Doctor</TableCell>
-                                        <TableCell>CanMEDS Roles</TableCell>
-                                        <TableCell align="right">
-                                            Actions
+                                        <TableCell sx={{ minWidth: 200 }}> {/* Adjust width for better display */}
+                                            Patient/Setting
                                         </TableCell>
+                                        <TableCell sx={{ minWidth: 200 }}> {/* Adjust width for better display */}
+                                            Interaction
+                                        </TableCell>
+                                        <TableCell sx={{ whiteSpace: "nowrap" }}>Hospital</TableCell>
+                                        <TableCell sx={{ whiteSpace: "nowrap" }}>Doctor</TableCell>
+                                        <TableCell sx={{ minWidth: 250 }}> {/* Adjust width for better display */}
+                                            CanMEDS Roles
+                                        </TableCell>
+                                        <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {filteredAndSortedEntries.map((entry) => (
+                                    {paginatedEntries.map((entry) => (
                                         <TableRow
                                             key={entry.id}
                                             sx={{
+                                                borderBottom: `1px solid ${theme.palette.divider}`, // Add bottom border for rows
                                                 "&:hover": {
-                                                    backgroundColor: alpha(
-                                                        theme.palette.primary
-                                                            .main,
-                                                        0.04
-                                                    ),
+                                                    backgroundColor:
+                                                        alpha(
+                                                            theme.palette
+                                                                .primary.main,
+                                                            0.04
+                                                        ),
                                                 },
                                             }}
                                         >
-                                            <TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                }}
+                                            >
                                                 {new Date(
                                                     entry.date
                                                 ).toLocaleDateString()}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                }}
+                                            >
                                                 <Chip
                                                     label={entry.rotation}
                                                     size="small"
                                                     sx={{
-                                                        backgroundColor: alpha(
-                                                            theme.palette
-                                                                .primary.main,
-                                                            0.1
-                                                        ),
+                                                        backgroundColor:
+                                                            alpha(
+                                                                theme.palette
+                                                                    .primary
+                                                                    .main,
+                                                                0.1
+                                                            ),
                                                         color: theme.palette
                                                             .primary.main,
                                                         fontWeight: 500,
                                                     }}
                                                 />
                                             </TableCell>
-                                            <TableCell>
-                                                {entry.patientSetting}
+                                            <TableCell
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    height: "100%", // Allow height to adjust
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        display: "-webkit-box", // Use -webkit-box for multiline ellipsis
+                                                        WebkitLineClamp: 5, // Limit to 5 lines
+                                                        WebkitBoxOrient: "vertical", // Set box orientation to vertical
+                                                        whiteSpace: "normal",
+                                                    }}
+                                                >
+                                                    {entry.patientsetting || "N/A"} {/* Ensure fallback value */}
+                                                </Box>
                                             </TableCell>
-                                            <TableCell>
-                                                {entry.interaction}
+                                            <TableCell
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                    height: "100%", // Allow height to adjust
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        display: "-webkit-box", // Use -webkit-box for multiline ellipsis
+                                                        WebkitLineClamp: 5, // Limit to 5 lines
+                                                        WebkitBoxOrient: "vertical", // Set box orientation to vertical
+                                                        whiteSpace: "normal",
+                                                    }}
+                                                >
+                                                    {entry.interaction || "N/A"} {/* Ensure fallback value */}
+                                                </Box>
                                             </TableCell>
-                                            <TableCell>
-                                                {entry.hospital || "N/A"}
+                                            <TableCell
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                }}
+                                            >
+                                                {entry.hospital ||
+                                                    "N/A"}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                }}
+                                            >
                                                 {entry.doctor || "N/A"}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    WebkitBoxOrient: "vertical",
+                                                    whiteSpace: "normal",
+                                                    verticalAlign: "middle",
+                                                }}
+                                            >
                                                 <Box
                                                     sx={{
                                                         display: "flex",
-                                                        flexWrap: "wrap",
+                                                        flexWrap:
+                                                            "wrap",
                                                         gap: 0.5,
                                                     }}
                                                 >
-                                                    {entry.canmedsRoles.map(
-                                                        (role) => (
+                                                    {entry.canmedsroles?.length > 0
+                                                        ? entry.canmedsroles.map((role) => (
                                                             <Chip
                                                                 key={role}
                                                                 label={role}
                                                                 size="small"
                                                                 sx={{
-                                                                    backgroundColor:
-                                                                        alpha(
-                                                                            getCanMEDSColor(
-                                                                                role
-                                                                            ),
-                                                                            0.1
-                                                                        ),
-                                                                    color: getCanMEDSColor(
-                                                                        role
-                                                                    ),
+                                                                    backgroundColor: alpha(getCanMEDSColor(role), 0.1),
+                                                                    color: getCanMEDSColor(role),
                                                                     fontWeight: 500,
                                                                 }}
                                                             />
-                                                        )
-                                                    )}
+                                                        ))
+                                                        : "N/A"} {/* Ensure fallback value */}
                                                 </Box>
                                             </TableCell>
-                                            <TableCell align="right">
+                                            <TableCell
+                                                align="right"
+                                                sx={{
+                                                    verticalAlign: "middle", // Ensure vertical alignment
+                                                }}
+                                            >
                                                 <Box
                                                     sx={{
                                                         display: "flex",
@@ -685,7 +778,7 @@ export default function MedicalJournalPage() {
                                                         <IconButton
                                                             onClick={() =>
                                                                 handleEditEntry(
-                                                                    entry
+                                                                    entry.id
                                                                 )
                                                             }
                                                             size="small"
@@ -694,7 +787,8 @@ export default function MedicalJournalPage() {
                                                                     .palette
                                                                     .primary
                                                                     .main,
-                                                                "&:hover": {
+                                                                "&:hover":
+                                                                {
                                                                     backgroundColor:
                                                                         alpha(
                                                                             theme
@@ -720,8 +814,10 @@ export default function MedicalJournalPage() {
                                                             sx={{
                                                                 color: theme
                                                                     .palette
-                                                                    .error.main,
-                                                                "&:hover": {
+                                                                    .error
+                                                                    .main,
+                                                                "&:hover":
+                                                                {
                                                                     backgroundColor:
                                                                         alpha(
                                                                             theme
@@ -742,6 +838,23 @@ export default function MedicalJournalPage() {
                                     ))}
                                 </TableBody>
                             </Table>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    mt: 2,
+                                }}
+                            >
+                                <Pagination
+                                    count={Math.ceil(
+                                        filteredAndSortedEntries.length /
+                                        limit
+                                    )}
+                                    page={page}
+                                    onChange={handlePageChange}
+                                    color="primary"
+                                />
+                            </Box>
                         </TableContainer>
                     </Card>
                 </Box>
@@ -761,13 +874,18 @@ export default function MedicalJournalPage() {
                 }}
             >
                 <DialogTitle
+                    component="div" // Change to div to avoid improper heading nesting
                     sx={{
                         background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                         py: 2,
                         mb: 2,
                     }}
                 >
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography
+                        variant="h6"
+                        component="h3" // Keep h3 for proper semantic structure
+                        sx={{ fontWeight: 600 }}
+                    >
                         {editingEntry ? "Edit Entry" : "Add New Entry"}
                     </Typography>
                 </DialogTitle>
@@ -869,10 +987,10 @@ export default function MedicalJournalPage() {
                             <FormControl fullWidth>
                                 <Select
                                     multiple
-                                    value={currentEntry.canmedsRoles}
+                                    value={currentEntry.canmedsroles || []} // Ensure value is always an array
                                     onChange={(e) =>
                                         handleInputChange(
-                                            "canmedsRoles",
+                                            "canmedsroles",
                                             e.target.value
                                         )
                                     }
@@ -926,16 +1044,16 @@ export default function MedicalJournalPage() {
                                 fullWidth
                                 multiline
                                 rows={2}
-                                value={currentEntry.patientSetting}
+                                value={currentEntry.patientsetting}
                                 onChange={(e) =>
                                     handleInputChange(
-                                        "patientSetting",
+                                        "patientsetting",
                                         e.target.value
                                     )
                                 }
-                                error={!!errors.patientSetting}
+                                error={!!errors.patientsetting}
                                 helperText={
-                                    errors.patientSetting
+                                    errors.patientsetting
                                         ? "This field is required"
                                         : ""
                                 }
@@ -1012,7 +1130,7 @@ export default function MedicalJournalPage() {
                             <FormControl fullWidth>
                                 <Select
                                     multiple
-                                    value={currentEntry.learningObjectives}
+                                    value={currentEntry.learningObjectives || []} // Ensure value is always an array
                                     onChange={(e) =>
                                         handleInputChange(
                                             "learningObjectives",
