@@ -11,6 +11,7 @@ src/
 │   ├── designs/          # Design showcase
 │   ├── fantasy-bball/    # Fantasy Basketball Stats for personal league
 │   ├── fantasy-f1/       # Fantasy F1 Stats as well as driver/constructor championship data
+│   ├── medical-journal/  # Reflections Journal (WORK IN PROGRESS)
 │   ├── maps/             # Interactive map feature (WORK IN PROGRESS)
 │   ├── email/            # Contact Form  (WORK IN PROGRESS)
 │   ├── forum/            # Discussion forum  (WORK IN PROGRESS)
@@ -73,6 +74,10 @@ src/
 - Image gallery
 - Photo showcase
 
+### Medical Journal
+
+- Log Reflections
+
 ## Libraries and Dependencies
 
 ### Core
@@ -80,6 +85,7 @@ src/
 - **Next.js**: React framework for production-grade applications
 - **React**: JavaScript library for building user interfaces
 - **TypeScript**: Static type-checking for JavaScript
+- **0Auth**: User Management Library
 
 ### UI/Components
 
