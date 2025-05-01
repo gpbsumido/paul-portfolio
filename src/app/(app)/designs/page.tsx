@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
-import Footer from "../../components/layout/Footer";
+import Footer from "../../../components/layout/Footer";
 import {
     figmaDesigns,
     figmaImages,

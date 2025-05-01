@@ -8,6 +8,7 @@ import {
     useMediaQuery,
     IconButton,
     Avatar,
+    Button,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -18,12 +19,16 @@ import { useState, useEffect } from "react";
 import paulImage from "@/assets/paul.jpeg";
 import { HOME_PAGE_SECTIONS } from "@/constants/constants";
 import { getShapeProps } from "@/utils/background";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
     const theme = useTheme();
     const router = useRouter();
     const [hoveredSection, setHoveredSection] = useState<number | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
+        useAuth0();
 
     const activeIndex =
         hoveredSection !== null ? hoveredSection : currentImageIndex;
@@ -362,6 +367,69 @@ export default function Home() {
                     })}
                 </Box>
             </Container>
+
+            {/* Floating Card */}
+            <Box
+                sx={{
+                    position: "fixed",
+                    bottom: { xs: "16px", sm: "32px" },
+                    right: { xs: "16px", sm: "32px" },
+                    zIndex: 9999,
+                    background: theme.palette.background.paper,
+                    boxShadow: theme.shadows[4],
+                    borderRadius: 2,
+                    p: 3,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 2,
+                    width: { xs: "90%", sm: "300px" },
+                }}
+            >
+                {!isLoading && isAuthenticated ? (
+                    <>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 500,
+                                color: theme.palette.text.primary,
+                                textAlign: "center",
+                            }}
+                        >
+                            Welcome, {user?.name || "User"}!
+                        </Typography>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() =>
+                                logout({
+                                    logoutParams: {
+                                        returnTo: window.location.origin,
+                                    },
+                                })
+                            }
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: 500,
+                            }}
+                        >
+                            Logout
+                        </Button>
+                    </>
+                ) : (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => loginWithRedirect()}
+                        sx={{
+                            textTransform: "none",
+                            fontWeight: 500,
+                        }}
+                    >
+                        Log In
+                    </Button>
+                )}
+            </Box>
         </Box>
     );
 }

@@ -605,7 +605,7 @@ export default function MedicalJournalPage() {
                                 onClick={() =>
                                     loginWithRedirect({
                                         appState: {
-                                            returnTo: "/medical-journal",
+                                            returnTo: `${window.location.origin}/medical-journal`,
                                         },
                                         authorizationParams: {
                                             audience:

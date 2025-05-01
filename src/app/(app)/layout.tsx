@@ -26,16 +26,13 @@ export default function RootLayout({
             authorizationParams={{
                 redirect_uri:
                     typeof window !== "undefined"
-                        ? `${window.location.origin}/medical-journal`
+                        ? `${window.location.origin}`
                         : "",
                 audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
             }}
             onRedirectCallback={(appState) => {
-                window.history.replaceState(
-                    {},
-                    document.title,
-                    appState?.returnTo || "/medical-journal"
-                );
+                const returnTo = appState?.returnTo || "/";
+                window.location.replace(returnTo);
             }}
             useRefreshTokens={true}
             cacheLocation="localstorage"
