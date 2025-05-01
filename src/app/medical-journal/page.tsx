@@ -502,7 +502,7 @@ export default function MedicalJournalPage() {
                         WebkitTextFillColor: "transparent",
                     }}
                 >
-                    Learning Objectives in EM
+                    {t("medicalJournal.title")}
                 </Typography>
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
                     <Tabs
@@ -517,18 +517,37 @@ export default function MedicalJournalPage() {
                     >
                         <Tab
                             icon={<AssignmentIcon />}
-                            label="Objectives"
+                            label={t("medicalJournal.objectivesTitle")}
                             iconPosition="start"
                         />
                         {isAuthenticated && user && (
                             <Tab
                                 icon={<TimelineIcon />}
-                                label="Encounters"
+                                label={t("medicalJournal.encountersTitle")}
                                 iconPosition="start"
                             />
                         )}
                     </Tabs>
                 </Box>
+                {!isAuthenticated && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            mt: 2,
+                        }}
+                    >
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                fontWeight: 500,
+                                color: theme.palette.text.secondary,
+                            }}
+                        >
+                            {t("medicalJournal.loginPrompt")}
+                        </Typography>
+                    </Box>
+                )}
                 {!isLoading && (
                     <Box
                         sx={{
@@ -552,7 +571,10 @@ export default function MedicalJournalPage() {
                                         color: theme.palette.text.primary,
                                     }}
                                 >
-                                    Welcome, {user?.name || "User"}!
+                                    {t("medicalJournal.welcomeMessage")}{" "}
+                                    {user?.name ||
+                                        t("medicalJournal.userFallback")}
+                                    !
                                 </Typography>
                                 <Button
                                     variant="outlined"
@@ -570,7 +592,7 @@ export default function MedicalJournalPage() {
                                         borderRadius: 2,
                                     }}
                                 >
-                                    Logout
+                                    {t("medicalJournal.logoutButton")}
                                 </Button>
                             </Box>
                         ) : (
@@ -597,7 +619,7 @@ export default function MedicalJournalPage() {
                                     px: 3,
                                 }}
                             >
-                                Log In
+                                {t("medicalJournal.loginButton")}
                             </Button>
                         )}
                     </Box>
@@ -660,7 +682,9 @@ export default function MedicalJournalPage() {
                                                 component="h2"
                                                 sx={{ fontWeight: 600 }}
                                             >
-                                                {category.category}
+                                                {t(
+                                                    `medicalJournal.category.${category.category}`
+                                                )}
                                             </Typography>
                                         </Box>
                                         <Divider sx={{ mb: 2 }} />
@@ -679,7 +703,9 @@ export default function MedicalJournalPage() {
                                                                 .text.secondary,
                                                         }}
                                                     >
-                                                        {objective}
+                                                        {t(
+                                                            `medicalJournal.objective.${objective}`
+                                                        )}
                                                     </Box>
                                                 )
                                             )}
@@ -710,24 +736,51 @@ export default function MedicalJournalPage() {
                                 alignItems: "center",
                                 background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                                 borderBottom: `1px solid ${theme.palette.divider}`,
+                                gap: 5,
                             }}
                         >
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                Clinical Encounters
+                            <Typography
+                                variant="h6"
+                                sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
+                            >
+                                {t("medicalJournal.clinicalEncountersTitle")}
                             </Typography>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<AddIcon />}
-                                onClick={() => setIsEditDialogOpen(true)}
+
+                            <Box
                                 sx={{
-                                    borderRadius: 2,
-                                    textTransform: "none",
-                                    px: 3,
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    mt: 2,
                                 }}
                             >
-                                Add Entry
-                            </Button>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: 500,
+                                        color: theme.palette.text.secondary,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 3,
+                                        WebkitBoxOrient: "vertical",
+                                    }}
+                                >
+                                    {t("medicalJournal.reflectionNote")}
+                                </Typography>
+                            </Box>
+                            <Tooltip
+                                title={t("medicalJournal.addEntryTooltip")}
+                            >
+                                <IconButton
+                                    color="primary"
+                                    onClick={() => setIsEditDialogOpen(true)}
+                                    sx={{
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <AddIcon />
+                                </IconButton>
+                            </Tooltip>
                         </Box>
                         <TableContainer sx={{ overflowX: "auto" }}>
                             {" "}
@@ -744,7 +797,7 @@ export default function MedicalJournalPage() {
                                                 whiteSpace: "nowrap",
                                             }}
                                         >
-                                            Date{" "}
+                                            {t("medicalJournal.dateColumn")}{" "}
                                             {sortField === "date" &&
                                                 (sortOrder === "asc"
                                                     ? "↑"
@@ -756,7 +809,7 @@ export default function MedicalJournalPage() {
                                                 whiteSpace: "nowrap",
                                             }}
                                         >
-                                            Rotation{" "}
+                                            {t("medicalJournal.rotationColumn")}{" "}
                                             {sortField === "rotation" &&
                                                 (sortOrder === "asc"
                                                     ? "↑"
@@ -764,31 +817,37 @@ export default function MedicalJournalPage() {
                                         </TableCell>
                                         <TableCell sx={{ minWidth: 200 }}>
                                             {" "}
-                                            Patient/Setting
+                                            {t(
+                                                "medicalJournal.patientSettingColumn"
+                                            )}
                                         </TableCell>
                                         <TableCell sx={{ minWidth: 200 }}>
                                             {" "}
-                                            Interaction
+                                            {t(
+                                                "medicalJournal.interactionColumn"
+                                            )}
                                         </TableCell>
                                         <TableCell
                                             sx={{ whiteSpace: "nowrap" }}
                                         >
-                                            Hospital
+                                            {t("medicalJournal.hospitalColumn")}
                                         </TableCell>
                                         <TableCell
                                             sx={{ whiteSpace: "nowrap" }}
                                         >
-                                            Doctor
+                                            {t("medicalJournal.doctorColumn")}
                                         </TableCell>
                                         <TableCell sx={{ minWidth: 250 }}>
                                             {" "}
-                                            CanMEDS Roles
+                                            {t(
+                                                "medicalJournal.canmedsRolesColumn"
+                                            )}
                                         </TableCell>
                                         <TableCell
                                             align="right"
                                             sx={{ whiteSpace: "nowrap" }}
                                         >
-                                            Actions
+                                            {t("medicalJournal.actionsColumn")}
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -951,7 +1010,11 @@ export default function MedicalJournalPage() {
                                                             "flex-end",
                                                     }}
                                                 >
-                                                    <Tooltip title="Edit Entry">
+                                                    <Tooltip
+                                                        title={t(
+                                                            "medicalJournal.editEntryTooltip"
+                                                        )}
+                                                    >
                                                         <IconButton
                                                             onClick={() =>
                                                                 handleEditEntry(
@@ -979,7 +1042,11 @@ export default function MedicalJournalPage() {
                                                             <EditIcon />
                                                         </IconButton>
                                                     </Tooltip>
-                                                    <Tooltip title="Delete Entry">
+                                                    <Tooltip
+                                                        title={t(
+                                                            "medicalJournal.deleteEntryTooltip"
+                                                        )}
+                                                    >
                                                         <IconButton
                                                             onClick={() =>
                                                                 handleDeleteEntry(
@@ -1059,7 +1126,9 @@ export default function MedicalJournalPage() {
                         component="h3"
                         sx={{ fontWeight: 600 }}
                     >
-                        {editingEntry ? "Edit Entry" : "Add New Entry"}
+                        {editingEntry
+                            ? t("medicalJournal.editEntryTitle")
+                            : t("medicalJournal.addNewEntryTitle")}
                     </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ pt: 3 }}>
@@ -1069,7 +1138,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Date
+                                {t("medicalJournal.dateLabel")}
                             </Typography>
                             <TextField
                                 fullWidth
@@ -1080,7 +1149,9 @@ export default function MedicalJournalPage() {
                                 }
                                 error={!!errors.date}
                                 helperText={
-                                    errors.date ? "This field is required" : ""
+                                    errors.date
+                                        ? t("medicalJournal.requiredFieldError")
+                                        : ""
                                 }
                             />
                         </Grid>
@@ -1089,7 +1160,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Rotation
+                                {t("medicalJournal.rotationLabel")}
                             </Typography>
                             <FormControl fullWidth error={!!errors.rotation}>
                                 <Select
@@ -1112,7 +1183,7 @@ export default function MedicalJournalPage() {
                                 </Select>
                                 {errors.rotation && (
                                     <Typography variant="caption" color="error">
-                                        This field is required
+                                        {t("medicalJournal.requiredFieldError")}
                                     </Typography>
                                 )}
                             </FormControl>
@@ -1122,7 +1193,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Location
+                                {t("medicalJournal.locationLabel")}
                             </Typography>
                             <FormControl fullWidth error={!!errors.location}>
                                 <Select
@@ -1145,7 +1216,7 @@ export default function MedicalJournalPage() {
                                 </Select>
                                 {errors.location && (
                                     <Typography variant="caption" color="error">
-                                        This field is required
+                                        {t("medicalJournal.requiredFieldError")}
                                     </Typography>
                                 )}
                             </FormControl>
@@ -1155,7 +1226,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                CanMEDS Roles
+                                {t("medicalJournal.canmedsRolesLabel")}
                             </Typography>
                             <FormControl fullWidth>
                                 <Select
@@ -1211,7 +1282,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Patient/Setting
+                                {t("medicalJournal.patientSettingLabel")}
                             </Typography>
                             <TextField
                                 fullWidth
@@ -1227,7 +1298,7 @@ export default function MedicalJournalPage() {
                                 error={!!errors.patientsetting}
                                 helperText={
                                     errors.patientsetting
-                                        ? "This field is required"
+                                        ? t("medicalJournal.requiredFieldError")
                                         : ""
                                 }
                             />
@@ -1237,7 +1308,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Interaction
+                                {t("medicalJournal.interactionLabel")}
                             </Typography>
                             <TextField
                                 fullWidth
@@ -1253,7 +1324,7 @@ export default function MedicalJournalPage() {
                                 error={!!errors.interaction}
                                 helperText={
                                     errors.interaction
-                                        ? "This field is required"
+                                        ? t("medicalJournal.requiredFieldError")
                                         : ""
                                 }
                             />
@@ -1263,7 +1334,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Hospital
+                                {t("medicalJournal.hospitalLabel")}
                             </Typography>
                             <TextField
                                 fullWidth
@@ -1274,7 +1345,9 @@ export default function MedicalJournalPage() {
                                         e.target.value
                                     )
                                 }
-                                placeholder="Enter hospital name"
+                                placeholder={t(
+                                    "medicalJournal.hospitalPlaceholder"
+                                )}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -1282,7 +1355,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Doctor
+                                {t("medicalJournal.doctorLabel")}
                             </Typography>
                             <TextField
                                 fullWidth
@@ -1290,7 +1363,9 @@ export default function MedicalJournalPage() {
                                 onChange={(e) =>
                                     handleInputChange("doctor", e.target.value)
                                 }
-                                placeholder="Enter doctor's name"
+                                placeholder={t(
+                                    "medicalJournal.doctorPlaceholder"
+                                )}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -1298,7 +1373,7 @@ export default function MedicalJournalPage() {
                                 variant="body2"
                                 sx={{ mb: 1, fontWeight: 500 }}
                             >
-                                Learning Objectives
+                                {t("medicalJournal.learningObjectivesLabel")}
                             </Typography>
                             <FormControl fullWidth>
                                 <Select
@@ -1372,7 +1447,7 @@ export default function MedicalJournalPage() {
                             fontWeight: 500,
                         }}
                     >
-                        Cancel
+                        {t("medicalJournal.cancelButton")}
                     </Button>
                     <Button
                         onClick={handleSaveEntry}
@@ -1386,7 +1461,9 @@ export default function MedicalJournalPage() {
                             borderRadius: 2,
                         }}
                     >
-                        {editingEntry ? "Save Changes" : "Add Entry"}
+                        {editingEntry
+                            ? t("medicalJournal.saveChangesButton")
+                            : t("medicalJournal.addEntryButton")}
                     </Button>
                 </DialogActions>
             </Dialog>

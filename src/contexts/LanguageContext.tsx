@@ -13,6 +13,7 @@ type TranslationKey =
     | "pages"
     | "pages.fantasy"
     | "pages.fantasy.subpages"
+    | "medicalJournal"
     | "pages.fantasy.columns";
 type TranslationPath = `${TranslationKey}.${string}`;
 
@@ -45,6 +46,80 @@ const translations = {
             viewDesign: "View {name} Design",
             subtitle: "Implemented and Designed",
             explore: "Explore",
+        },
+        medicalJournal: {
+            title: "Learning Objectives in EM",
+            objectivesTitle: "Objectives",
+            encountersTitle: "Encounters",
+            loginPrompt:
+                "To start creating/editing/viewing reflections, please login.",
+            welcomeMessage: "Welcome,",
+            userFallback: "User",
+            clinicalEncountersTitle: "Clinical Encounters",
+            reflectionNote:
+                "Reflections you create/edit are only visible to you. Still, don't enter any sensitive or personal information about yourself, colleagues, or patients.",
+            addEntryTooltip: "Add Entry",
+            dateColumn: "Date",
+            rotationColumn: "Rotation",
+            logoutButton: "Log Out",
+            loginButton: "Log In",
+            patientSettingColumn: "Patient/Setting",
+            interactionColumn: "Interaction",
+            hospitalColumn: "Hospital",
+            doctorColumn: "Doctor",
+            canmedsRolesColumn: "CanMEDS Roles",
+            actionsColumn: "Actions",
+            editEntryTooltip: "Edit Entry",
+            deleteEntryTooltip: "Delete Entry",
+            addNewEntryTitle: "Add New Entry",
+            editEntryTitle: "Edit Entry",
+            dateLabel: "Date",
+            rotationLabel: "Rotation",
+            locationLabel: "Location",
+            canmedsRolesLabel: "CanMEDS Roles",
+            patientSettingLabel: "Patient/Setting",
+            interactionLabel: "Interaction",
+            hospitalLabel: "Hospital",
+            doctorLabel: "Doctor",
+            learningObjectivesLabel: "Learning Objectives",
+            requiredFieldError: "This field is required",
+            cancelButton: "Cancel",
+            saveChangesButton: "Save Changes",
+            addEntryButton: "Add Entry",
+            hospitalPlaceholder: "Enter hospital name",
+            doctorPlaceholder: "Enter doctor's name",
+            category: {
+                "Approach to Cardinal EM Presentations":
+                    "Approach to Cardinal EM Presentations",
+                "Clinical Skills": "Clinical Skills",
+                Communication: "Communication",
+            },
+            objective: {
+                "Appropriate consideration of broader differential diagnoses":
+                    "Appropriate consideration of broader differential diagnoses",
+                "Suggest rule out/ rule in investigations and management":
+                    "Suggest rule out/ rule in investigations and management",
+                "Develop systematic approach to common presentations":
+                    "Develop systematic approach to common presentations",
+                "Recognize critical vs non-critical patients":
+                    "Recognize critical vs non-critical patients",
+                "Perform focused history and physical examination":
+                    "Perform focused history and physical examination",
+                "Document patient encounters accurately":
+                    "Document patient encounters accurately",
+                "Develop and implement management plans":
+                    "Develop and implement management plans",
+                "Follow-up on investigation results":
+                    "Follow-up on investigation results",
+                "Clear communication with patients and families":
+                    "Clear communication with patients and families",
+                "Effective handover to other healthcare providers":
+                    "Effective handover to other healthcare providers",
+                "Appropriate consultation with specialists":
+                    "Appropriate consultation with specialists",
+                "Documentation of clinical reasoning":
+                    "Documentation of clinical reasoning",
+            },
         },
         pages: {
             error: "Error",
@@ -133,6 +208,80 @@ const translations = {
             viewDesign: "Ver diseño de {name}",
             subtitle: "Implementado y Diseñado",
             explore: "Explorar",
+        },
+        medicalJournal: {
+            title: "Objetivos de Aprendizaje en EM",
+            objectivesTitle: "Objetivos",
+            encountersTitle: "Encuentros",
+            loginPrompt:
+                "Para comenzar a crear/editar/ver reflexiones, por favor inicia sesión.",
+            welcomeMessage: "Bienvenido,",
+            userFallback: "Usuario",
+            clinicalEncountersTitle: "Encuentros Clínicos",
+            reflectionNote:
+                "Las reflexiones que creas/editas son visibles solo para ti. Aún así, no ingreses información sensible o personal sobre ti, colegas o pacientes.",
+            addEntryTooltip: "Agregar Entrada",
+            dateColumn: "Fecha",
+            rotationColumn: "Rotación",
+            patientSettingColumn: "Paciente/Ajuste",
+            interactionColumn: "Interacción",
+            hospitalColumn: "Hospital",
+            doctorColumn: "Doctor",
+            loginButton: "Iniciar Sesión",
+            logoutButton: "Cerrar Sesión",
+            canmedsRolesColumn: "Roles de CanMEDS",
+            actionsColumn: "Acciones",
+            editEntryTooltip: "Editar Entrada",
+            deleteEntryTooltip: "Eliminar Entrada",
+            addNewEntryTitle: "Agregar Nueva Entrada",
+            editEntryTitle: "Editar Entrada",
+            dateLabel: "Fecha",
+            rotationLabel: "Rotación",
+            locationLabel: "Ubicación",
+            canmedsRolesLabel: "Roles de CanMEDS",
+            patientSettingLabel: "Paciente/Ajuste",
+            interactionLabel: "Interacción",
+            hospitalLabel: "Hospital",
+            doctorLabel: "Doctor",
+            learningObjectivesLabel: "Objetivos de Aprendizaje",
+            requiredFieldError: "Este campo es obligatorio",
+            cancelButton: "Cancelar",
+            saveChangesButton: "Guardar Cambios",
+            addEntryButton: "Agregar Entrada",
+            hospitalPlaceholder: "Ingrese el nombre del hospital",
+            doctorPlaceholder: "Ingrese el nombre del doctor",
+            category: {
+                "Approach to Cardinal EM Presentations":
+                    "Enfoque a Presentaciones Cardinales en EM",
+                "Clinical Skills": "Habilidades Clínicas",
+                Communication: "Comunicación",
+            },
+            objective: {
+                "Appropriate consideration of broader differential diagnoses":
+                    "Consideración apropiada de diagnósticos diferenciales más amplios",
+                "Suggest rule out/ rule in investigations and management":
+                    "Sugerir investigaciones y manejo para descartar/confirmar",
+                "Develop systematic approach to common presentations":
+                    "Desarrollar enfoque sistemático para presentaciones comunes",
+                "Recognize critical vs non-critical patients":
+                    "Reconocer pacientes críticos vs no críticos",
+                "Perform focused history and physical examination":
+                    "Realizar historia clínica y examen físico enfocados",
+                "Document patient encounters accurately":
+                    "Documentar encuentros con pacientes con precisión",
+                "Develop and implement management plans":
+                    "Desarrollar e implementar planes de manejo",
+                "Follow-up on investigation results":
+                    "Seguimiento de resultados de investigaciones",
+                "Clear communication with patients and families":
+                    "Comunicación clara con pacientes y familias",
+                "Effective handover to other healthcare providers":
+                    "Transferencia efectiva a otros proveedores de salud",
+                "Appropriate consultation with specialists":
+                    "Consulta apropiada con especialistas",
+                "Documentation of clinical reasoning":
+                    "Documentación del razonamiento clínico",
+            },
         },
         pages: {
             error: "Error",
@@ -223,6 +372,80 @@ const translations = {
             viewDesign: "Voir le design {name}",
             subtitle: "Implémenté et Conçu",
             explore: "Explorer",
+        },
+        medicalJournal: {
+            title: "Objectifs d'apprentissage en EM",
+            objectivesTitle: "Objectifs",
+            encountersTitle: "Rencontres",
+            loginPrompt:
+                "Pour commencer à créer/modifier/voir des réflexions, veuillez vous connecter.",
+            welcomeMessage: "Bienvenue,",
+            userFallback: "Utilisateur",
+            clinicalEncountersTitle: "Rencontres Cliniques",
+            reflectionNote:
+                "Les réflexions que vous créez/modifiez ne sont visibles que par vous. N'entrez pas d'informations sensibles ou personnelles sur vous-même, vos collègues ou vos patients.",
+            addEntryTooltip: "Ajouter une Entrée",
+            dateColumn: "Date",
+            rotationColumn: "Rotation",
+            logoutButton: "Déconnexion",
+            loginButton: "Connexion",
+            patientSettingColumn: "Patient/Contexte",
+            interactionColumn: "Interaction",
+            hospitalColumn: "Hôpital",
+            doctorColumn: "Docteur",
+            canmedsRolesColumn: "Rôles CanMEDS",
+            actionsColumn: "Actions",
+            editEntryTooltip: "Modifier l'Entrée",
+            deleteEntryTooltip: "Supprimer l'Entrée",
+            addNewEntryTitle: "Ajouter une Nouvelle Entrée",
+            editEntryTitle: "Modifier l'Entrée",
+            dateLabel: "Date",
+            rotationLabel: "Rotation",
+            locationLabel: "Lieu",
+            canmedsRolesLabel: "Rôles CanMEDS",
+            patientSettingLabel: "Patient/Contexte",
+            interactionLabel: "Interaction",
+            hospitalLabel: "Hôpital",
+            doctorLabel: "Docteur",
+            learningObjectivesLabel: "Objectifs d'apprentissage",
+            requiredFieldError: "Ce champ est obligatoire",
+            cancelButton: "Annuler",
+            saveChangesButton: "Enregistrer les Modifications",
+            addEntryButton: "Ajouter une Entrée",
+            hospitalPlaceholder: "Entrez le nom de l'hôpital",
+            doctorPlaceholder: "Entrez le nom du médecin",
+            category: {
+                "Approach to Cardinal EM Presentations":
+                    "Approche des présentations cardinales en EM",
+                "Clinical Skills": "Compétences Cliniques",
+                Communication: "Communication",
+            },
+            objective: {
+                "Appropriate consideration of broader differential diagnoses":
+                    "Considération appropriée des diagnostics différentiels plus larges",
+                "Suggest rule out/ rule in investigations and management":
+                    "Suggérer des investigations et une gestion pour exclure/confirmer",
+                "Develop systematic approach to common presentations":
+                    "Développer une approche systématique des présentations courantes",
+                "Recognize critical vs non-critical patients":
+                    "Reconnaître les patients critiques vs non critiques",
+                "Perform focused history and physical examination":
+                    "Effectuer une anamnèse et un examen physique ciblés",
+                "Document patient encounters accurately":
+                    "Documenter avec précision les rencontres avec les patients",
+                "Develop and implement management plans":
+                    "Élaborer et mettre en œuvre des plans de gestion",
+                "Follow-up on investigation results":
+                    "Suivi des résultats des investigations",
+                "Clear communication with patients and families":
+                    "Communication claire avec les patients et les familles",
+                "Effective handover to other healthcare providers":
+                    "Transmission efficace aux autres prestataires de soins",
+                "Appropriate consultation with specialists":
+                    "Consultation appropriée avec les spécialistes",
+                "Documentation of clinical reasoning":
+                    "Documentation du raisonnement clinique",
+            },
         },
         pages: {
             error: "Erreur",
