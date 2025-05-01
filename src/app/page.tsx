@@ -223,14 +223,13 @@ export default function Home() {
                 </Box>
                 <Box
                     sx={{
-                        display: "grid",
-                        gridTemplateColumns: {
-                            xs: "1fr",
-                            sm: "repeat(2, 1fr)",
-                            md: "repeat(3, 1fr)",
-                        },
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
                         gap: 3,
                         py: 4,
+                        maxWidth: "1200px",
+                        mx: "auto",
                     }}
                 >
                     {HOME_PAGE_SECTIONS.map((section, index) => {
@@ -243,6 +242,15 @@ export default function Home() {
                                 onMouseEnter={() => setHoveredSection(index)}
                                 onMouseLeave={() => setHoveredSection(null)}
                                 sx={{
+                                    flex: {
+                                        xs: "1 1 100%",
+                                        sm: "1 1 calc(50% - 24px)",
+                                        md: "1 1 calc(33.333% - 24px)",
+                                    },
+                                    maxWidth: {
+                                        sm: "calc(50% - 24px)",
+                                        md: "calc(33.333% - 24px)",
+                                    },
                                     position: "relative",
                                     cursor: "pointer",
                                     transform: isActive

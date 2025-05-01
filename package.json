@@ -21,6 +21,7 @@
         }
     },
     "dependencies": {
+        "@auth0/auth0-react": "^2.3.0",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
         "@maplibre/maplibre-gl-geocoder": "^1.8.0",
@@ -50,6 +51,7 @@
         "react-tooltip": "^5.28.1",
         "recharts": "^2.15.2",
         "sharp": "^0.34.1",
+        "uuid": "^11.1.0",
         "zustand": "^4.5.0"
     },
     "devDependencies": {

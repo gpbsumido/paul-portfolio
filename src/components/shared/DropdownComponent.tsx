@@ -22,6 +22,7 @@ export default function DropdownComponent({
     minWidth = "15em",
     title,
     titleLocation = "above",
+    defaultLabel = "",
 }: DropdownComponentProps) {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -94,7 +95,7 @@ export default function DropdownComponent({
             >
                 <Box sx={{ flexGrow: 1, textAlign: "left" }}>
                     {items.find((item) => item.key === currentSelected)
-                        ?.label || "Select"}
+                        ?.label || defaultLabel}
                 </Box>
                 <KeyboardArrowDownIcon />
             </Button>
