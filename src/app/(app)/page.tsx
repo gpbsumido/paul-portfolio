@@ -5,10 +5,9 @@ import {
     Typography,
     Container,
     useTheme,
-    useMediaQuery,
     IconButton,
     Avatar,
-    Button,
+    Skeleton,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -20,6 +19,7 @@ import paulImage from "@/assets/paul.jpeg";
 import { HOME_PAGE_SECTIONS } from "@/constants/constants";
 import { getShapeProps } from "@/utils/background";
 import { useAuth0 } from "@auth0/auth0-react";
+import FloatingPill from "@/components/shared/FloatingPill";
 
 export default function Home() {
     const theme = useTheme();
@@ -27,7 +27,7 @@ export default function Home() {
     const [hoveredSection, setHoveredSection] = useState<number | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
+    const { isLoading, loginWithRedirect, logout } =
         useAuth0();
 
     const activeIndex =
@@ -56,6 +56,33 @@ export default function Home() {
         preloadImages();
     }, []);
 
+    if (isLoading) {
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "100vh",
+                    background: theme.palette.background.default,
+                    gap: 2,
+                }}
+            >
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <Box>
+                        <Skeleton variant="circular" width={100} height={100} />
+                    </Box>
+                    <Box>
+                        <Skeleton variant="text" width={200} height={40} />
+                        <Skeleton variant="text" width={150} height={30} />
+                    </Box>
+                </Box>
+                <Skeleton variant="rectangular" width="80%" height={200} />
+            </Box>
+        );
+    }
+
     return (
         <Box
             sx={{
@@ -65,6 +92,7 @@ export default function Home() {
                 overflow: "hidden",
             }}
         >
+            <FloatingPill />
             {HOME_PAGE_SECTIONS.map((section, index) => {
                 const isActive = index === activeIndex;
                 const shapeProps = getShapeProps(index);
@@ -300,7 +328,7 @@ export default function Home() {
                                             theme.palette.mode === "light"
                                                 ? "rgba(255, 255, 255, 0.9)"
                                                 : theme.palette.background
-                                                      .paper,
+                                                    .paper,
                                         boxShadow:
                                             theme.palette.mode === "light"
                                                 ? "0 4px 10px rgba(0, 0, 0, 0.1)"
@@ -312,7 +340,7 @@ export default function Home() {
                                                 theme.palette.mode === "light"
                                                     ? "rgba(245, 245, 245, 1)"
                                                     : theme.palette.action
-                                                          .hover,
+                                                        .hover,
                                         },
                                     }}
                                 >
@@ -367,69 +395,6 @@ export default function Home() {
                     })}
                 </Box>
             </Container>
-
-            {/* Floating Card */}
-            <Box
-                sx={{
-                    position: "fixed",
-                    bottom: { xs: "16px", sm: "32px" },
-                    right: { xs: "16px", sm: "32px" },
-                    zIndex: 9999,
-                    background: theme.palette.background.paper,
-                    boxShadow: theme.shadows[4],
-                    borderRadius: 2,
-                    p: 3,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 2,
-                    width: { xs: "90%", sm: "300px" },
-                }}
-            >
-                {!isLoading && isAuthenticated ? (
-                    <>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 500,
-                                color: theme.palette.text.primary,
-                                textAlign: "center",
-                            }}
-                        >
-                            Welcome, {user?.name || "User"}!
-                        </Typography>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={() =>
-                                logout({
-                                    logoutParams: {
-                                        returnTo: window.location.origin,
-                                    },
-                                })
-                            }
-                            sx={{
-                                textTransform: "none",
-                                fontWeight: 500,
-                            }}
-                        >
-                            Logout
-                        </Button>
-                    </>
-                ) : (
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => loginWithRedirect()}
-                        sx={{
-                            textTransform: "none",
-                            fontWeight: 500,
-                        }}
-                    >
-                        Log In
-                    </Button>
-                )}
-            </Box>
         </Box>
     );
 }
