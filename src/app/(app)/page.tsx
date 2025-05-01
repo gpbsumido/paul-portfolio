@@ -5,9 +5,9 @@ import {
     Typography,
     Container,
     useTheme,
-    useMediaQuery,
     IconButton,
     Avatar,
+    Skeleton,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -18,12 +18,16 @@ import { useState, useEffect } from "react";
 import paulImage from "@/assets/paul.jpeg";
 import { HOME_PAGE_SECTIONS } from "@/constants/constants";
 import { getShapeProps } from "@/utils/background";
+import { useAuth0 } from "@auth0/auth0-react";
+import FloatingPill from "@/components/shared/FloatingPill";
 
 export default function Home() {
     const theme = useTheme();
     const router = useRouter();
     const [hoveredSection, setHoveredSection] = useState<number | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const { isLoading, loginWithRedirect, logout } = useAuth0();
 
     const activeIndex =
         hoveredSection !== null ? hoveredSection : currentImageIndex;
@@ -51,6 +55,33 @@ export default function Home() {
         preloadImages();
     }, []);
 
+    if (isLoading) {
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "100vh",
+                    background: theme.palette.background.default,
+                    gap: 2,
+                }}
+            >
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <Box>
+                        <Skeleton variant="circular" width={100} height={100} />
+                    </Box>
+                    <Box>
+                        <Skeleton variant="text" width={200} height={40} />
+                        <Skeleton variant="text" width={150} height={30} />
+                    </Box>
+                </Box>
+                <Skeleton variant="rectangular" width="80%" height={200} />
+            </Box>
+        );
+    }
+
     return (
         <Box
             sx={{
@@ -60,6 +91,7 @@ export default function Home() {
                 overflow: "hidden",
             }}
         >
+            <FloatingPill />
             {HOME_PAGE_SECTIONS.map((section, index) => {
                 const isActive = index === activeIndex;
                 const shapeProps = getShapeProps(index);
@@ -99,7 +131,14 @@ export default function Home() {
                     />
                 );
             })}
-            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
+            <Container
+                maxWidth="lg"
+                sx={{
+                    position: "relative",
+                    zIndex: 2,
+                    paddingTop: { xs: "2em", md: 0 },
+                }}
+            >
                 <Box
                     sx={{
                         display: "flex",

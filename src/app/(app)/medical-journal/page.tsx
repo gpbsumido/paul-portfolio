@@ -51,6 +51,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import Alert from "@mui/material/Alert";
 
 import { useAuth0 } from "@auth0/auth0-react";
+import FloatingPill from "@/components/shared/FloatingPill";
 
 interface LearningEntry {
     id: string;
@@ -450,7 +451,7 @@ export default function MedicalJournalPage() {
                     {errorMessage}
                 </Alert>
             )}
-
+            <FloatingPill />
             <Box
                 sx={{
                     position: "fixed",
@@ -549,82 +550,6 @@ export default function MedicalJournalPage() {
                         >
                             {t("medicalJournal.loginPrompt")}
                         </Typography>
-                    </Box>
-                )}
-                {!isLoading && (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            mt: 4,
-                        }}
-                    >
-                        {isAuthenticated ? (
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    gap: 2,
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        fontWeight: 500,
-                                        color: theme.palette.text.primary,
-                                    }}
-                                >
-                                    {t("medicalJournal.welcomeMessage")}{" "}
-                                    {user?.name ||
-                                        t("medicalJournal.userFallback")}
-                                    !
-                                </Typography>
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    onClick={() =>
-                                        logout({
-                                            logoutParams: {
-                                                returnTo: `${window.location.origin}/medical-journal`,
-                                            },
-                                        })
-                                    }
-                                    sx={{
-                                        textTransform: "none",
-                                        fontWeight: 500,
-                                        borderRadius: 2,
-                                    }}
-                                >
-                                    {t("medicalJournal.logoutButton")}
-                                </Button>
-                            </Box>
-                        ) : (
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() =>
-                                    loginWithRedirect({
-                                        appState: {
-                                            returnTo: "/medical-journal",
-                                        },
-                                        authorizationParams: {
-                                            audience:
-                                                process.env
-                                                    .NEXT_PUBLIC_AUTH0_AUDIENCE,
-                                            prompt: "consent",
-                                        },
-                                    })
-                                }
-                                sx={{
-                                    textTransform: "none",
-                                    fontWeight: 500,
-                                    borderRadius: 2,
-                                    px: 3,
-                                }}
-                            >
-                                {t("medicalJournal.loginButton")}
-                            </Button>
-                        )}
                     </Box>
                 )}
             </Box>

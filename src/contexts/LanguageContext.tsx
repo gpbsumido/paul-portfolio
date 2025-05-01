@@ -171,6 +171,8 @@ const translations = {
             forum: {
                 title: "Forum",
                 createPost: "Create Post",
+                subtitle: "Join the discussion and share your thoughts.",
+                postedBy: "Posted by",
                 createTitle: "Create New Post",
                 cancel: "Cancel",
                 submit: "Submit",
@@ -341,6 +343,8 @@ const translations = {
                 text: "Texto",
                 username: "Nombre de usuario",
                 newPostTitle: "Título",
+                subtitle: "Únete a la discusión y comparte tus pensamientos.",
+                postedBy: "Publicado por",
             },
             maps: {
                 title: "Carte",
@@ -506,6 +510,8 @@ const translations = {
                 text: "Texte",
                 username: "Nom d'utilisateur",
                 newPostTitle: "Titre",
+                subtitle: "Rejoignez la discussion et partagez vos pensées.",
+                postedBy: "Publié par",
             },
             maps: {
                 title: "Carte",
