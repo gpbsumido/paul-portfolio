@@ -172,7 +172,6 @@ const LEARNING_OBJECTIVES = [
     },
 ];
 
-
 const LEARNING_OBJECTIVES_DROPDOWN = [
     "Appropriate consideration of broader differential diagnoses",
     "Suggest rule out/ rule in investigations and management",
@@ -186,7 +185,7 @@ const LEARNING_OBJECTIVES_DROPDOWN = [
     "Effective handover to other healthcare providers",
     "Appropriate consultation with specialists",
     "Documentation of clinical reasoning",
-]
+];
 
 //todo: move to a db table somewhere
 const ROTATIONS = [
@@ -228,7 +227,11 @@ const FeedbackDialog = ({
     onClose: () => void;
     selectedFeedback: Feedback | null;
     currentEntry: LearningEntry;
-    onSave: (text: string, rotation: string, journalEntryId?: string) => Promise<void>;
+    onSave: (
+        text: string,
+        rotation: string,
+        journalEntryId?: string
+    ) => Promise<void>;
 }) => {
     const [localFeedback, setLocalFeedback] = useState({
         text: "",
@@ -241,7 +244,8 @@ const FeedbackDialog = ({
             setLocalFeedback({
                 text: selectedFeedback.text,
                 rotation: selectedFeedback.rotation,
-                journalEntryId: selectedFeedback.journal_entry_id || currentEntry.id,
+                journalEntryId:
+                    selectedFeedback.journal_entry_id || currentEntry.id,
             });
         } else {
             setLocalFeedback({
@@ -290,7 +294,7 @@ const FeedbackDialog = ({
                                 label="Feedback"
                                 value={localFeedback.text}
                                 onChange={(e) => {
-                                    setLocalFeedback(prev => ({
+                                    setLocalFeedback((prev) => ({
                                         ...prev,
                                         text: e.target.value,
                                     }));
@@ -309,7 +313,7 @@ const FeedbackDialog = ({
                                 <Select
                                     value={localFeedback.rotation}
                                     onChange={(e) => {
-                                        setLocalFeedback(prev => ({
+                                        setLocalFeedback((prev) => ({
                                             ...prev,
                                             rotation: e.target.value,
                                         }));
@@ -408,83 +412,138 @@ export default function MedicalJournalPage() {
 
     const [feedbackPage, setFeedbackPage] = useState(1);
     const [feedbackLimit, setFeedbackLimit] = useState(5);
-    const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+    const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
+        null
+    );
     const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 
-    const [feedbackSortField, setFeedbackSortField] = useState<keyof Feedback>("text");
-    const [feedbackSortOrder, setFeedbackSortOrder] = useState<"asc" | "desc">("desc");
-    const [feedbackRotationFilter, setFeedbackRotationFilter] = useState<string>("");
+    const [feedbackSortField, setFeedbackSortField] =
+        useState<keyof Feedback>("text");
+    const [feedbackSortOrder, setFeedbackSortOrder] = useState<"asc" | "desc">(
+        "desc"
+    );
+    const [feedbackRotationFilter, setFeedbackRotationFilter] =
+        useState<string>("");
 
     const [feedbackTotalCount, setFeedbackTotalCount] = useState<number>(0);
 
-    const [expandedFeedback, setExpandedFeedback] = useState<string | null>(null);
-    const [expandedFeedbackText, setExpandedFeedbackText] = useState<string | null>(null);
-    const [needsTruncation, setNeedsTruncation] = useState<{ [key: string]: boolean }>({});
+    const [expandedFeedback, setExpandedFeedback] = useState<string | null>(
+        null
+    );
+    const [expandedFeedbackText, setExpandedFeedbackText] = useState<
+        string | null
+    >(null);
+    const [needsTruncation, setNeedsTruncation] = useState<{
+        [key: string]: boolean;
+    }>({});
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
     // Memoize filtered and sorted entries to prevent unnecessary recalculations
-    const filteredAndSortedEntries = useMemo(() => 
-        entries
-            .filter((entry) => {
-                if (filters.rotation && entry.rotation !== filters.rotation) return false;
-                if (filters.location && entry.location !== filters.location) return false;
-                if (filters.hospital && entry.hospital !== filters.hospital) return false;
-                if (filters.doctor && entry.doctor !== filters.doctor) return false;
-                return true;
-            })
-            .sort((a, b) => {
-                const aValue = a[sortField] || "";
-                const bValue = b[sortField] || "";
+    const filteredAndSortedEntries = useMemo(
+        () =>
+            entries
+                .filter((entry) => {
+                    if (filters.rotation && entry.rotation !== filters.rotation)
+                        return false;
+                    if (filters.location && entry.location !== filters.location)
+                        return false;
+                    if (filters.hospital && entry.hospital !== filters.hospital)
+                        return false;
+                    if (filters.doctor && entry.doctor !== filters.doctor)
+                        return false;
+                    return true;
+                })
+                .sort((a, b) => {
+                    const aValue = a[sortField] || "";
+                    const bValue = b[sortField] || "";
 
-                if (Array.isArray(aValue) && Array.isArray(bValue)) {
-                    const aString = aValue.join(", ");
-                    const bString = bValue.join(", ");
-                    return sortOrder === "asc" ? aString.localeCompare(bString) : bString.localeCompare(aString);
-                }
+                    if (Array.isArray(aValue) && Array.isArray(bValue)) {
+                        const aString = aValue.join(", ");
+                        const bString = bValue.join(", ");
+                        return sortOrder === "asc"
+                            ? aString.localeCompare(bString)
+                            : bString.localeCompare(aString);
+                    }
 
-                if (typeof aValue === "string" && typeof bValue === "string") {
-                    return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-                }
+                    if (
+                        typeof aValue === "string" &&
+                        typeof bValue === "string"
+                    ) {
+                        return sortOrder === "asc"
+                            ? aValue.localeCompare(bValue)
+                            : bValue.localeCompare(aValue);
+                    }
 
-                if (sortField === "date") {
-                    const aDate = new Date(typeof aValue === "string" ? aValue : "").getTime();
-                    const bDate = new Date(typeof bValue === "string" ? bValue : "").getTime();
-                    return sortOrder === "asc" ? aDate - bDate : bDate - aDate;
-                }
+                    if (sortField === "date") {
+                        const aDate = new Date(
+                            typeof aValue === "string" ? aValue : ""
+                        ).getTime();
+                        const bDate = new Date(
+                            typeof bValue === "string" ? bValue : ""
+                        ).getTime();
+                        return sortOrder === "asc"
+                            ? aDate - bDate
+                            : bDate - aDate;
+                    }
 
-                return sortOrder === "asc" ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? -1 : 1);
-            }),
+                    return sortOrder === "asc"
+                        ? aValue > bValue
+                            ? 1
+                            : -1
+                        : aValue < bValue
+                          ? -1
+                          : 1;
+                }),
         [entries, filters, sortField, sortOrder]
     );
 
     // Memoize filtered and sorted feedbacks
-    const filteredAndSortedFeedbacks = useMemo(() => 
-        feedbacks
-            .filter((feedback) => {
-                if (feedbackRotationFilter && feedback.rotation !== feedbackRotationFilter) return false;
-                return true;
-            })
-            .sort((a, b) => {
-                const aValue = a[feedbackSortField] || "";
-                const bValue = b[feedbackSortField] || "";
+    const filteredAndSortedFeedbacks = useMemo(
+        () =>
+            feedbacks
+                .filter((feedback) => {
+                    if (
+                        feedbackRotationFilter &&
+                        feedback.rotation !== feedbackRotationFilter
+                    )
+                        return false;
+                    return true;
+                })
+                .sort((a, b) => {
+                    const aValue = a[feedbackSortField] || "";
+                    const bValue = b[feedbackSortField] || "";
 
-                if (typeof aValue === "string" && typeof bValue === "string") {
-                    return feedbackSortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-                }
-                return 0;
-            }),
-        [feedbacks, feedbackRotationFilter, feedbackSortField, feedbackSortOrder]
+                    if (
+                        typeof aValue === "string" &&
+                        typeof bValue === "string"
+                    ) {
+                        return feedbackSortOrder === "asc"
+                            ? aValue.localeCompare(bValue)
+                            : bValue.localeCompare(aValue);
+                    }
+                    return 0;
+                }),
+        [
+            feedbacks,
+            feedbackRotationFilter,
+            feedbackSortField,
+            feedbackSortOrder,
+        ]
     );
 
     // Memoize paginated entries
-    const paginatedEntries = useMemo(() => 
-        filteredAndSortedEntries.slice((page - 1) * limit, page * limit),
+    const paginatedEntries = useMemo(
+        () => filteredAndSortedEntries.slice((page - 1) * limit, page * limit),
         [filteredAndSortedEntries, page, limit]
     );
 
     // Memoize paginated feedbacks
-    const paginatedFeedbacks = useMemo(() => 
-        filteredAndSortedFeedbacks.slice((feedbackPage - 1) * feedbackLimit, feedbackPage * feedbackLimit),
+    const paginatedFeedbacks = useMemo(
+        () =>
+            filteredAndSortedFeedbacks.slice(
+                (feedbackPage - 1) * feedbackLimit,
+                feedbackPage * feedbackLimit
+            ),
         [filteredAndSortedFeedbacks, feedbackPage, feedbackLimit]
     );
 
@@ -494,7 +553,11 @@ export default function MedicalJournalPage() {
 
         const fetchData = async () => {
             await handleFetchEntries();
-            await handleFetchFeedback(feedbackPage, feedbackLimit, feedbackRotationFilter);
+            await handleFetchFeedback(
+                feedbackPage,
+                feedbackLimit,
+                feedbackRotationFilter
+            );
         };
 
         fetchData();
@@ -507,19 +570,23 @@ export default function MedicalJournalPage() {
                 clearTimeout(resizeTimeoutRef.current);
             }
             resizeTimeoutRef.current = setTimeout(() => {
-                const tableCell = document.querySelector('.feedback-text-cell');
+                const tableCell = document.querySelector(".feedback-text-cell");
                 if (!tableCell) return;
-                
+
                 const containerWidth = tableCell.clientWidth - 40;
-                filteredAndSortedFeedbacks.forEach(feedback => {
-                    measureTextHeight(feedback.text, feedback.id, containerWidth);
+                filteredAndSortedFeedbacks.forEach((feedback) => {
+                    measureTextHeight(
+                        feedback.text,
+                        feedback.id,
+                        containerWidth
+                    );
                 });
             }, 100);
         };
 
-        window.addEventListener('resize', handleResize);
+        window.addEventListener("resize", handleResize);
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener("resize", handleResize);
             if (resizeTimeoutRef.current) {
                 clearTimeout(resizeTimeoutRef.current);
             }
@@ -1039,32 +1106,36 @@ export default function MedicalJournalPage() {
         }
     };
 
-    const measureTextHeight = (text: string, id: string, containerWidth: number) => {
-        const element = document.createElement('div');
+    const measureTextHeight = (
+        text: string,
+        id: string,
+        containerWidth: number
+    ) => {
+        const element = document.createElement("div");
         element.style.width = `${containerWidth}px`;
-        element.style.visibility = 'hidden';
-        element.style.position = 'absolute';
-        element.style.whiteSpace = 'pre-wrap';
-        element.style.fontSize = '14px';
-        element.style.lineHeight = '1.5';
-        element.style.padding = '0';
-        element.style.margin = '0';
+        element.style.visibility = "hidden";
+        element.style.position = "absolute";
+        element.style.whiteSpace = "pre-wrap";
+        element.style.fontSize = "14px";
+        element.style.lineHeight = "1.5";
+        element.style.padding = "0";
+        element.style.margin = "0";
         element.textContent = text;
         document.body.appendChild(element);
         const height = element.offsetHeight;
         document.body.removeChild(element);
-        setNeedsTruncation(prev => ({
+        setNeedsTruncation((prev) => ({
             ...prev,
-            [id]: height > 4.5 * 14 // 3 lines * 1.5 line-height * 14px font size
+            [id]: height > 4.5 * 14, // 3 lines * 1.5 line-height * 14px font size
         }));
     };
 
     const updateMeasurements = () => {
-        const tableCell = document.querySelector('.feedback-text-cell');
+        const tableCell = document.querySelector(".feedback-text-cell");
         if (!tableCell) return;
-        
+
         const containerWidth = tableCell.clientWidth - 40; // Account for padding and expand button
-        filteredAndSortedFeedbacks.forEach(feedback => {
+        filteredAndSortedFeedbacks.forEach((feedback) => {
             measureTextHeight(feedback.text, feedback.id, containerWidth);
         });
     };
@@ -1081,9 +1152,9 @@ export default function MedicalJournalPage() {
             resizeTimeoutRef.current = setTimeout(updateMeasurements, 100);
         };
 
-        window.addEventListener('resize', handleResize);
+        window.addEventListener("resize", handleResize);
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener("resize", handleResize);
             if (resizeTimeoutRef.current) {
                 clearTimeout(resizeTimeoutRef.current);
             }
@@ -1174,9 +1245,18 @@ export default function MedicalJournalPage() {
         setExpandedRow((prev) => (prev === id ? null : id));
     };
 
-    const handleSaveFeedback = async (text: string, rotation: string, journalEntryId?: string) => {
+    const handleSaveFeedback = async (
+        text: string,
+        rotation: string,
+        journalEntryId?: string
+    ) => {
         if (selectedFeedback?.id) {
-            await handleUpdateFeedback(selectedFeedback.id, text, rotation, journalEntryId);
+            await handleUpdateFeedback(
+                selectedFeedback.id,
+                text,
+                rotation,
+                journalEntryId
+            );
         } else {
             await handleAddFeedback(text, rotation, journalEntryId);
         }
@@ -1262,13 +1342,16 @@ export default function MedicalJournalPage() {
                                 gap: 1,
                             },
                             "& .MuiTabs-indicator": {
-                                display: "none"
+                                display: "none",
                             },
                             "& .Mui-selected": {
                                 color: theme.palette.primary.main,
-                                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                backgroundColor: alpha(
+                                    theme.palette.primary.main,
+                                    0.1
+                                ),
                                 borderRadius: 1,
-                            }
+                            },
                         }}
                     >
                         <Tab
@@ -1313,7 +1396,9 @@ export default function MedicalJournalPage() {
                 )}
             </Box>
             <Fade in={activeTab === 0}>
-                <Box sx={{ display: activeTab === 0 ? "block" : "none", mb: 4 }}>
+                <Box
+                    sx={{ display: activeTab === 0 ? "block" : "none", mb: 4 }}
+                >
                     {/* Learning Objectives Section */}
                     <Grid container spacing={3}>
                         {LEARNING_OBJECTIVES.map((category, index) => (
@@ -1355,7 +1440,8 @@ export default function MedicalJournalPage() {
                                                 <PsychologyIcon
                                                     sx={{
                                                         mr: 1,
-                                                        color: theme.palette.primary.main,
+                                                        color: theme.palette
+                                                            .primary.main,
                                                         fontSize: "2rem",
                                                     }}
                                                 />
@@ -1364,7 +1450,8 @@ export default function MedicalJournalPage() {
                                                 <AutoStoriesIcon
                                                     sx={{
                                                         mr: 1,
-                                                        color: theme.palette.secondary.main,
+                                                        color: theme.palette
+                                                            .secondary.main,
                                                         fontSize: "2rem",
                                                     }}
                                                 />
@@ -1373,7 +1460,8 @@ export default function MedicalJournalPage() {
                                                 <ChecklistIcon
                                                     sx={{
                                                         mr: 1,
-                                                        color: theme.palette.success.main,
+                                                        color: theme.palette
+                                                            .success.main,
                                                         fontSize: "2rem",
                                                     }}
                                                 />
@@ -1409,20 +1497,48 @@ export default function MedicalJournalPage() {
                                                         key={objIndex}
                                                         sx={{
                                                             mb: 1.5,
-                                                            color: theme.palette.text.secondary,
-                                                            fontSize: "0.875rem",
-                                                            ...(objective.startsWith("1.") || objective.startsWith("2.") || objective.startsWith("3.") || objective.startsWith("4.") || objective.startsWith("5.") ? {
-                                                                color: theme.palette.text.primary,
-                                                                fontWeight: 600,
-                                                                fontSize: "1rem",
-                                                                mt: 2,
-                                                            } : {}),
-                                                            ...(objective === "" ? {
-                                                                mb: 0.5,
-                                                            } : {}),
-                                                            ...(objective.startsWith("   •") ? {
-                                                                pl: 2,
-                                                            } : {}),
+                                                            color: theme.palette
+                                                                .text.secondary,
+                                                            fontSize:
+                                                                "0.875rem",
+                                                            ...(objective.startsWith(
+                                                                "1."
+                                                            ) ||
+                                                            objective.startsWith(
+                                                                "2."
+                                                            ) ||
+                                                            objective.startsWith(
+                                                                "3."
+                                                            ) ||
+                                                            objective.startsWith(
+                                                                "4."
+                                                            ) ||
+                                                            objective.startsWith(
+                                                                "5."
+                                                            )
+                                                                ? {
+                                                                      color: theme
+                                                                          .palette
+                                                                          .text
+                                                                          .primary,
+                                                                      fontWeight: 600,
+                                                                      fontSize:
+                                                                          "1rem",
+                                                                      mt: 2,
+                                                                  }
+                                                                : {}),
+                                                            ...(objective === ""
+                                                                ? {
+                                                                      mb: 0.5,
+                                                                  }
+                                                                : {}),
+                                                            ...(objective.startsWith(
+                                                                "   •"
+                                                            )
+                                                                ? {
+                                                                      pl: 2,
+                                                                  }
+                                                                : {}),
                                                         }}
                                                     >
                                                         {objective}
@@ -2085,12 +2201,16 @@ export default function MedicalJournalPage() {
                                         titleLocation="left"
                                         currentSelected={feedbackRotationFilter}
                                         items={[
-                                            { label: "- No Filter -", value: "", key: "no-filter" },
+                                            {
+                                                label: "- No Filter -",
+                                                value: "",
+                                                key: "no-filter",
+                                            },
                                             ...ROTATIONS.map((rotation) => ({
                                                 label: rotation,
                                                 value: rotation,
                                                 key: rotation,
-                                            }))
+                                            })),
                                         ]}
                                         onChange={setFeedbackRotationFilter}
                                     />
@@ -2111,32 +2231,43 @@ export default function MedicalJournalPage() {
                                     <TableHead>
                                         <TableRow>
                                             <TableCell
-                                                sx={{ 
+                                                sx={{
                                                     cursor: "pointer",
-                                                    width: "70%"
+                                                    width: "70%",
                                                 }}
-                                                onClick={() => handleFeedbackSort("text")}
+                                                onClick={() =>
+                                                    handleFeedbackSort("text")
+                                                }
                                             >
                                                 Feedback{" "}
                                                 {feedbackSortField === "text" &&
-                                                    (feedbackSortOrder === "asc" ? "↑" : "↓")}
+                                                    (feedbackSortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
                                             </TableCell>
                                             <TableCell
-                                                sx={{ 
+                                                sx={{
                                                     cursor: "pointer",
                                                     width: "15%",
-                                                    whiteSpace: "nowrap"
+                                                    whiteSpace: "nowrap",
                                                 }}
-                                                onClick={() => handleFeedbackSort("rotation")}
+                                                onClick={() =>
+                                                    handleFeedbackSort(
+                                                        "rotation"
+                                                    )
+                                                }
                                             >
                                                 Rotation{" "}
-                                                {feedbackSortField === "rotation" &&
-                                                    (feedbackSortOrder === "asc" ? "↑" : "↓")}
+                                                {feedbackSortField ===
+                                                    "rotation" &&
+                                                    (feedbackSortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
                                             </TableCell>
                                             <TableCell
-                                                sx={{ 
+                                                sx={{
                                                     width: "15%",
-                                                    whiteSpace: "nowrap"
+                                                    whiteSpace: "nowrap",
                                                 }}
                                             >
                                                 Actions
@@ -2144,159 +2275,415 @@ export default function MedicalJournalPage() {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {filteredAndSortedFeedbacks.map((feedback) => (
-                                            <React.Fragment key={feedback.id}>
-                                                <TableRow
-                                                    hover
-                                                    sx={{ 
-                                                        '&:hover': {
-                                                            backgroundColor: alpha(theme.palette.action.hover, 0.04)
-                                                        }
-                                                    }}
+                                        {filteredAndSortedFeedbacks.map(
+                                            (feedback) => (
+                                                <React.Fragment
+                                                    key={feedback.id}
                                                 >
-                                                    <TableCell className="feedback-text-cell">
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <TableRow
+                                                        hover
+                                                        sx={{
+                                                            "&:hover": {
+                                                                backgroundColor:
+                                                                    alpha(
+                                                                        theme
+                                                                            .palette
+                                                                            .action
+                                                                            .hover,
+                                                                        0.04
+                                                                    ),
+                                                            },
+                                                        }}
+                                                    >
+                                                        <TableCell className="feedback-text-cell">
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        "flex",
+                                                                    alignItems:
+                                                                        "center",
+                                                                    gap: 1,
+                                                                }}
+                                                            >
+                                                                <Typography
+                                                                    sx={{
+                                                                        display:
+                                                                            "-webkit-box",
+                                                                        WebkitLineClamp:
+                                                                            expandedFeedbackText ===
+                                                                            feedback.id
+                                                                                ? undefined
+                                                                                : 3,
+                                                                        WebkitBoxOrient:
+                                                                            "vertical",
+                                                                        overflow:
+                                                                            "hidden",
+                                                                        flex: 1,
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        feedback.text
+                                                                    }
+                                                                </Typography>
+                                                                {needsTruncation[
+                                                                    feedback.id
+                                                                ] && (
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={(
+                                                                            e
+                                                                        ) => {
+                                                                            e.stopPropagation();
+                                                                            setExpandedFeedbackText(
+                                                                                expandedFeedbackText ===
+                                                                                    feedback.id
+                                                                                    ? null
+                                                                                    : feedback.id
+                                                                            );
+                                                                        }}
+                                                                        sx={{
+                                                                            transform:
+                                                                                expandedFeedbackText ===
+                                                                                feedback.id
+                                                                                    ? "rotate(180deg)"
+                                                                                    : "none",
+                                                                            transition:
+                                                                                "transform 0.2s",
+                                                                            p: 0.5,
+                                                                        }}
+                                                                    >
+                                                                        <KeyboardArrowDownIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                )}
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell>
                                                             <Typography
                                                                 sx={{
-                                                                    display: "-webkit-box",
-                                                                    WebkitLineClamp: expandedFeedbackText === feedback.id ? undefined : 3,
-                                                                    WebkitBoxOrient: "vertical",
-                                                                    overflow: "hidden",
-                                                                    flex: 1,
+                                                                    whiteSpace:
+                                                                        "nowrap",
+                                                                    overflow:
+                                                                        "hidden",
+                                                                    textOverflow:
+                                                                        "ellipsis",
                                                                 }}
                                                             >
-                                                                {feedback.text}
+                                                                {
+                                                                    feedback.rotation
+                                                                }
                                                             </Typography>
-                                                            {needsTruncation[feedback.id] && (
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setExpandedFeedbackText(expandedFeedbackText === feedback.id ? null : feedback.id);
-                                                                    }}
-                                                                    sx={{
-                                                                        transform: expandedFeedbackText === feedback.id ? 'rotate(180deg)' : 'none',
-                                                                        transition: 'transform 0.2s',
-                                                                        p: 0.5,
-                                                                    }}
-                                                                >
-                                                                    <KeyboardArrowDownIcon fontSize="small" />
-                                                                </IconButton>
-                                                            )}
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Typography
-                                                            sx={{
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis"
-                                                            }}
-                                                        >
-                                                            {feedback.rotation}
-                                                        </Typography>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Box
-                                                            sx={{
-                                                                display: "flex",
-                                                                gap: 1,
-                                                                alignItems: "center",
-                                                                justifyContent: "flex-start"
-                                                            }}
-                                                        >
-                                                            <IconButton
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setSelectedFeedback(feedback);
-                                                                    setIsFeedbackDialogOpen(true);
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        "flex",
+                                                                    gap: 1,
+                                                                    alignItems:
+                                                                        "center",
+                                                                    justifyContent:
+                                                                        "flex-start",
                                                                 }}
-                                                                size="small"
                                                             >
-                                                                <EditIcon />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleDeleteFeedback(feedback.id);
-                                                                }}
-                                                                size="small"
-                                                                color="error"
-                                                            >
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                            {feedback.journal && (
                                                                 <IconButton
-                                                                    onClick={(e) => {
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
                                                                         e.stopPropagation();
-                                                                        setExpandedFeedback(expandedFeedback === feedback.id ? null : feedback.id);
+                                                                        setSelectedFeedback(
+                                                                            feedback
+                                                                        );
+                                                                        setIsFeedbackDialogOpen(
+                                                                            true
+                                                                        );
                                                                     }}
                                                                     size="small"
-                                                                    sx={{
-                                                                        transform: expandedFeedback === feedback.id ? 'rotate(180deg)' : 'none',
-                                                                        transition: 'transform 0.2s',
-                                                                    }}
                                                                 >
-                                                                    <KeyboardArrowDownIcon />
+                                                                    <EditIcon />
                                                                 </IconButton>
-                                                            )}
-                                                        </Box>
-                                                    </TableCell>
-                                                </TableRow>
-                                                {expandedFeedback === feedback.id && feedback.journal && (
-                                                    <TableRow>
-                                                        <TableCell colSpan={3} sx={{ p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.05) }}>
-                                                            <Box sx={{ pl: 2 }}>
-                                                                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
-                                                                    Associated Journal Entry
-                                                                </Typography>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={12} sm={6}>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Date:</strong> {new Date(feedback.journal.date).toLocaleDateString()}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Rotation:</strong> {feedback.journal.rotation}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Location:</strong> {feedback.journal.location}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Hospital:</strong> {feedback.journal.hospital || "N/A"}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Doctor:</strong> {feedback.journal.doctor || "N/A"}
-                                                                        </Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={6}>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Patient Setting:</strong> {feedback.journal.patientSetting}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Interaction:</strong> {feedback.journal.interaction}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>CanMEDS Roles:</strong> {feedback.journal.canmedsRoles.join(", ")}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>Learning Objectives:</strong> {feedback.journal.learningObjectives.join(", ")}
-                                                                        </Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={12}>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>What I Did Well:</strong> {feedback.journal.whatIDidWell || "N/A"}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                            <strong>What I Could Improve:</strong> {feedback.journal.whatICouldImprove || "N/A"}
-                                                                        </Typography>
-                                                                    </Grid>
-                                                                </Grid>
+                                                                <IconButton
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        handleDeleteFeedback(
+                                                                            feedback.id
+                                                                        );
+                                                                    }}
+                                                                    size="small"
+                                                                    color="error"
+                                                                >
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                                {feedback.journal && (
+                                                                    <IconButton
+                                                                        onClick={(
+                                                                            e
+                                                                        ) => {
+                                                                            e.stopPropagation();
+                                                                            setExpandedFeedback(
+                                                                                expandedFeedback ===
+                                                                                    feedback.id
+                                                                                    ? null
+                                                                                    : feedback.id
+                                                                            );
+                                                                        }}
+                                                                        size="small"
+                                                                        sx={{
+                                                                            transform:
+                                                                                expandedFeedback ===
+                                                                                feedback.id
+                                                                                    ? "rotate(180deg)"
+                                                                                    : "none",
+                                                                            transition:
+                                                                                "transform 0.2s",
+                                                                        }}
+                                                                    >
+                                                                        <KeyboardArrowDownIcon />
+                                                                    </IconButton>
+                                                                )}
                                                             </Box>
                                                         </TableCell>
                                                     </TableRow>
-                                                )}
-                                            </React.Fragment>
-                                        ))}
+                                                    {expandedFeedback ===
+                                                        feedback.id &&
+                                                        feedback.journal && (
+                                                            <TableRow>
+                                                                <TableCell
+                                                                    colSpan={3}
+                                                                    sx={{
+                                                                        p: 2,
+                                                                        backgroundColor:
+                                                                            alpha(
+                                                                                theme
+                                                                                    .palette
+                                                                                    .primary
+                                                                                    .main,
+                                                                                0.05
+                                                                            ),
+                                                                    }}
+                                                                >
+                                                                    <Box
+                                                                        sx={{
+                                                                            pl: 2,
+                                                                        }}
+                                                                    >
+                                                                        <Typography
+                                                                            variant="subtitle1"
+                                                                            sx={{
+                                                                                mb: 2,
+                                                                                fontWeight: 600,
+                                                                            }}
+                                                                        >
+                                                                            Associated
+                                                                            Journal
+                                                                            Entry
+                                                                        </Typography>
+                                                                        <Grid
+                                                                            container
+                                                                            spacing={
+                                                                                2
+                                                                            }
+                                                                        >
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                                sm={
+                                                                                    6
+                                                                                }
+                                                                            >
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Date:
+                                                                                    </strong>{" "}
+                                                                                    {new Date(
+                                                                                        feedback.journal.date
+                                                                                    ).toLocaleDateString()}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Rotation:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .rotation
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Location:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .location
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Hospital:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .hospital ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Doctor:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .doctor ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                                sm={
+                                                                                    6
+                                                                                }
+                                                                            >
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Patient
+                                                                                        Setting:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .patientSetting
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Interaction:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .interaction
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        CanMEDS
+                                                                                        Roles:
+                                                                                    </strong>{" "}
+                                                                                    {feedback.journal.canmedsRoles.join(
+                                                                                        ", "
+                                                                                    )}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Learning
+                                                                                        Objectives:
+                                                                                    </strong>{" "}
+                                                                                    {feedback.journal.learningObjectives.join(
+                                                                                        ", "
+                                                                                    )}
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        What
+                                                                                        I
+                                                                                        Did
+                                                                                        Well:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .whatIDidWell ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        What
+                                                                                        I
+                                                                                        Could
+                                                                                        Improve:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .whatICouldImprove ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    </Box>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                </React.Fragment>
+                                            )
+                                        )}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
@@ -2310,13 +2697,18 @@ export default function MedicalJournalPage() {
                                 <Pagination
                                     count={Math.max(
                                         1,
-                                        Math.ceil(feedbackTotalCount / feedbackLimit)
+                                        Math.ceil(
+                                            feedbackTotalCount / feedbackLimit
+                                        )
                                     )}
                                     page={Math.min(
                                         feedbackPage,
                                         Math.max(
                                             1,
-                                            Math.ceil(feedbackTotalCount / feedbackLimit)
+                                            Math.ceil(
+                                                feedbackTotalCount /
+                                                    feedbackLimit
+                                            )
                                         )
                                     )}
                                     onChange={(_, value) => {
@@ -2658,13 +3050,14 @@ export default function MedicalJournalPage() {
                                         </Box>
                                     )}
                                 >
-                                    {LEARNING_OBJECTIVES_DROPDOWN.map((objective) =>(
-                                        <MenuItem
-                                            key={objective}
-                                            value={objective}
-                                        >
-                                            {objective}
-                                        </MenuItem>
+                                    {LEARNING_OBJECTIVES_DROPDOWN.map(
+                                        (objective) => (
+                                            <MenuItem
+                                                key={objective}
+                                                value={objective}
+                                            >
+                                                {objective}
+                                            </MenuItem>
                                         )
                                     )}
                                 </Select>
