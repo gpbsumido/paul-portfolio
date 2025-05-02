@@ -358,7 +358,8 @@ export default function MedicalJournalPage() {
                 page: String(page),
                 limit: String(limit),
             });
-            if (filters.rotation) queryParams.append("rotation", filters.rotation);
+            if (filters.rotation)
+                queryParams.append("rotation", filters.rotation);
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?${queryParams.toString()}`,
