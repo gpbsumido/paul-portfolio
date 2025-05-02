@@ -2074,7 +2074,7 @@ export default function MedicalJournalPage() {
                             <Box
                                 sx={{
                                     display: "flex",
-                                    justifyContent: "center", // Center the pagination
+                                    justifyContent: "center",
                                     mt: 2,
                                 }}
                             >
@@ -2084,7 +2084,14 @@ export default function MedicalJournalPage() {
                                     )}
                                     page={page}
                                     onChange={handlePageChange}
+                                    showFirstButton
+                                    showLastButton
+                                    siblingCount={1}
+                                    boundaryCount={1}
                                     color="primary"
+                                    size="large"
+                                    variant="outlined"
+                                    shape="rounded"
                                 />
                             </Box>
                         </TableContainer>
