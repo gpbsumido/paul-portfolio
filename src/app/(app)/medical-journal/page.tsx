@@ -32,9 +32,8 @@ import {
     Tab,
     Tabs,
     Fade,
-    Badge,
     Pagination,
-    InputLabel,
+    InputAdornment,
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
@@ -47,8 +46,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import SchoolIcon from "@mui/icons-material/School";
 import Alert from "@mui/material/Alert";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -56,311 +53,26 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import ChecklistIcon from "@mui/icons-material/Checklist";
-
+import {
+    CANMEDS_ROLES,
+    LEARNING_OBJECTIVES,
+    LEARNING_OBJECTIVES_DROPDOWN,
+    LOCATIONS,
+    ROTATIONS,
+} from "@/constants/medical-journal";
 import { useAuth0 } from "@auth0/auth0-react";
 import FloatingPill from "@/components/shared/FloatingPill";
 import React from "react";
 import DropdownComponent from "@/components/shared/DropdownComponent";
-
-interface Feedback {
-    id: string;
-    text: string;
-    rotation: string;
-    journal_entry_id?: string;
-    journal?: {
-        id: string;
-        patientSetting: string;
-        interaction: string;
-        canmedsRoles: string[];
-        learningObjectives: string[];
-        rotation: string;
-        date: string;
-        location: string;
-        hospital?: string;
-        doctor?: string;
-        whatIDidWell?: string;
-        whatICouldImprove?: string;
-    };
-}
-
-interface LearningEntry {
-    id: string;
-    patientSetting: string;
-    interaction: string;
-    canmedsRoles: string[];
-    learningObjectives: string[];
-    rotation: string;
-    date: string;
-    location: string;
-    hospital?: string;
-    doctor?: string;
-    whatIDidWell?: string;
-    whatICouldImprove?: string;
-    feedback?: Feedback[]; // Change feedback to be an array of Feedback objects
-}
-
-const CANMEDS_ROLES = [
-    "Medical Expert",
-    "Scholar",
-    "Communicator",
-    "Professional",
-    "Leader",
-    "Health Advocate",
-    "Collaborator",
-];
-
-const LEARNING_OBJECTIVES = [
-    {
-        category: "Objectives of Clerkship Reflections",
-        objectives: [
-            "1. Promote Self-Awareness",
-            "   • Understand your emotions, biases, and values in patient care",
-            "   • Identify how personal beliefs influence your clinical behavior",
-            "",
-            "2. Enhance Clinical Reasoning",
-            "   • Reflect on diagnostic and therapeutic decisions",
-            "   • Analyze what went well or what could have been improved",
-            "",
-            "3. Support Professional Identity Formation",
-            "   • Explore how experiences are shaping you as a future doctor",
-            "   • Reflect on how you embody roles like communicator, collaborator, advocate",
-            "",
-            "4. Develop Empathy & Patient-Centered Thinking",
-            "   • Consider patient perspectives, values, and lived experience",
-            "   • Reflect on your communication, especially in difficult or emotional cases",
-            "",
-            "5. Integrate Feedback and Learning",
-            "   • Reflect on feedback received and how it informed your development",
-            "   • Identify learning goals or knowledge gaps for future improvement",
-        ],
-    },
-    {
-        category: "Techniques for Effective Reflection",
-        objectives: [
-            "1. Gibbs Reflective Cycle",
-            "   • Description – What happened?",
-            "   • Feelings – What were you thinking/feeling?",
-            "   • Evaluation – What was good/bad?",
-            "   • Analysis – Why did it happen that way?",
-            "   • Conclusion – What did you learn?",
-            "   • Action Plan – What will you do differently next time?",
-            "",
-            "2. The DIEP Model",
-            "   • Describe the experience",
-            "   • Interpret what it means",
-            "   • Evaluate its significance to your development",
-            "   • Plan how you'll apply the insight",
-            "",
-            "3. Free-Writing or Journaling",
-            "   • More informal but can be deeply introspective",
-            "   • Often useful right after emotional or challenging cases",
-            "",
-            "4. CanMEDS or ACGME Role-Based Reflection",
-            "   • Align your reflection with roles like 'Scholar', 'Communicator'",
-            "   • Some schools require or recommend mapping reflections to these roles",
-        ],
-    },
-    {
-        category: "Best Practices",
-        objectives: [
-            "• Focus on one meaningful encounter rather than a vague overview",
-            "• Be honest — it's about insight, not perfection",
-            "• Include both emotional and cognitive elements",
-            "• Tie your reflection to actionable learning or professional growth",
-            "• Avoid patient identifiers — maintain confidentiality",
-        ],
-    },
-];
-
-const LEARNING_OBJECTIVES_DROPDOWN = [
-    "Appropriate consideration of broader differential diagnoses",
-    "Suggest rule out/ rule in investigations and management",
-    "Develop systematic approach to common presentations",
-    "Recognize critical vs non-critical patients",
-    "Perform focused history and physical examination",
-    "Document patient encounters accurately",
-    "Develop and implement management plans",
-    "Follow-up on investigation results",
-    "Clear communication with patients and families",
-    "Effective handover to other healthcare providers",
-    "Appropriate consultation with specialists",
-    "Documentation of clinical reasoning",
-];
-
-//todo: move to a db table somewhere
-const ROTATIONS = [
-    "Emergency Medicine",
-    "Internal Medicine - MTU",
-    "Internal Medicine - Selective",
-    "General Surgery",
-    "Pediatrics",
-    "Obstetrics/Gynecology",
-    "Psychiatry",
-    "Family Medicine - Rural",
-    "Family Medicine - Urban",
-    "Vascular Surgery",
-    "Plastic Surgery",
-    "Anasthesia",
-    "NICU",
-    "Elective",
-    "Neurology",
-];
-
-const LOCATIONS = [
-    "Emergency Department",
-    "Inpatient Ward",
-    "Outpatient Clinic",
-    "Operating Room",
-    "Intensive Care Unit",
-    "Other",
-    "Admissions",
-];
-
-const FeedbackDialog = ({
-    open,
-    onClose,
-    selectedFeedback,
-    currentEntry,
-    onSave,
-}: {
-    open: boolean;
-    onClose: () => void;
-    selectedFeedback: Feedback | null;
-    currentEntry: LearningEntry;
-    onSave: (
-        text: string,
-        rotation: string,
-        journalEntryId?: string
-    ) => Promise<void>;
-}) => {
-    const [localFeedback, setLocalFeedback] = useState({
-        text: "",
-        rotation: "",
-        journalEntryId: "",
-    });
-
-    useEffect(() => {
-        if (selectedFeedback) {
-            setLocalFeedback({
-                text: selectedFeedback.text,
-                rotation: selectedFeedback.rotation,
-                journalEntryId:
-                    selectedFeedback.journal_entry_id || currentEntry.id,
-            });
-        } else {
-            setLocalFeedback({
-                text: "",
-                rotation: currentEntry.rotation,
-                journalEntryId: currentEntry.id,
-            });
-        }
-    }, [selectedFeedback?.id, currentEntry.id, currentEntry.rotation]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        try {
-            await onSave(
-                localFeedback.text,
-                localFeedback.rotation,
-                localFeedback.journalEntryId
-            );
-            onClose();
-        } catch (error) {
-            console.error("Error saving feedback:", error);
-        }
-    };
-
-    return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            maxWidth="md"
-            fullWidth
-            disableRestoreFocus
-        >
-            <div>
-                <DialogTitle>
-                    {selectedFeedback ? "Edit Feedback" : "Add Feedback"}
-                </DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={3}
-                                label="Feedback"
-                                value={localFeedback.text}
-                                onChange={(e) => {
-                                    setLocalFeedback((prev) => ({
-                                        ...prev,
-                                        text: e.target.value,
-                                    }));
-                                }}
-                                autoFocus
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.ctrlKey) {
-                                        handleSubmit(e);
-                                    }
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <FormControl fullWidth>
-                                <InputLabel>Rotation</InputLabel>
-                                <Select
-                                    value={localFeedback.rotation}
-                                    onChange={(e) => {
-                                        setLocalFeedback((prev) => ({
-                                            ...prev,
-                                            rotation: e.target.value,
-                                        }));
-                                    }}
-                                    label="Rotation"
-                                >
-                                    {ROTATIONS.map((rotation) => (
-                                        <MenuItem
-                                            key={rotation}
-                                            value={rotation}
-                                        >
-                                            {rotation}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button type="button" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        type="button"
-                        onClick={handleSubmit}
-                        variant="contained"
-                        color="primary"
-                    >
-                        {selectedFeedback?.id ? "Update" : "Add"}
-                    </Button>
-                </DialogActions>
-            </div>
-        </Dialog>
-    );
-};
+import FeedbackDialog from "@/components/medical-journal/FeedbackDialog";
+import { Feedback, LearningEntry } from "@/types/medical-journal";
+import JournalEntryDialog from "@/components/medical-journal/JournalEntryDialog";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function MedicalJournalPage() {
     const theme = useTheme();
-    const {
-        user,
-        isAuthenticated,
-        isLoading,
-        loginWithRedirect,
-        logout,
-        getAccessTokenSilently,
-    } = useAuth0();
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
+        useAuth0();
 
     const { t } = useLanguage();
     const [entries, setEntries] = useState<LearningEntry[]>([]);
@@ -385,13 +97,6 @@ export default function MedicalJournalPage() {
     const [errors, setErrors] = useState<{
         [key in keyof LearningEntry]?: boolean;
     }>({});
-
-    // Update activeTab when authentication status changes
-    useEffect(() => {
-        if (!isLoading) {
-            setActiveTab(isAuthenticated ? 1 : 0);
-        }
-    }, [isAuthenticated, isLoading]);
 
     const [sortField, setSortField] = useState<keyof LearningEntry>("date");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -437,6 +142,13 @@ export default function MedicalJournalPage() {
         [key: string]: boolean;
     }>({});
     const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+
+    const [feedbackSearchTerm, setFeedbackSearchTerm] = useState("");
+    const [isFeedbackSearching, setIsFeedbackSearching] = useState(false);
 
     // Memoize filtered and sorted entries to prevent unnecessary recalculations
     const filteredAndSortedEntries = useMemo(
@@ -537,16 +249,6 @@ export default function MedicalJournalPage() {
         [filteredAndSortedEntries, page, limit]
     );
 
-    // Memoize paginated feedbacks
-    const paginatedFeedbacks = useMemo(
-        () =>
-            filteredAndSortedFeedbacks.slice(
-                (feedbackPage - 1) * feedbackLimit,
-                feedbackPage * feedbackLimit
-            ),
-        [filteredAndSortedFeedbacks, feedbackPage, feedbackLimit]
-    );
-
     // Fetch data only when necessary
     useEffect(() => {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
@@ -563,30 +265,51 @@ export default function MedicalJournalPage() {
         fetchData();
     }, [isLoading, isAuthenticated, user?.email_verified]);
 
-    // Handle window resize with debounce
+    // Update measurements when feedbacks change
     useEffect(() => {
-        const handleResize = () => {
+        if (filteredAndSortedFeedbacks.length > 0) {
+            const timer = setTimeout(() => {
+                updateMeasurements();
+            }, 50);
+            return () => clearTimeout(timer);
+        }
+    }, [filteredAndSortedFeedbacks]);
+
+    // Update measurements on mount
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            updateMeasurements();
+        }, 50);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Setup ResizeObserver when component mounts
+    useEffect(() => {
+        const tableCell = document.querySelector(".feedback-text-cell");
+        if (!tableCell) return;
+
+        // Clean up previous observer if it exists
+        if (resizeObserverRef.current) {
+            resizeObserverRef.current.disconnect();
+        }
+
+        // Create new observer
+        resizeObserverRef.current = new ResizeObserver(() => {
             if (resizeTimeoutRef.current) {
                 clearTimeout(resizeTimeoutRef.current);
             }
-            resizeTimeoutRef.current = setTimeout(() => {
-                const tableCell = document.querySelector(".feedback-text-cell");
-                if (!tableCell) return;
+            // Reduce the timeout to make it more responsive
+            resizeTimeoutRef.current = setTimeout(updateMeasurements, 50);
+        });
 
-                const containerWidth = tableCell.clientWidth - 40;
-                filteredAndSortedFeedbacks.forEach((feedback) => {
-                    measureTextHeight(
-                        feedback.text,
-                        feedback.id,
-                        containerWidth
-                    );
-                });
-            }, 100);
-        };
+        // Start observing
+        resizeObserverRef.current.observe(tableCell);
 
-        window.addEventListener("resize", handleResize);
+        // Cleanup
         return () => {
-            window.removeEventListener("resize", handleResize);
+            if (resizeObserverRef.current) {
+                resizeObserverRef.current.disconnect();
+            }
             if (resizeTimeoutRef.current) {
                 clearTimeout(resizeTimeoutRef.current);
             }
@@ -1106,6 +829,19 @@ export default function MedicalJournalPage() {
         }
     };
 
+    const updateMeasurements = () => {
+        const tableCell = document.querySelector(".feedback-text-cell");
+        if (!tableCell) return;
+
+        // Get the actual width of the text container, accounting for padding and margins
+        const containerWidth = tableCell.clientWidth - 40; // Account for padding and expand button
+        filteredAndSortedFeedbacks.forEach((feedback) => {
+            if (feedback.text) {
+                measureTextHeight(feedback.text, feedback.id, containerWidth);
+            }
+        });
+    };
+
     const measureTextHeight = (
         text: string,
         id: string,
@@ -1120,46 +856,65 @@ export default function MedicalJournalPage() {
         element.style.lineHeight = "1.5";
         element.style.padding = "0";
         element.style.margin = "0";
+        element.style.fontFamily = "Roboto, sans-serif";
+        element.style.boxSizing = "border-box";
+        element.style.wordBreak = "break-word";
+        element.style.overflowWrap = "break-word";
+        element.style.hyphens = "auto";
         element.textContent = text;
         document.body.appendChild(element);
         const height = element.offsetHeight;
         document.body.removeChild(element);
-        setNeedsTruncation((prev) => ({
-            ...prev,
-            [id]: height > 4.5 * 14, // 3 lines * 1.5 line-height * 14px font size
-        }));
-    };
 
-    const updateMeasurements = () => {
-        const tableCell = document.querySelector(".feedback-text-cell");
-        if (!tableCell) return;
+        // Calculate if text exceeds 3 lines (3 * line-height * font-size)
+        // Add a small buffer to account for rounding and browser differences
+        const threeLinesHeight = 3 * 1.5 * 14 + 2;
+        const needsTruncation = height > threeLinesHeight;
 
-        const containerWidth = tableCell.clientWidth - 40; // Account for padding and expand button
-        filteredAndSortedFeedbacks.forEach((feedback) => {
-            measureTextHeight(feedback.text, feedback.id, containerWidth);
+        setNeedsTruncation((prev) => {
+            const newState = { ...prev, [id]: needsTruncation };
+            return newState;
         });
     };
 
+    // Update measurements when feedback search or filter changes
     useEffect(() => {
-        updateMeasurements();
+        const timer = setTimeout(() => {
+            updateMeasurements();
+        }, 50);
+        return () => clearTimeout(timer);
+    }, [feedbackSearchTerm, feedbackRotationFilter]);
+
+    // Update measurements when expanded feedback changes
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            updateMeasurements();
+        }, 50);
+        return () => clearTimeout(timer);
+    }, [expandedFeedbackText]);
+
+    // Update measurements when the table is visible
+    useEffect(() => {
+        if (activeTab === 2) {
+            const timer = setTimeout(() => {
+                updateMeasurements();
+            }, 50);
+            return () => clearTimeout(timer);
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (filteredAndSortedFeedbacks.length > 0) {
+            updateMeasurements();
+        }
     }, [filteredAndSortedFeedbacks]);
 
     useEffect(() => {
-        const handleResize = () => {
-            if (resizeTimeoutRef.current) {
-                clearTimeout(resizeTimeoutRef.current);
-            }
-            resizeTimeoutRef.current = setTimeout(updateMeasurements, 100);
-        };
-
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-            if (resizeTimeoutRef.current) {
-                clearTimeout(resizeTimeoutRef.current);
-            }
-        };
-    }, [filteredAndSortedFeedbacks]);
+        const timer = setTimeout(() => {
+            updateMeasurements();
+        }, 50); // Small delay to ensure DOM is ready
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
@@ -1196,6 +951,13 @@ export default function MedicalJournalPage() {
         isAuthenticated,
         user?.email_verified,
     ]);
+
+    // Update activeTab when authentication status changes
+    useEffect(() => {
+        if (!isLoading) {
+            setActiveTab(isAuthenticated ? 1 : 0);
+        }
+    }, [isAuthenticated, isLoading]);
 
     const handleCloseEditDialog = () => {
         setIsEditDialogOpen(false);
@@ -1259,6 +1021,85 @@ export default function MedicalJournalPage() {
             );
         } else {
             await handleAddFeedback(text, rotation, journalEntryId);
+        }
+    };
+
+    const handleSearch = async () => {
+        try {
+            setIsSearching(true);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(searchTerm)}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to fetch entries.");
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setEntries(data.entries);
+            }
+        } catch (error) {
+            console.error(error);
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to fetch entries."
+            );
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleFeedbackSearch = async () => {
+        try {
+            setIsFeedbackSearching(true);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/feedback?page=${feedbackPage}&limit=${feedbackLimit}&searchTerm=${encodeURIComponent(feedbackSearchTerm)}${feedbackRotationFilter ? `&rotation=${encodeURIComponent(feedbackRotationFilter)}` : ""}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to fetch feedback.");
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setFeedbacks(data.feedback);
+                setFeedbackTotalCount(data.totalCount);
+            }
+        } catch (error) {
+            console.error(error);
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to fetch feedback."
+            );
+        } finally {
+            setIsFeedbackSearching(false);
         }
     };
 
@@ -1623,6 +1464,91 @@ export default function MedicalJournalPage() {
                                     <AddIcon />
                                 </IconButton>
                             </Tooltip>
+                        </Box>
+                        <Box
+                            sx={{
+                                p: 2,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                borderBottom: `1px solid ${theme.palette.divider}`,
+                                gap: 2,
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 2,
+                                    flex: 1,
+                                    maxWidth: 400,
+                                }}
+                            >
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    placeholder="Search entries..."
+                                    value={searchTerm}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            handleSearch();
+                                        }
+                                    }}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <SearchIcon
+                                                    sx={{
+                                                        color: theme.palette
+                                                            .primary.main,
+                                                    }}
+                                                />
+                                            </InputAdornment>
+                                        ),
+                                        sx: {
+                                            borderRadius: 2,
+                                            backgroundColor: alpha(
+                                                theme.palette.background.paper,
+                                                0.8
+                                            ),
+                                            "&:hover": {
+                                                backgroundColor: alpha(
+                                                    theme.palette.background
+                                                        .paper,
+                                                    0.9
+                                                ),
+                                            },
+                                            "&.Mui-focused": {
+                                                backgroundColor:
+                                                    theme.palette.background
+                                                        .paper,
+                                            },
+                                        },
+                                    }}
+                                />
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSearch}
+                                    disabled={isSearching}
+                                    startIcon={<SearchIcon />}
+                                    sx={{
+                                        textTransform: "none",
+                                        fontWeight: 500,
+                                        borderRadius: 2,
+                                        px: 3,
+                                        boxShadow: theme.shadows[1],
+                                        "&:hover": {
+                                            boxShadow: theme.shadows[2],
+                                        },
+                                    }}
+                                >
+                                    {isSearching ? "Searching..." : "Search"}
+                                </Button>
+                            </Box>
                         </Box>
                         <TableContainer sx={{ overflowX: "auto" }}>
                             <Table>
@@ -2148,7 +2074,7 @@ export default function MedicalJournalPage() {
                             <Box
                                 sx={{
                                     display: "flex",
-                                    justifyContent: "center", // Center the pagination
+                                    justifyContent: "center",
                                     mt: 2,
                                 }}
                             >
@@ -2158,567 +2084,6 @@ export default function MedicalJournalPage() {
                                     )}
                                     page={page}
                                     onChange={handlePageChange}
-                                    color="primary"
-                                />
-                            </Box>
-                        </TableContainer>
-                    </Card>
-                </Box>
-            </Fade>
-
-            <Fade in={activeTab === 2}>
-                <Box sx={{ display: activeTab === 2 ? "block" : "none" }}>
-                    <Card sx={{ mb: 4 }}>
-                        <Box sx={{ p: 2 }}>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    mb: 2,
-                                    flexWrap: "wrap",
-                                    gap: 2,
-                                }}
-                            >
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 600,
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    Feedback
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        flexWrap: "wrap",
-                                        gap: 2,
-                                    }}
-                                >
-                                    <DropdownComponent
-                                        title="Filter by Rotation"
-                                        titleLocation="left"
-                                        currentSelected={feedbackRotationFilter}
-                                        items={[
-                                            {
-                                                label: "- No Filter -",
-                                                value: "",
-                                                key: "no-filter",
-                                            },
-                                            ...ROTATIONS.map((rotation) => ({
-                                                label: rotation,
-                                                value: rotation,
-                                                key: rotation,
-                                            })),
-                                        ]}
-                                        onChange={setFeedbackRotationFilter}
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<AddIcon />}
-                                        onClick={() => {
-                                            setSelectedFeedback(null);
-                                            setIsFeedbackDialogOpen(true);
-                                        }}
-                                    >
-                                        Add Feedback
-                                    </Button>
-                                </Box>
-                            </Box>
-                            <TableContainer>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    width: "70%",
-                                                }}
-                                                onClick={() =>
-                                                    handleFeedbackSort("text")
-                                                }
-                                            >
-                                                Feedback{" "}
-                                                {feedbackSortField === "text" &&
-                                                    (feedbackSortOrder === "asc"
-                                                        ? "↑"
-                                                        : "↓")}
-                                            </TableCell>
-                                            <TableCell
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    width: "15%",
-                                                    whiteSpace: "nowrap",
-                                                }}
-                                                onClick={() =>
-                                                    handleFeedbackSort(
-                                                        "rotation"
-                                                    )
-                                                }
-                                            >
-                                                Rotation{" "}
-                                                {feedbackSortField ===
-                                                    "rotation" &&
-                                                    (feedbackSortOrder === "asc"
-                                                        ? "↑"
-                                                        : "↓")}
-                                            </TableCell>
-                                            <TableCell
-                                                sx={{
-                                                    width: "15%",
-                                                    whiteSpace: "nowrap",
-                                                }}
-                                            >
-                                                Actions
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {filteredAndSortedFeedbacks.map(
-                                            (feedback) => (
-                                                <React.Fragment
-                                                    key={feedback.id}
-                                                >
-                                                    <TableRow
-                                                        hover
-                                                        sx={{
-                                                            "&:hover": {
-                                                                backgroundColor:
-                                                                    alpha(
-                                                                        theme
-                                                                            .palette
-                                                                            .action
-                                                                            .hover,
-                                                                        0.04
-                                                                    ),
-                                                            },
-                                                        }}
-                                                    >
-                                                        <TableCell className="feedback-text-cell">
-                                                            <Box
-                                                                sx={{
-                                                                    display:
-                                                                        "flex",
-                                                                    alignItems:
-                                                                        "center",
-                                                                    gap: 1,
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    sx={{
-                                                                        display:
-                                                                            "-webkit-box",
-                                                                        WebkitLineClamp:
-                                                                            expandedFeedbackText ===
-                                                                            feedback.id
-                                                                                ? undefined
-                                                                                : 3,
-                                                                        WebkitBoxOrient:
-                                                                            "vertical",
-                                                                        overflow:
-                                                                            "hidden",
-                                                                        flex: 1,
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        feedback.text
-                                                                    }
-                                                                </Typography>
-                                                                {needsTruncation[
-                                                                    feedback.id
-                                                                ] && (
-                                                                    <IconButton
-                                                                        size="small"
-                                                                        onClick={(
-                                                                            e
-                                                                        ) => {
-                                                                            e.stopPropagation();
-                                                                            setExpandedFeedbackText(
-                                                                                expandedFeedbackText ===
-                                                                                    feedback.id
-                                                                                    ? null
-                                                                                    : feedback.id
-                                                                            );
-                                                                        }}
-                                                                        sx={{
-                                                                            transform:
-                                                                                expandedFeedbackText ===
-                                                                                feedback.id
-                                                                                    ? "rotate(180deg)"
-                                                                                    : "none",
-                                                                            transition:
-                                                                                "transform 0.2s",
-                                                                            p: 0.5,
-                                                                        }}
-                                                                    >
-                                                                        <KeyboardArrowDownIcon fontSize="small" />
-                                                                    </IconButton>
-                                                                )}
-                                                            </Box>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Typography
-                                                                sx={{
-                                                                    whiteSpace:
-                                                                        "nowrap",
-                                                                    overflow:
-                                                                        "hidden",
-                                                                    textOverflow:
-                                                                        "ellipsis",
-                                                                }}
-                                                            >
-                                                                {
-                                                                    feedback.rotation
-                                                                }
-                                                            </Typography>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Box
-                                                                sx={{
-                                                                    display:
-                                                                        "flex",
-                                                                    gap: 1,
-                                                                    alignItems:
-                                                                        "center",
-                                                                    justifyContent:
-                                                                        "flex-start",
-                                                                }}
-                                                            >
-                                                                <IconButton
-                                                                    onClick={(
-                                                                        e
-                                                                    ) => {
-                                                                        e.stopPropagation();
-                                                                        setSelectedFeedback(
-                                                                            feedback
-                                                                        );
-                                                                        setIsFeedbackDialogOpen(
-                                                                            true
-                                                                        );
-                                                                    }}
-                                                                    size="small"
-                                                                >
-                                                                    <EditIcon />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    onClick={(
-                                                                        e
-                                                                    ) => {
-                                                                        e.stopPropagation();
-                                                                        handleDeleteFeedback(
-                                                                            feedback.id
-                                                                        );
-                                                                    }}
-                                                                    size="small"
-                                                                    color="error"
-                                                                >
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                                {feedback.journal && (
-                                                                    <IconButton
-                                                                        onClick={(
-                                                                            e
-                                                                        ) => {
-                                                                            e.stopPropagation();
-                                                                            setExpandedFeedback(
-                                                                                expandedFeedback ===
-                                                                                    feedback.id
-                                                                                    ? null
-                                                                                    : feedback.id
-                                                                            );
-                                                                        }}
-                                                                        size="small"
-                                                                        sx={{
-                                                                            transform:
-                                                                                expandedFeedback ===
-                                                                                feedback.id
-                                                                                    ? "rotate(180deg)"
-                                                                                    : "none",
-                                                                            transition:
-                                                                                "transform 0.2s",
-                                                                        }}
-                                                                    >
-                                                                        <KeyboardArrowDownIcon />
-                                                                    </IconButton>
-                                                                )}
-                                                            </Box>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    {expandedFeedback ===
-                                                        feedback.id &&
-                                                        feedback.journal && (
-                                                            <TableRow>
-                                                                <TableCell
-                                                                    colSpan={3}
-                                                                    sx={{
-                                                                        p: 2,
-                                                                        backgroundColor:
-                                                                            alpha(
-                                                                                theme
-                                                                                    .palette
-                                                                                    .primary
-                                                                                    .main,
-                                                                                0.05
-                                                                            ),
-                                                                    }}
-                                                                >
-                                                                    <Box
-                                                                        sx={{
-                                                                            pl: 2,
-                                                                        }}
-                                                                    >
-                                                                        <Typography
-                                                                            variant="subtitle1"
-                                                                            sx={{
-                                                                                mb: 2,
-                                                                                fontWeight: 600,
-                                                                            }}
-                                                                        >
-                                                                            Associated
-                                                                            Journal
-                                                                            Entry
-                                                                        </Typography>
-                                                                        <Grid
-                                                                            container
-                                                                            spacing={
-                                                                                2
-                                                                            }
-                                                                        >
-                                                                            <Grid
-                                                                                item
-                                                                                xs={
-                                                                                    12
-                                                                                }
-                                                                                sm={
-                                                                                    6
-                                                                                }
-                                                                            >
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Date:
-                                                                                    </strong>{" "}
-                                                                                    {new Date(
-                                                                                        feedback.journal.date
-                                                                                    ).toLocaleDateString()}
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Rotation:
-                                                                                    </strong>{" "}
-                                                                                    {
-                                                                                        feedback
-                                                                                            .journal
-                                                                                            .rotation
-                                                                                    }
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Location:
-                                                                                    </strong>{" "}
-                                                                                    {
-                                                                                        feedback
-                                                                                            .journal
-                                                                                            .location
-                                                                                    }
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Hospital:
-                                                                                    </strong>{" "}
-                                                                                    {feedback
-                                                                                        .journal
-                                                                                        .hospital ||
-                                                                                        "N/A"}
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Doctor:
-                                                                                    </strong>{" "}
-                                                                                    {feedback
-                                                                                        .journal
-                                                                                        .doctor ||
-                                                                                        "N/A"}
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                            <Grid
-                                                                                item
-                                                                                xs={
-                                                                                    12
-                                                                                }
-                                                                                sm={
-                                                                                    6
-                                                                                }
-                                                                            >
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Patient
-                                                                                        Setting:
-                                                                                    </strong>{" "}
-                                                                                    {
-                                                                                        feedback
-                                                                                            .journal
-                                                                                            .patientSetting
-                                                                                    }
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Interaction:
-                                                                                    </strong>{" "}
-                                                                                    {
-                                                                                        feedback
-                                                                                            .journal
-                                                                                            .interaction
-                                                                                    }
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        CanMEDS
-                                                                                        Roles:
-                                                                                    </strong>{" "}
-                                                                                    {feedback.journal.canmedsRoles.join(
-                                                                                        ", "
-                                                                                    )}
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        Learning
-                                                                                        Objectives:
-                                                                                    </strong>{" "}
-                                                                                    {feedback.journal.learningObjectives.join(
-                                                                                        ", "
-                                                                                    )}
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                            <Grid
-                                                                                item
-                                                                                xs={
-                                                                                    12
-                                                                                }
-                                                                            >
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        What
-                                                                                        I
-                                                                                        Did
-                                                                                        Well:
-                                                                                    </strong>{" "}
-                                                                                    {feedback
-                                                                                        .journal
-                                                                                        .whatIDidWell ||
-                                                                                        "N/A"}
-                                                                                </Typography>
-                                                                                <Typography
-                                                                                    variant="body2"
-                                                                                    sx={{
-                                                                                        mb: 1,
-                                                                                    }}
-                                                                                >
-                                                                                    <strong>
-                                                                                        What
-                                                                                        I
-                                                                                        Could
-                                                                                        Improve:
-                                                                                    </strong>{" "}
-                                                                                    {feedback
-                                                                                        .journal
-                                                                                        .whatICouldImprove ||
-                                                                                        "N/A"}
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                        </Grid>
-                                                                    </Box>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        )}
-                                                </React.Fragment>
-                                            )
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    mt: 2,
-                                }}
-                            >
-                                <Pagination
-                                    count={Math.max(
-                                        1,
-                                        Math.ceil(
-                                            feedbackTotalCount / feedbackLimit
-                                        )
-                                    )}
-                                    page={Math.min(
-                                        feedbackPage,
-                                        Math.max(
-                                            1,
-                                            Math.ceil(
-                                                feedbackTotalCount /
-                                                    feedbackLimit
-                                            )
-                                        )
-                                    )}
-                                    onChange={(_, value) => {
-                                        setFeedbackPage(value);
-                                        handleFetchFeedback(
-                                            value,
-                                            feedbackLimit,
-                                            feedbackRotationFilter
-                                        );
-                                    }}
                                     showFirstButton
                                     showLastButton
                                     siblingCount={1}
@@ -2729,448 +2094,688 @@ export default function MedicalJournalPage() {
                                     shape="rounded"
                                 />
                             </Box>
+                        </TableContainer>
+                    </Card>
+                </Box>
+            </Fade>
+
+            <Fade in={activeTab === 2}>
+                <Box sx={{ display: activeTab === 2 ? "block" : "none" }}>
+                    <Card sx={{ mb: 4 }}>
+                        <Box
+                            sx={{
+                                p: 2,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                borderBottom: `1px solid ${theme.palette.divider}`,
+                                gap: 2,
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 600,
+                                    whiteSpace: "nowrap",
+                                }}
+                            >
+                                Feedback
+                            </Typography>
+                            <Tooltip
+                                title={t("medicalJournal.addEntryTooltip")}
+                            >
+                                <IconButton
+                                    color="primary"
+                                    onClick={() => {
+                                        setSelectedFeedback(null);
+                                        setIsFeedbackDialogOpen(true);
+                                    }}
+                                    sx={{
+                                        borderRadius: 2,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <AddIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                        <Box
+                            sx={{
+                                p: 2,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                borderBottom: `1px solid ${theme.palette.divider}`,
+                                gap: 2,
+                                flexWrap: "wrap",
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 2,
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 2,
+                                        width: "100%",
+                                        maxWidth: 400,
+                                    }}
+                                >
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        placeholder="Search feedback..."
+                                        value={feedbackSearchTerm}
+                                        onChange={(e) =>
+                                            setFeedbackSearchTerm(
+                                                e.target.value
+                                            )
+                                        }
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                handleFeedbackSearch();
+                                            }
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon
+                                                        sx={{
+                                                            color: theme.palette
+                                                                .primary.main,
+                                                        }}
+                                                    />
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                borderRadius: 2,
+                                                backgroundColor: alpha(
+                                                    theme.palette.background
+                                                        .paper,
+                                                    0.8
+                                                ),
+                                                "&:hover": {
+                                                    backgroundColor: alpha(
+                                                        theme.palette.background
+                                                            .paper,
+                                                        0.9
+                                                    ),
+                                                },
+                                                "&.Mui-focused": {
+                                                    backgroundColor:
+                                                        theme.palette.background
+                                                            .paper,
+                                                },
+                                            },
+                                        }}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleFeedbackSearch}
+                                        disabled={isFeedbackSearching}
+                                        startIcon={<SearchIcon />}
+                                        sx={{
+                                            textTransform: "none",
+                                            fontWeight: 500,
+                                            borderRadius: 2,
+                                            px: 3,
+                                            boxShadow: theme.shadows[1],
+                                            "&:hover": {
+                                                boxShadow: theme.shadows[2],
+                                            },
+                                        }}
+                                    >
+                                        {isFeedbackSearching
+                                            ? "Searching..."
+                                            : "Search"}
+                                    </Button>
+                                </Box>
+                            </Box>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 2,
+                                    justifyContent: "flex-start",
+                                }}
+                            >
+                                <DropdownComponent
+                                    title="Filter by Rotation"
+                                    titleLocation="left"
+                                    currentSelected={feedbackRotationFilter}
+                                    items={[
+                                        {
+                                            label: "- No Filter -",
+                                            value: "",
+                                            key: "no-filter",
+                                        },
+                                        ...ROTATIONS.map((rotation) => ({
+                                            label: rotation,
+                                            value: rotation,
+                                            key: rotation,
+                                        })),
+                                    ]}
+                                    onChange={setFeedbackRotationFilter}
+                                />
+                            </Box>
+                        </Box>
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell
+                                            sx={{
+                                                cursor: "pointer",
+                                                width: "70%",
+                                            }}
+                                            onClick={() =>
+                                                handleFeedbackSort("text")
+                                            }
+                                        >
+                                            Feedback{" "}
+                                            {feedbackSortField === "text" &&
+                                                (feedbackSortOrder === "asc"
+                                                    ? "↑"
+                                                    : "↓")}
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                cursor: "pointer",
+                                                width: "15%",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                            onClick={() =>
+                                                handleFeedbackSort("rotation")
+                                            }
+                                        >
+                                            Rotation{" "}
+                                            {feedbackSortField === "rotation" &&
+                                                (feedbackSortOrder === "asc"
+                                                    ? "↑"
+                                                    : "↓")}
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                width: "15%",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            Actions
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {filteredAndSortedFeedbacks.map(
+                                        (feedback) => (
+                                            <React.Fragment key={feedback.id}>
+                                                <TableRow
+                                                    hover
+                                                    sx={{
+                                                        "&:hover": {
+                                                            backgroundColor:
+                                                                alpha(
+                                                                    theme
+                                                                        .palette
+                                                                        .action
+                                                                        .hover,
+                                                                    0.04
+                                                                ),
+                                                        },
+                                                    }}
+                                                >
+                                                    <TableCell className="feedback-text-cell">
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems:
+                                                                    "center",
+                                                                gap: 1,
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                sx={{
+                                                                    display:
+                                                                        "-webkit-box",
+                                                                    WebkitLineClamp:
+                                                                        expandedFeedbackText ===
+                                                                        feedback.id
+                                                                            ? undefined
+                                                                            : 3,
+                                                                    WebkitBoxOrient:
+                                                                        "vertical",
+                                                                    overflow:
+                                                                        "hidden",
+                                                                    flex: 1,
+                                                                }}
+                                                            >
+                                                                {feedback.text}
+                                                            </Typography>
+                                                            {needsTruncation[
+                                                                feedback.id
+                                                            ] && (
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        setExpandedFeedbackText(
+                                                                            expandedFeedbackText ===
+                                                                                feedback.id
+                                                                                ? null
+                                                                                : feedback.id
+                                                                        );
+                                                                    }}
+                                                                    sx={{
+                                                                        transform:
+                                                                            expandedFeedbackText ===
+                                                                            feedback.id
+                                                                                ? "rotate(180deg)"
+                                                                                : "none",
+                                                                        transition:
+                                                                            "transform 0.2s",
+                                                                        p: 0.5,
+                                                                    }}
+                                                                >
+                                                                    <KeyboardArrowDownIcon fontSize="small" />
+                                                                </IconButton>
+                                                            )}
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography
+                                                            sx={{
+                                                                whiteSpace:
+                                                                    "nowrap",
+                                                                overflow:
+                                                                    "hidden",
+                                                                textOverflow:
+                                                                    "ellipsis",
+                                                            }}
+                                                        >
+                                                            {feedback.rotation}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                gap: 1,
+                                                                alignItems:
+                                                                    "center",
+                                                                justifyContent:
+                                                                    "flex-start",
+                                                            }}
+                                                        >
+                                                            <IconButton
+                                                                onClick={(
+                                                                    e
+                                                                ) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedFeedback(
+                                                                        feedback
+                                                                    );
+                                                                    setIsFeedbackDialogOpen(
+                                                                        true
+                                                                    );
+                                                                }}
+                                                                size="small"
+                                                            >
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                onClick={(
+                                                                    e
+                                                                ) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteFeedback(
+                                                                        feedback.id
+                                                                    );
+                                                                }}
+                                                                size="small"
+                                                                color="error"
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                            {feedback.journal && (
+                                                                <IconButton
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        setExpandedFeedback(
+                                                                            expandedFeedback ===
+                                                                                feedback.id
+                                                                                ? null
+                                                                                : feedback.id
+                                                                        );
+                                                                    }}
+                                                                    size="small"
+                                                                    sx={{
+                                                                        transform:
+                                                                            expandedFeedback ===
+                                                                            feedback.id
+                                                                                ? "rotate(180deg)"
+                                                                                : "none",
+                                                                        transition:
+                                                                            "transform 0.2s",
+                                                                    }}
+                                                                >
+                                                                    <KeyboardArrowDownIcon />
+                                                                </IconButton>
+                                                            )}
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                                {expandedFeedback ===
+                                                    feedback.id &&
+                                                    feedback.journal && (
+                                                        <TableRow>
+                                                            <TableCell
+                                                                colSpan={3}
+                                                                sx={{
+                                                                    p: 2,
+                                                                    backgroundColor:
+                                                                        alpha(
+                                                                            theme
+                                                                                .palette
+                                                                                .primary
+                                                                                .main,
+                                                                            0.05
+                                                                        ),
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        pl: 2,
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="subtitle1"
+                                                                        sx={{
+                                                                            mb: 2,
+                                                                            fontWeight: 600,
+                                                                        }}
+                                                                    >
+                                                                        Associated
+                                                                        Journal
+                                                                        Entry
+                                                                    </Typography>
+                                                                    <Grid
+                                                                        container
+                                                                        spacing={
+                                                                            2
+                                                                        }
+                                                                    >
+                                                                        <Grid
+                                                                            item
+                                                                            xs={
+                                                                                12
+                                                                            }
+                                                                            sm={
+                                                                                6
+                                                                            }
+                                                                        >
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Date:
+                                                                                </strong>{" "}
+                                                                                {new Date(
+                                                                                    feedback.journal.date
+                                                                                ).toLocaleDateString()}
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Rotation:
+                                                                                </strong>{" "}
+                                                                                {
+                                                                                    feedback
+                                                                                        .journal
+                                                                                        .rotation
+                                                                                }
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Location:
+                                                                                </strong>{" "}
+                                                                                {
+                                                                                    feedback
+                                                                                        .journal
+                                                                                        .location
+                                                                                }
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Hospital:
+                                                                                </strong>{" "}
+                                                                                {feedback
+                                                                                    .journal
+                                                                                    .hospital ||
+                                                                                    "N/A"}
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Doctor:
+                                                                                </strong>{" "}
+                                                                                {feedback
+                                                                                    .journal
+                                                                                    .doctor ||
+                                                                                    "N/A"}
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid
+                                                                            item
+                                                                            xs={
+                                                                                12
+                                                                            }
+                                                                            sm={
+                                                                                6
+                                                                            }
+                                                                        >
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Patient
+                                                                                    Setting:
+                                                                                </strong>{" "}
+                                                                                {
+                                                                                    feedback
+                                                                                        .journal
+                                                                                        .patientSetting
+                                                                                }
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Interaction:
+                                                                                </strong>{" "}
+                                                                                {
+                                                                                    feedback
+                                                                                        .journal
+                                                                                        .interaction
+                                                                                }
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    CanMEDS
+                                                                                    Roles:
+                                                                                </strong>{" "}
+                                                                                {feedback.journal.canmedsRoles.join(
+                                                                                    ", "
+                                                                                )}
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    Learning
+                                                                                    Objectives:
+                                                                                </strong>{" "}
+                                                                                {feedback.journal.learningObjectives.join(
+                                                                                    ", "
+                                                                                )}
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid
+                                                                            item
+                                                                            xs={
+                                                                                12
+                                                                            }
+                                                                        >
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    What
+                                                                                    I
+                                                                                    Did
+                                                                                    Well:
+                                                                                </strong>{" "}
+                                                                                {feedback
+                                                                                    .journal
+                                                                                    .whatIDidWell ||
+                                                                                    "N/A"}
+                                                                            </Typography>
+                                                                            <Typography
+                                                                                variant="body2"
+                                                                                sx={{
+                                                                                    mb: 1,
+                                                                                }}
+                                                                            >
+                                                                                <strong>
+                                                                                    What
+                                                                                    I
+                                                                                    Could
+                                                                                    Improve:
+                                                                                </strong>{" "}
+                                                                                {feedback
+                                                                                    .journal
+                                                                                    .whatICouldImprove ||
+                                                                                    "N/A"}
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Box>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
+                                            </React.Fragment>
+                                        )
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                mt: 2,
+                            }}
+                        >
+                            <Pagination
+                                count={Math.max(
+                                    1,
+                                    Math.ceil(
+                                        feedbackTotalCount / feedbackLimit
+                                    )
+                                )}
+                                page={Math.min(
+                                    feedbackPage,
+                                    Math.max(
+                                        1,
+                                        Math.ceil(
+                                            feedbackTotalCount / feedbackLimit
+                                        )
+                                    )
+                                )}
+                                onChange={(_, value) => {
+                                    setFeedbackPage(value);
+                                    handleFetchFeedback(
+                                        value,
+                                        feedbackLimit,
+                                        feedbackRotationFilter
+                                    );
+                                }}
+                                showFirstButton
+                                showLastButton
+                                siblingCount={1}
+                                boundaryCount={1}
+                                color="primary"
+                                size="large"
+                                variant="outlined"
+                                shape="rounded"
+                            />
                         </Box>
                     </Card>
                 </Box>
             </Fade>
 
-            {/* Edit Dialog */}
-            <Dialog
+            {/* Journal Entry Dialog */}
+            <JournalEntryDialog
                 open={isEditDialogOpen}
                 onClose={handleCloseEditDialog}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        borderRadius: 2,
-                        overflow: "hidden",
-                    },
-                }}
-            >
-                <DialogTitle
-                    component="div"
-                    sx={{
-                        background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
-                        py: 2,
-                        mb: 2,
-                    }}
-                >
-                    <Typography
-                        variant="h6"
-                        component="h3"
-                        sx={{ fontWeight: 600 }}
-                    >
-                        {editingEntry
-                            ? t("medicalJournal.editEntryTitle")
-                            : t("medicalJournal.addNewEntryTitle")}
-                    </Typography>
-                </DialogTitle>
-                <DialogContent sx={{ pt: 3 }}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.dateLabel")}
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                type="date"
-                                value={currentEntry.date}
-                                onChange={(e) =>
-                                    handleInputChange("date", e.target.value)
-                                }
-                                error={!!errors.date}
-                                helperText={
-                                    errors.date
-                                        ? t("medicalJournal.requiredFieldError")
-                                        : ""
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.rotationLabel")}
-                            </Typography>
-                            <FormControl fullWidth error={!!errors.rotation}>
-                                <Select
-                                    value={currentEntry.rotation}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "rotation",
-                                            e.target.value
-                                        )
-                                    }
-                                >
-                                    {ROTATIONS.sort().map((rotation) => (
-                                        <MenuItem
-                                            key={rotation}
-                                            value={rotation}
-                                        >
-                                            {rotation}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {errors.rotation && (
-                                    <Typography variant="caption" color="error">
-                                        {t("medicalJournal.requiredFieldError")}
-                                    </Typography>
-                                )}
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.locationLabel")}
-                            </Typography>
-                            <FormControl fullWidth error={!!errors.location}>
-                                <Select
-                                    value={currentEntry.location}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "location",
-                                            e.target.value
-                                        )
-                                    }
-                                >
-                                    {LOCATIONS.sort().map((location) => (
-                                        <MenuItem
-                                            key={location}
-                                            value={location}
-                                        >
-                                            {location}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {errors.location && (
-                                    <Typography variant="caption" color="error">
-                                        {t("medicalJournal.requiredFieldError")}
-                                    </Typography>
-                                )}
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.canmedsRolesLabel")}
-                            </Typography>
-                            <FormControl fullWidth>
-                                <Select
-                                    multiple
-                                    value={currentEntry.canmedsRoles || []}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "canmedsRoles",
-                                            e.target.value
-                                        )
-                                    }
-                                    input={<OutlinedInput />}
-                                    renderValue={(selected) => (
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                flexWrap: "wrap",
-                                                gap: 0.5,
-                                            }}
-                                        >
-                                            {selected.map((value) => (
-                                                <Chip
-                                                    key={value}
-                                                    label={value}
-                                                    size="small"
-                                                    sx={{
-                                                        backgroundColor: alpha(
-                                                            getCanMEDSColor(
-                                                                value
-                                                            ),
-                                                            0.1
-                                                        ),
-                                                        color: getCanMEDSColor(
-                                                            value
-                                                        ),
-                                                        fontWeight: 500,
-                                                    }}
-                                                />
-                                            ))}
-                                        </Box>
-                                    )}
-                                >
-                                    {CANMEDS_ROLES.map((role) => (
-                                        <MenuItem key={role} value={role}>
-                                            {role}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.patientSettingLabel")}
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={2}
-                                value={currentEntry.patientSetting}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        "patientSetting",
-                                        e.target.value
-                                    )
-                                }
-                                error={!!errors.patientSetting}
-                                helperText={
-                                    errors.patientSetting
-                                        ? t("medicalJournal.requiredFieldError")
-                                        : ""
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.interactionLabel")}
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={3}
-                                value={currentEntry.interaction}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        "interaction",
-                                        e.target.value
-                                    )
-                                }
-                                error={!!errors.interaction}
-                                helperText={
-                                    errors.interaction
-                                        ? t("medicalJournal.requiredFieldError")
-                                        : ""
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.hospitalLabel")}
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                value={currentEntry.hospital || ""}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        "hospital",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder={t(
-                                    "medicalJournal.hospitalPlaceholder"
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.doctorLabel")}
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                value={currentEntry.doctor || ""}
-                                onChange={(e) =>
-                                    handleInputChange("doctor", e.target.value)
-                                }
-                                placeholder={t(
-                                    "medicalJournal.doctorPlaceholder"
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                {t("medicalJournal.learningobjectivesLabel")}
-                            </Typography>
-                            <FormControl fullWidth>
-                                <Select
-                                    multiple
-                                    value={
-                                        currentEntry.learningObjectives || []
-                                    }
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "learningObjectives",
-                                            e.target.value
-                                        )
-                                    }
-                                    input={<OutlinedInput />}
-                                    renderValue={(selected) => (
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                flexWrap: "wrap",
-                                                gap: 0.5,
-                                            }}
-                                        >
-                                            {selected.map((value) => (
-                                                <Chip
-                                                    key={value}
-                                                    label={value}
-                                                    size="small"
-                                                    sx={{
-                                                        backgroundColor: alpha(
-                                                            theme.palette.info
-                                                                .main,
-                                                            0.1
-                                                        ),
-                                                        color: theme.palette
-                                                            .info.main,
-                                                        fontWeight: 500,
-                                                    }}
-                                                />
-                                            ))}
-                                        </Box>
-                                    )}
-                                >
-                                    {LEARNING_OBJECTIVES_DROPDOWN.map(
-                                        (objective) => (
-                                            <MenuItem
-                                                key={objective}
-                                                value={objective}
-                                            >
-                                                {objective}
-                                            </MenuItem>
-                                        )
-                                    )}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                What I Did Well
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={3}
-                                value={currentEntry.whatIDidWell || ""}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        "whatIDidWell",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter what you did well..."
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                What I Could Improve
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={3}
-                                value={currentEntry.whatICouldImprove || ""}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        "whatICouldImprove",
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Enter what you could improve..."
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, fontWeight: 500 }}
-                            >
-                                Feedback
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={3}
-                                value={currentEntry.feedback?.[0]?.text || ""}
-                                onChange={(e) => {
-                                    const text = e.target.value;
-                                    if (text.trim()) {
-                                        handleInputChange("feedback", [
-                                            {
-                                                text: text,
-                                                rotation: currentEntry.rotation,
-                                            },
-                                        ]);
-                                    } else {
-                                        handleInputChange("feedback", []);
-                                    }
-                                }}
-                                placeholder="Enter feedback for this entry..."
-                            />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions
-                    sx={{
-                        p: 3,
-                        background: alpha(
-                            theme.palette.background.default,
-                            0.5
-                        ),
-                    }}
-                >
-                    <Button
-                        onClick={handleCloseEditDialog}
-                        sx={{
-                            textTransform: "none",
-                            fontWeight: 500,
-                        }}
-                    >
-                        {t("medicalJournal.cancelButton")}
-                    </Button>
-                    <Button
-                        onClick={handleSaveEntry}
-                        variant="contained"
-                        color="primary"
-                        startIcon={<SaveIcon />}
-                        sx={{
-                            textTransform: "none",
-                            fontWeight: 500,
-                            px: 3,
-                            borderRadius: 2,
-                        }}
-                    >
-                        {editingEntry
-                            ? t("medicalJournal.saveChangesButton")
-                            : t("medicalJournal.addEntryButton")}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                editingEntry={editingEntry}
+                currentEntry={currentEntry}
+                errors={errors}
+                onInputChange={(field: keyof LearningEntry, value: any) =>
+                    handleInputChange(field, value)
+                }
+                onSave={handleSaveEntry}
+            />
+
+            {/* Feedback Dialog */}
             <FeedbackDialog
                 open={isFeedbackDialogOpen}
                 onClose={() => {
