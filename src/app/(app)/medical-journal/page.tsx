@@ -2149,6 +2149,7 @@ export default function MedicalJournalPage() {
                                 background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                                 borderBottom: `1px solid ${theme.palette.divider}`,
                                 gap: 2,
+                                flexWrap: "wrap",
                             }}
                         >
                             <Box
