@@ -48,14 +48,14 @@ const translations = {
             explore: "Explore",
         },
         medicalJournal: {
-            title: "Learning Objectives in EM",
+            title: "Clerkship Reflections",
             objectivesTitle: "Objectives",
             encountersTitle: "Encounters",
             loginPrompt:
                 "To start creating/editing/viewing reflections, please login.",
             welcomeMessage: "Welcome,",
             userFallback: "User",
-            clinicalEncountersTitle: "Clinical Encounters",
+            clinicalEncountersTitle: "Encounters",
             reflectionNote:
                 "Reflections you create/edit are only visible to you. Still, don't enter any sensitive or personal information about yourself, colleagues, or patients.",
             addEntryTooltip: "Add Entry",
@@ -81,7 +81,7 @@ const translations = {
             interactionLabel: "Interaction",
             hospitalLabel: "Hospital",
             doctorLabel: "Doctor",
-            learningObjectivesLabel: "Learning Objectives",
+            learningobjectivesLabel: "Learning Objectives",
             requiredFieldError: "This field is required",
             cancelButton: "Cancel",
             saveChangesButton: "Save Changes",
@@ -212,14 +212,14 @@ const translations = {
             explore: "Explorar",
         },
         medicalJournal: {
-            title: "Objetivos de Aprendizaje en EM",
+            title: "Reflexiones de Internado",
             objectivesTitle: "Objetivos",
             encountersTitle: "Encuentros",
             loginPrompt:
                 "Para comenzar a crear/editar/ver reflexiones, por favor inicia sesión.",
             welcomeMessage: "Bienvenido,",
             userFallback: "Usuario",
-            clinicalEncountersTitle: "Encuentros Clínicos",
+            clinicalEncountersTitle: "Encuentros",
             reflectionNote:
                 "Las reflexiones que creas/editas son visibles solo para ti. Aún así, no ingreses información sensible o personal sobre ti, colegas o pacientes.",
             addEntryTooltip: "Agregar Entrada",
@@ -245,7 +245,7 @@ const translations = {
             interactionLabel: "Interacción",
             hospitalLabel: "Hospital",
             doctorLabel: "Doctor",
-            learningObjectivesLabel: "Objetivos de Aprendizaje",
+            learningobjectivesLabel: "Objetivos de Aprendizaje",
             requiredFieldError: "Este campo es obligatorio",
             cancelButton: "Cancelar",
             saveChangesButton: "Guardar Cambios",
@@ -378,14 +378,14 @@ const translations = {
             explore: "Explorer",
         },
         medicalJournal: {
-            title: "Objectifs d'apprentissage en EM",
+            title: "Réflexions de Stage",
             objectivesTitle: "Objectifs",
             encountersTitle: "Rencontres",
             loginPrompt:
                 "Pour commencer à créer/modifier/voir des réflexions, veuillez vous connecter.",
             welcomeMessage: "Bienvenue,",
             userFallback: "Utilisateur",
-            clinicalEncountersTitle: "Rencontres Cliniques",
+            clinicalEncountersTitle: "Rencontres",
             reflectionNote:
                 "Les réflexions que vous créez/modifiez ne sont visibles que par vous. N'entrez pas d'informations sensibles ou personnelles sur vous-même, vos collègues ou vos patients.",
             addEntryTooltip: "Ajouter une Entrée",
@@ -411,7 +411,7 @@ const translations = {
             interactionLabel: "Interaction",
             hospitalLabel: "Hôpital",
             doctorLabel: "Docteur",
-            learningObjectivesLabel: "Objectifs d'apprentissage",
+            learningobjectivesLabel: "Objectifs d'apprentissage",
             requiredFieldError: "Ce champ est obligatoire",
             cancelButton: "Annuler",
             saveChangesButton: "Enregistrer les Modifications",
