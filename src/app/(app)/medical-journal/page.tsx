@@ -258,7 +258,8 @@ export default function MedicalJournalPage() {
             await handleFetchFeedback(
                 feedbackPage,
                 feedbackLimit,
-                feedbackRotationFilter
+                feedbackRotationFilter,
+                feedbackSearchTerm
             );
         };
 
@@ -353,8 +354,15 @@ export default function MedicalJournalPage() {
                 },
             });
 
+            const queryParams = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+            });
+            if (filters.rotation)
+                queryParams.append("rotation", filters.rotation);
+
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}`,
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?${queryParams.toString()}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -369,7 +377,6 @@ export default function MedicalJournalPage() {
 
             const data = await response.json();
             if (data.success) {
-                // The API already formats the entries with feedback
                 setEntries(data.entries);
             }
         } catch (error) {
@@ -447,7 +454,8 @@ export default function MedicalJournalPage() {
                     await handleFetchFeedback(
                         feedbackPage,
                         feedbackLimit,
-                        feedbackRotationFilter
+                        feedbackRotationFilter,
+                        feedbackSearchTerm
                     );
                 }
 
@@ -572,7 +580,8 @@ export default function MedicalJournalPage() {
     const handleFetchFeedback = async (
         page: number,
         limit: number,
-        rotation?: string
+        rotation?: string,
+        searchTerm?: string
     ) => {
         try {
             const token = await getAccessTokenSilently({
@@ -586,6 +595,7 @@ export default function MedicalJournalPage() {
                 limit: String(limit),
             });
             if (rotation) queryParams.append("rotation", rotation);
+            if (searchTerm) queryParams.append("searchTerm", searchTerm);
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL || ""}/api/feedback?${queryParams.toString()}`,
@@ -604,18 +614,7 @@ export default function MedicalJournalPage() {
             const data = await response.json();
             if (data.success) {
                 setFeedbacks(data.feedback);
-
-                const totalCount =
-                    typeof data.totalCount === "number"
-                        ? data.totalCount
-                        : data.feedback.length;
-                setFeedbackTotalCount(totalCount);
-
-                // Ensure page is within valid range
-                const totalPages = Math.ceil(totalCount / limit);
-                setFeedbackPage((prev) =>
-                    Math.min(prev, Math.max(1, totalPages))
-                );
+                setFeedbackTotalCount(data.totalCount);
             }
         } catch (error) {
             console.error(error);
@@ -918,18 +917,21 @@ export default function MedicalJournalPage() {
 
     useEffect(() => {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
-
-        const fetchData = async () => {
-            await handleFetchEntries();
-            await handleFetchFeedback(
-                feedbackPage,
-                feedbackLimit,
-                feedbackRotationFilter
-            );
-        };
-
-        fetchData();
-    }, [isLoading, isAuthenticated, user?.email_verified]);
+        handleFetchFeedback(
+            feedbackPage,
+            feedbackLimit,
+            feedbackRotationFilter,
+            feedbackSearchTerm
+        );
+    }, [
+        feedbackPage,
+        feedbackLimit,
+        feedbackRotationFilter,
+        feedbackSearchTerm,
+        isLoading,
+        isAuthenticated,
+        user?.email_verified,
+    ]);
 
     useEffect(() => {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
@@ -941,12 +943,14 @@ export default function MedicalJournalPage() {
         handleFetchFeedback(
             feedbackPage,
             feedbackLimit,
-            feedbackRotationFilter
+            feedbackRotationFilter,
+            feedbackSearchTerm
         );
     }, [
         feedbackPage,
         feedbackLimit,
         feedbackRotationFilter,
+        feedbackSearchTerm,
         isLoading,
         isAuthenticated,
         user?.email_verified,
@@ -1034,7 +1038,7 @@ export default function MedicalJournalPage() {
             });
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(searchTerm)}`,
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(searchTerm)}${filters.rotation ? `&rotation=${encodeURIComponent(filters.rotation)}` : ""}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -1474,6 +1478,7 @@ export default function MedicalJournalPage() {
                                 background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                                 borderBottom: `1px solid ${theme.palette.divider}`,
                                 gap: 2,
+                                flexWrap: "wrap",
                             }}
                         >
                             <Box
@@ -1548,6 +1553,39 @@ export default function MedicalJournalPage() {
                                 >
                                     {isSearching ? "Searching..." : "Search"}
                                 </Button>
+                            </Box>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 2,
+                                    justifyContent: "flex-start",
+                                }}
+                            >
+                                <DropdownComponent
+                                    title="Filter by Rotation"
+                                    titleLocation="left"
+                                    currentSelected={filters.rotation || ""}
+                                    items={[
+                                        {
+                                            label: "- No Filter -",
+                                            value: "",
+                                            key: "no-filter",
+                                        },
+                                        ...ROTATIONS.map((rotation) => ({
+                                            label: rotation,
+                                            value: rotation,
+                                            key: rotation,
+                                        })),
+                                    ]}
+                                    onChange={(value) => {
+                                        setFilters((prev) => ({
+                                            ...prev,
+                                            rotation: value,
+                                        }));
+                                        setPage(1); // Reset to first page when filter changes
+                                    }}
+                                />
                             </Box>
                         </Box>
                         <TableContainer sx={{ overflowX: "auto" }}>
@@ -2745,7 +2783,8 @@ export default function MedicalJournalPage() {
                                     handleFetchFeedback(
                                         value,
                                         feedbackLimit,
-                                        feedbackRotationFilter
+                                        feedbackRotationFilter,
+                                        feedbackSearchTerm
                                     );
                                 }}
                                 showFirstButton
