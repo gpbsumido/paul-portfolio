@@ -37,4 +37,4 @@ export interface LearningEntry {
     feedback?: Feedback[];
 }
 
-export type Rotation = typeof ROTATIONS[number]; 
+export type Rotation = (typeof ROTATIONS)[number];
