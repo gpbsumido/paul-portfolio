@@ -382,6 +382,13 @@ export default function MedicalJournalPage() {
         [key in keyof LearningEntry]?: boolean;
     }>({});
 
+    // Update activeTab when authentication status changes
+    useEffect(() => {
+        if (!isLoading) {
+            setActiveTab(isAuthenticated ? 1 : 0);
+        }
+    }, [isAuthenticated, isLoading]);
+
     const [sortField, setSortField] = useState<keyof LearningEntry>("date");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [filters, setFilters] = useState<{
