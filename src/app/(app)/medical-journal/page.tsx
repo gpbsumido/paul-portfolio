@@ -258,7 +258,8 @@ export default function MedicalJournalPage() {
             await handleFetchFeedback(
                 feedbackPage,
                 feedbackLimit,
-                feedbackRotationFilter
+                feedbackRotationFilter,
+                feedbackSearchTerm
             );
         };
 
@@ -447,7 +448,8 @@ export default function MedicalJournalPage() {
                     await handleFetchFeedback(
                         feedbackPage,
                         feedbackLimit,
-                        feedbackRotationFilter
+                        feedbackRotationFilter,
+                        feedbackSearchTerm
                     );
                 }
 
@@ -572,7 +574,8 @@ export default function MedicalJournalPage() {
     const handleFetchFeedback = async (
         page: number,
         limit: number,
-        rotation?: string
+        rotation?: string,
+        searchTerm?: string
     ) => {
         try {
             const token = await getAccessTokenSilently({
@@ -586,6 +589,7 @@ export default function MedicalJournalPage() {
                 limit: String(limit),
             });
             if (rotation) queryParams.append("rotation", rotation);
+            if (searchTerm) queryParams.append("searchTerm", searchTerm);
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL || ""}/api/feedback?${queryParams.toString()}`,
@@ -604,18 +608,7 @@ export default function MedicalJournalPage() {
             const data = await response.json();
             if (data.success) {
                 setFeedbacks(data.feedback);
-
-                const totalCount =
-                    typeof data.totalCount === "number"
-                        ? data.totalCount
-                        : data.feedback.length;
-                setFeedbackTotalCount(totalCount);
-
-                // Ensure page is within valid range
-                const totalPages = Math.ceil(totalCount / limit);
-                setFeedbackPage((prev) =>
-                    Math.min(prev, Math.max(1, totalPages))
-                );
+                setFeedbackTotalCount(data.totalCount);
             }
         } catch (error) {
             console.error(error);
@@ -918,18 +911,21 @@ export default function MedicalJournalPage() {
 
     useEffect(() => {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
-
-        const fetchData = async () => {
-            await handleFetchEntries();
-            await handleFetchFeedback(
-                feedbackPage,
-                feedbackLimit,
-                feedbackRotationFilter
-            );
-        };
-
-        fetchData();
-    }, [isLoading, isAuthenticated, user?.email_verified]);
+        handleFetchFeedback(
+            feedbackPage,
+            feedbackLimit,
+            feedbackRotationFilter,
+            feedbackSearchTerm
+        );
+    }, [
+        feedbackPage,
+        feedbackLimit,
+        feedbackRotationFilter,
+        feedbackSearchTerm,
+        isLoading,
+        isAuthenticated,
+        user?.email_verified,
+    ]);
 
     useEffect(() => {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
@@ -941,12 +937,14 @@ export default function MedicalJournalPage() {
         handleFetchFeedback(
             feedbackPage,
             feedbackLimit,
-            feedbackRotationFilter
+            feedbackRotationFilter,
+            feedbackSearchTerm
         );
     }, [
         feedbackPage,
         feedbackLimit,
         feedbackRotationFilter,
+        feedbackSearchTerm,
         isLoading,
         isAuthenticated,
         user?.email_verified,
@@ -1034,7 +1032,7 @@ export default function MedicalJournalPage() {
             });
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(searchTerm)}`,
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(searchTerm)}${filters.rotation ? `&rotation=${encodeURIComponent(filters.rotation)}` : ""}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -2745,7 +2743,8 @@ export default function MedicalJournalPage() {
                                     handleFetchFeedback(
                                         value,
                                         feedbackLimit,
-                                        feedbackRotationFilter
+                                        feedbackRotationFilter,
+                                        feedbackSearchTerm
                                     );
                                 }}
                                 showFirstButton
