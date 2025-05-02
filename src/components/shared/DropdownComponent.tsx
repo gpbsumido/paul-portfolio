@@ -45,7 +45,10 @@ export default function DropdownComponent({
         <Box
             sx={{
                 display: "flex",
-                flexDirection: titleLocation === "left" ? {xs: "column", sm: "row"} : "column",
+                flexDirection:
+                    titleLocation === "left"
+                        ? { xs: "column", sm: "row" }
+                        : "column",
                 alignItems: titleLocation === "left" ? "center" : "flex-start",
                 gap: titleLocation === "left" ? 2 : 0,
             }}

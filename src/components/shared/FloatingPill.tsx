@@ -1,6 +1,13 @@
 "use client";
 
-import { Box, Typography, Button, useTheme, useMediaQuery, Avatar } from "@mui/material";
+import {
+    Box,
+    Typography,
+    Button,
+    useTheme,
+    useMediaQuery,
+    Avatar,
+} from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -58,7 +65,11 @@ export default function FloatingPill({
     };
 
     return (
-        <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTap} onClick={handleTap}
+        <Box
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTap}
+            onClick={handleTap}
             sx={{
                 position: "fixed",
                 top: { xs: "8px", sm: "8px" }, // Top center of the screen
@@ -70,9 +81,11 @@ export default function FloatingPill({
                         ? "rgba(15, 23, 42, 0.95)" // Dark blue pastel
                         : "rgba(30, 58, 138, 0.95)", // Lighter blue pastel
                 boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
-                transition: 'all 0.3s ease-in-out',
-                borderRadius: isLoggedIn && isMobile && minimized ? "50%" : "20px",
-                padding: isLoggedIn && isMobile && minimized ? "8px" : "8px 16px",
+                transition: "all 0.3s ease-in-out",
+                borderRadius:
+                    isLoggedIn && isMobile && minimized ? "50%" : "20px",
+                padding:
+                    isLoggedIn && isMobile && minimized ? "8px" : "8px 16px",
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
@@ -84,7 +97,11 @@ export default function FloatingPill({
         >
             {!isLoading && isAuthenticated ? (
                 minimized && isMobile ? (
-                    <Avatar src={user?.picture} alt={user?.name} sx={{ width: 32, height: 32 }} />
+                    <Avatar
+                        src={user?.picture}
+                        alt={user?.name}
+                        sx={{ width: 32, height: 32 }}
+                    />
                 ) : (
                     <>
                         <Typography
