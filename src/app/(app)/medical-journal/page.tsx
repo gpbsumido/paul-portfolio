@@ -1585,10 +1585,11 @@ export default function MedicalJournalPage() {
                                         }));
                                         setPage(1); // Reset to first page when filter changes
                                     }}
+                                    minWidth="12em"
                                 />
                             </Box>
                         </Box>
-                        <TableContainer sx={{ overflowX: "auto" }}>
+                        <TableContainer sx={{ overflowX: "scroll" }}>
                             <Table>
                                 <TableHead>
                                     <TableRow>
@@ -2113,7 +2114,7 @@ export default function MedicalJournalPage() {
                                 sx={{
                                     display: "flex",
                                     justifyContent: "center",
-                                    mt: 2,
+                                    my: 2,
                                 }}
                             >
                                 <Pagination
@@ -2302,10 +2303,11 @@ export default function MedicalJournalPage() {
                                         })),
                                     ]}
                                     onChange={setFeedbackRotationFilter}
+                                    minWidth="12em"
                                 />
                             </Box>
                         </Box>
-                        <TableContainer>
+                        <TableContainer sx={{ overflowX: "scroll" }}>
                             <Table>
                                 <TableHead>
                                     <TableRow>
@@ -2759,7 +2761,7 @@ export default function MedicalJournalPage() {
                             sx={{
                                 display: "flex",
                                 justifyContent: "center",
-                                mt: 2,
+                                my: 2,
                             }}
                         >
                             <Pagination
