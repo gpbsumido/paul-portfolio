@@ -2110,30 +2110,30 @@ export default function MedicalJournalPage() {
                                     ))}
                                 </TableBody>
                             </Table>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    my: 2,
-                                }}
-                            >
-                                <Pagination
-                                    count={Math.ceil(
-                                        filteredAndSortedEntries.length / limit
-                                    )}
-                                    page={page}
-                                    onChange={handlePageChange}
-                                    showFirstButton
-                                    showLastButton
-                                    siblingCount={1}
-                                    boundaryCount={1}
-                                    color="primary"
-                                    size="large"
-                                    variant="outlined"
-                                    shape="rounded"
-                                />
-                            </Box>
                         </TableContainer>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                my: 2,
+                            }}
+                        >
+                            <Pagination
+                                count={Math.ceil(
+                                    filteredAndSortedEntries.length / limit
+                                )}
+                                page={page}
+                                onChange={handlePageChange}
+                                showFirstButton
+                                showLastButton
+                                siblingCount={1}
+                                boundaryCount={1}
+                                color="primary"
+                                size="large"
+                                variant="outlined"
+                                shape="rounded"
+                            />
+                        </Box>
                     </Card>
                 </Box>
             </Fade>
