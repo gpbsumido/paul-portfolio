@@ -870,7 +870,7 @@ export default function MedicalJournalPage() {
         // Add a small buffer to account for rounding and browser differences
         const threeLinesHeight = 3 * 1.5 * 14 + 2;
         const needsTruncation = height > threeLinesHeight;
-        
+
         setNeedsTruncation((prev) => {
             const newState = { ...prev, [id]: needsTruncation };
             return newState;
