@@ -32,9 +32,7 @@ import {
     Tab,
     Tabs,
     Fade,
-    Badge,
     Pagination,
-    InputLabel,
 } from "@mui/material";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
@@ -47,8 +45,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import SchoolIcon from "@mui/icons-material/School";
 import Alert from "@mui/material/Alert";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -56,300 +52,14 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import ChecklistIcon from "@mui/icons-material/Checklist";
-
+import {CANMEDS_ROLES, LEARNING_OBJECTIVES, LEARNING_OBJECTIVES_DROPDOWN, LOCATIONS, ROTATIONS  } from "@/constants/medical-journal";
 import { useAuth0 } from "@auth0/auth0-react";
 import FloatingPill from "@/components/shared/FloatingPill";
 import React from "react";
 import DropdownComponent from "@/components/shared/DropdownComponent";
+import FeedbackDialog from "@/components/medical-journal/FeedbackDialog";
+import { Feedback, LearningEntry } from "@/types/medical-journal";
 
-interface Feedback {
-    id: string;
-    text: string;
-    rotation: string;
-    journal_entry_id?: string;
-    journal?: {
-        id: string;
-        patientSetting: string;
-        interaction: string;
-        canmedsRoles: string[];
-        learningObjectives: string[];
-        rotation: string;
-        date: string;
-        location: string;
-        hospital?: string;
-        doctor?: string;
-        whatIDidWell?: string;
-        whatICouldImprove?: string;
-    };
-}
-
-interface LearningEntry {
-    id: string;
-    patientSetting: string;
-    interaction: string;
-    canmedsRoles: string[];
-    learningObjectives: string[];
-    rotation: string;
-    date: string;
-    location: string;
-    hospital?: string;
-    doctor?: string;
-    whatIDidWell?: string;
-    whatICouldImprove?: string;
-    feedback?: Feedback[]; // Change feedback to be an array of Feedback objects
-}
-
-const CANMEDS_ROLES = [
-    "Medical Expert",
-    "Scholar",
-    "Communicator",
-    "Professional",
-    "Leader",
-    "Health Advocate",
-    "Collaborator",
-];
-
-const LEARNING_OBJECTIVES = [
-    {
-        category: "Objectives of Clerkship Reflections",
-        objectives: [
-            "1. Promote Self-Awareness",
-            "   • Understand your emotions, biases, and values in patient care",
-            "   • Identify how personal beliefs influence your clinical behavior",
-            "",
-            "2. Enhance Clinical Reasoning",
-            "   • Reflect on diagnostic and therapeutic decisions",
-            "   • Analyze what went well or what could have been improved",
-            "",
-            "3. Support Professional Identity Formation",
-            "   • Explore how experiences are shaping you as a future doctor",
-            "   • Reflect on how you embody roles like communicator, collaborator, advocate",
-            "",
-            "4. Develop Empathy & Patient-Centered Thinking",
-            "   • Consider patient perspectives, values, and lived experience",
-            "   • Reflect on your communication, especially in difficult or emotional cases",
-            "",
-            "5. Integrate Feedback and Learning",
-            "   • Reflect on feedback received and how it informed your development",
-            "   • Identify learning goals or knowledge gaps for future improvement",
-        ],
-    },
-    {
-        category: "Techniques for Effective Reflection",
-        objectives: [
-            "1. Gibbs Reflective Cycle",
-            "   • Description – What happened?",
-            "   • Feelings – What were you thinking/feeling?",
-            "   • Evaluation – What was good/bad?",
-            "   • Analysis – Why did it happen that way?",
-            "   • Conclusion – What did you learn?",
-            "   • Action Plan – What will you do differently next time?",
-            "",
-            "2. The DIEP Model",
-            "   • Describe the experience",
-            "   • Interpret what it means",
-            "   • Evaluate its significance to your development",
-            "   • Plan how you'll apply the insight",
-            "",
-            "3. Free-Writing or Journaling",
-            "   • More informal but can be deeply introspective",
-            "   • Often useful right after emotional or challenging cases",
-            "",
-            "4. CanMEDS or ACGME Role-Based Reflection",
-            "   • Align your reflection with roles like 'Scholar', 'Communicator'",
-            "   • Some schools require or recommend mapping reflections to these roles",
-        ],
-    },
-    {
-        category: "Best Practices",
-        objectives: [
-            "• Focus on one meaningful encounter rather than a vague overview",
-            "• Be honest — it's about insight, not perfection",
-            "• Include both emotional and cognitive elements",
-            "• Tie your reflection to actionable learning or professional growth",
-            "• Avoid patient identifiers — maintain confidentiality",
-        ],
-    },
-];
-
-const LEARNING_OBJECTIVES_DROPDOWN = [
-    "Appropriate consideration of broader differential diagnoses",
-    "Suggest rule out/ rule in investigations and management",
-    "Develop systematic approach to common presentations",
-    "Recognize critical vs non-critical patients",
-    "Perform focused history and physical examination",
-    "Document patient encounters accurately",
-    "Develop and implement management plans",
-    "Follow-up on investigation results",
-    "Clear communication with patients and families",
-    "Effective handover to other healthcare providers",
-    "Appropriate consultation with specialists",
-    "Documentation of clinical reasoning",
-];
-
-//todo: move to a db table somewhere
-const ROTATIONS = [
-    "Emergency Medicine",
-    "Internal Medicine - MTU",
-    "Internal Medicine - Selective",
-    "General Surgery",
-    "Pediatrics",
-    "Obstetrics/Gynecology",
-    "Psychiatry",
-    "Family Medicine - Rural",
-    "Family Medicine - Urban",
-    "Vascular Surgery",
-    "Plastic Surgery",
-    "Anasthesia",
-    "NICU",
-    "Elective",
-    "Neurology",
-];
-
-const LOCATIONS = [
-    "Emergency Department",
-    "Inpatient Ward",
-    "Outpatient Clinic",
-    "Operating Room",
-    "Intensive Care Unit",
-    "Other",
-    "Admissions",
-];
-
-const FeedbackDialog = ({
-    open,
-    onClose,
-    selectedFeedback,
-    currentEntry,
-    onSave,
-}: {
-    open: boolean;
-    onClose: () => void;
-    selectedFeedback: Feedback | null;
-    currentEntry: LearningEntry;
-    onSave: (
-        text: string,
-        rotation: string,
-        journalEntryId?: string
-    ) => Promise<void>;
-}) => {
-    const [localFeedback, setLocalFeedback] = useState({
-        text: "",
-        rotation: "",
-        journalEntryId: "",
-    });
-
-    useEffect(() => {
-        if (selectedFeedback) {
-            setLocalFeedback({
-                text: selectedFeedback.text,
-                rotation: selectedFeedback.rotation,
-                journalEntryId:
-                    selectedFeedback.journal_entry_id || currentEntry.id,
-            });
-        } else {
-            setLocalFeedback({
-                text: "",
-                rotation: currentEntry.rotation,
-                journalEntryId: currentEntry.id,
-            });
-        }
-    }, [selectedFeedback?.id, currentEntry.id, currentEntry.rotation]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        try {
-            await onSave(
-                localFeedback.text,
-                localFeedback.rotation,
-                localFeedback.journalEntryId
-            );
-            onClose();
-        } catch (error) {
-            console.error("Error saving feedback:", error);
-        }
-    };
-
-    return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            maxWidth="md"
-            fullWidth
-            disableRestoreFocus
-        >
-            <div>
-                <DialogTitle>
-                    {selectedFeedback ? "Edit Feedback" : "Add Feedback"}
-                </DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={3}
-                                label="Feedback"
-                                value={localFeedback.text}
-                                onChange={(e) => {
-                                    setLocalFeedback((prev) => ({
-                                        ...prev,
-                                        text: e.target.value,
-                                    }));
-                                }}
-                                autoFocus
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.ctrlKey) {
-                                        handleSubmit(e);
-                                    }
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <FormControl fullWidth>
-                                <InputLabel>Rotation</InputLabel>
-                                <Select
-                                    value={localFeedback.rotation}
-                                    onChange={(e) => {
-                                        setLocalFeedback((prev) => ({
-                                            ...prev,
-                                            rotation: e.target.value,
-                                        }));
-                                    }}
-                                    label="Rotation"
-                                >
-                                    {ROTATIONS.map((rotation) => (
-                                        <MenuItem
-                                            key={rotation}
-                                            value={rotation}
-                                        >
-                                            {rotation}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button type="button" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        type="button"
-                        onClick={handleSubmit}
-                        variant="contained"
-                        color="primary"
-                    >
-                        {selectedFeedback?.id ? "Update" : "Add"}
-                    </Button>
-                </DialogActions>
-            </div>
-        </Dialog>
-    );
-};
 
 export default function MedicalJournalPage() {
     const theme = useTheme();
@@ -357,8 +67,6 @@ export default function MedicalJournalPage() {
         user,
         isAuthenticated,
         isLoading,
-        loginWithRedirect,
-        logout,
         getAccessTokenSilently,
     } = useAuth0();
 
@@ -385,13 +93,6 @@ export default function MedicalJournalPage() {
     const [errors, setErrors] = useState<{
         [key in keyof LearningEntry]?: boolean;
     }>({});
-
-    // Update activeTab when authentication status changes
-    useEffect(() => {
-        if (!isLoading) {
-            setActiveTab(isAuthenticated ? 1 : 0);
-        }
-    }, [isAuthenticated, isLoading]);
 
     const [sortField, setSortField] = useState<keyof LearningEntry>("date");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -535,16 +236,6 @@ export default function MedicalJournalPage() {
     const paginatedEntries = useMemo(
         () => filteredAndSortedEntries.slice((page - 1) * limit, page * limit),
         [filteredAndSortedEntries, page, limit]
-    );
-
-    // Memoize paginated feedbacks
-    const paginatedFeedbacks = useMemo(
-        () =>
-            filteredAndSortedFeedbacks.slice(
-                (feedbackPage - 1) * feedbackLimit,
-                feedbackPage * feedbackLimit
-            ),
-        [filteredAndSortedFeedbacks, feedbackPage, feedbackLimit]
     );
 
     // Fetch data only when necessary
@@ -1196,6 +887,13 @@ export default function MedicalJournalPage() {
         isAuthenticated,
         user?.email_verified,
     ]);
+
+    // Update activeTab when authentication status changes
+    useEffect(() => {
+        if (!isLoading) {
+            setActiveTab(isAuthenticated ? 1 : 0);
+        }
+    }, [isAuthenticated, isLoading]);
 
     const handleCloseEditDialog = () => {
         setIsEditDialogOpen(false);
