@@ -354,8 +354,14 @@ export default function MedicalJournalPage() {
                 },
             });
 
+            const queryParams = new URLSearchParams({
+                page: String(page),
+                limit: String(limit),
+            });
+            if (filters.rotation) queryParams.append("rotation", filters.rotation);
+
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?page=${page}&limit=${limit}`,
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/med-journal/entries?${queryParams.toString()}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -370,7 +376,6 @@ export default function MedicalJournalPage() {
 
             const data = await response.json();
             if (data.success) {
-                // The API already formats the entries with feedback
                 setEntries(data.entries);
             }
         } catch (error) {
@@ -1472,6 +1477,7 @@ export default function MedicalJournalPage() {
                                 background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                                 borderBottom: `1px solid ${theme.palette.divider}`,
                                 gap: 2,
+                                flexWrap: "wrap",
                             }}
                         >
                             <Box
@@ -1546,6 +1552,39 @@ export default function MedicalJournalPage() {
                                 >
                                     {isSearching ? "Searching..." : "Search"}
                                 </Button>
+                            </Box>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 2,
+                                    justifyContent: "flex-start",
+                                }}
+                            >
+                                <DropdownComponent
+                                    title="Filter by Rotation"
+                                    titleLocation="left"
+                                    currentSelected={filters.rotation || ""}
+                                    items={[
+                                        {
+                                            label: "- No Filter -",
+                                            value: "",
+                                            key: "no-filter",
+                                        },
+                                        ...ROTATIONS.map((rotation) => ({
+                                            label: rotation,
+                                            value: rotation,
+                                            key: rotation,
+                                        })),
+                                    ]}
+                                    onChange={(value) => {
+                                        setFilters((prev) => ({
+                                            ...prev,
+                                            rotation: value,
+                                        }));
+                                        setPage(1); // Reset to first page when filter changes
+                                    }}
+                                />
                             </Box>
                         </Box>
                         <TableContainer sx={{ overflowX: "auto" }}>
