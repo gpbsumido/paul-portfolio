@@ -439,7 +439,13 @@ export default function Gallery(): React.ReactElement | null {
             setImageFile(null);
             handleCloseModal();
         } catch (err: any) {
-            setUploadError(err.message || "An unexpected error occurred");
+            if (err.message.includes("Missing Refresh Token")) {
+                setUploadError(
+                    "Authentication error: Missing refresh token. Please login to resolve the issue. If already logged in, try logging out and then logging back in."
+                );
+            } else {
+                setUploadError(err.message || "An unexpected error occurred");
+            }
         } finally {
             setUploading(false);
         }
@@ -908,6 +914,21 @@ export default function Gallery(): React.ReactElement | null {
                                         bgcolor: "action.hover",
                                     },
                                 }}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    if (
+                                        e.dataTransfer.files &&
+                                        e.dataTransfer.files.length > 0
+                                    ) {
+                                        const file = e.dataTransfer.files[0];
+                                        if (file.type.startsWith("image/")) {
+                                            setImageFile(file);
+                                        } else {
+                                            alert("Please drop an image file.");
+                                        }
+                                    }
+                                }}
                             >
                                 <input
                                     type="file"
@@ -977,16 +998,8 @@ export default function Gallery(): React.ReactElement | null {
                                     boxShadow: 1,
                                 }}
                             >
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    Error:
-                                </Typography>
                                 <Typography variant="body2">
-                                    {uploadError}
+                                    Error: {uploadError}
                                 </Typography>
                             </Box>
                         )}
