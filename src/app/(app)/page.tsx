@@ -282,6 +282,7 @@ export default function Home() {
                                 onMouseEnter={() => setHoveredSection(index)}
                                 onMouseLeave={() => setHoveredSection(null)}
                                 sx={{
+                                    borderRadius: "8px",
                                     flex: {
                                         xs: "1 1 100%",
                                         sm: "1 1 calc(50% - 24px)",
@@ -303,6 +304,7 @@ export default function Home() {
                                         : "none",
                                     transition:
                                         "transform 0.3s ease, box-shadow 0.3s ease",
+                                    overflow: "hidden",
                                     "&::before": {
                                         content: '""',
                                         position: "absolute",
@@ -316,10 +318,14 @@ export default function Home() {
                                         transition:
                                             "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease",
                                         zIndex: -1,
+                                        borderRadius: "inherit",
                                     },
-                                    "&:hover::before": {
-                                        transform: "scale(1)",
-                                        background: theme.palette.action.hover,
+                                    "&:hover": {
+                                        "&::before": {
+                                            transform: "scale(1)",
+                                            background:
+                                                theme.palette.action.hover,
+                                        },
                                     },
                                 }}
                             >
@@ -342,13 +348,13 @@ export default function Home() {
                                                 : "none",
                                         borderRadius: "8px",
                                         "&:hover": {
-                                            transform: "translateY(-5px)",
                                             background:
                                                 theme.palette.mode === "light"
                                                     ? "rgba(245, 245, 245, 1)"
                                                     : theme.palette.action
                                                           .hover,
                                         },
+                                        height: "100%",
                                     }}
                                 >
                                     <Typography
