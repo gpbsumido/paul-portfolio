@@ -10,7 +10,6 @@ import {
     TextField,
     Container,
     useTheme,
-    useMediaQuery,
     IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,6 +21,9 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { HomeButton } from "@/components/common/HomeButton";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth0 } from "@auth0/auth0-react";
+import FloatingPill from "@/components/shared/FloatingPill";
+import ReusableModal from "@/components/common/ReusableModal";
 
 interface ImageData {
     src: string;
@@ -30,22 +32,26 @@ interface ImageData {
     blurDataURL?: string;
     originalWidth: number;
     originalHeight: number;
+    user_sub?: string;
 }
 
 export default function Gallery(): React.ReactElement | null {
+
+
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
+        useAuth0();
+
     const { t } = useLanguage();
 
     const theme = useTheme();
 
     const [images, setImages] = useState<ImageData[]>([]);
     const [containerWidth, setContainerWidth] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [text, setText] = useState("");
     const [description, setDescription] = useState("");
-    const [date, setDate] = useState("");
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [fetchedImages, setFetchedImages] = useState<any[]>([]);
@@ -60,6 +66,8 @@ export default function Gallery(): React.ReactElement | null {
     const [uploadError, setUploadError] = useState<string | null>(null); // State to track upload errors
     const [deleteError, setDeleteError] = useState<string | null>(null); // State to track delete errors
     const [fetchError, setFetchError] = useState<string | null>(null); // State to track fetch errors
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [imageToDelete, setImageToDelete] = useState<{ id: string; src: string } | null>(null);
 
     const preloadImage = (src: string): Promise<void> => {
         // Skip preloading for unsupported formats like .HEIC
@@ -248,8 +256,18 @@ export default function Gallery(): React.ReactElement | null {
             setIsFetching(true);
             setFetchError(null);
             try {
+                const token = await getAccessTokenSilently({
+                    authorizationParams: {
+                        audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                    },
+                });
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`
+                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
                 );
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -270,6 +288,7 @@ export default function Gallery(): React.ReactElement | null {
                                 key: string;
                                 imageUrl: string;
                                 blurDataURL?: string;
+                                user_sub?: string;
                             }) => {
                                 if (
                                     pageNumber === 1 &&
@@ -284,6 +303,7 @@ export default function Gallery(): React.ReactElement | null {
                                     originalWidth: 0,
                                     originalHeight: 0,
                                     blurDataURL: item.blurDataURL,
+                                    user_sub: item.user_sub,
                                 };
                             }
                         )
@@ -302,10 +322,9 @@ export default function Gallery(): React.ReactElement | null {
             } catch (error: any) {
                 setFetchError(
                     error.message ||
-                        "An unexpected error occurred while fetching posts."
+                    "An unexpected error occurred while fetching posts."
                 );
             } finally {
-                setIsLoading(false);
                 setIsFetching(false);
             }
         },
@@ -357,6 +376,10 @@ export default function Gallery(): React.ReactElement | null {
         }
     };
 
+    const handleUnselectFile = () => {
+        setImageFile(null);
+    };
+
     const handleSubmit = async () => {
         if (!imageFile) return;
         setUploading(true);
@@ -370,11 +393,19 @@ export default function Gallery(): React.ReactElement | null {
         formData.append("date", currentDate.toISOString());
 
         try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/gallery`,
                 {
                     method: "POST",
                     body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
             );
 
@@ -423,16 +454,37 @@ export default function Gallery(): React.ReactElement | null {
         }
     };
 
-    const handleDeleteImage = async (imageId: string, imageUrl: string) => {
-        if (deletingImageId) return; // Prevent multiple delete attempts
+    const handleOpenDeleteModal = (imageId: string, imageUrl: string) => {
+        setImageToDelete({ id: imageId, src: imageUrl });
+        setIsDeleteModalOpen(true);
+    };
 
-        setDeletingImageId(imageId);
-        setDeleteError(null); // Reset delete error state
+    const handleCloseDeleteModal = () => {
+        setImageToDelete(null);
+        setIsDeleteModalOpen(false);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!imageToDelete) return;
+
+        const { id, src } = imageToDelete;
+        setDeletingImageId(id);
+        setDeleteError(null);
+
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+            },
+        });
+
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${imageId}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`,
                 {
                     method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
             );
 
@@ -441,26 +493,25 @@ export default function Gallery(): React.ReactElement | null {
                 throw new Error(errorData.error || "Failed to delete image");
             }
 
-            // Remove the image from both states
-            setImages((prev) => prev.filter((img) => img.src !== imageUrl));
-            setFetchedImages((prev) =>
-                prev.filter((img) => img.id !== imageId)
-            );
-
-            // Remove from image cache
-            delete imageCache.current[imageUrl];
+            setImages((prev) => prev.filter((img) => img.src !== src));
+            setFetchedImages((prev) => prev.filter((img) => img.id !== id));
+            delete imageCache.current[src];
         } catch (error: any) {
             setDeleteError(
                 error.message ||
-                    "An unexpected error occurred while deleting the post."
+                "An unexpected error occurred while deleting the post."
             );
         } finally {
             setDeletingImageId(null);
+            handleCloseDeleteModal();
         }
     };
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
+
+            <FloatingPill redirectUrl={`${window.location.origin}/gallery`} />
+
             <Box
                 sx={{
                     position: "fixed",
@@ -481,26 +532,33 @@ export default function Gallery(): React.ReactElement | null {
             >
                 <LanguageSwitcher />
             </Box>
+
             <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 4 }}
+                sx={{
+                    mb: 5,
+                    textAlign: "center",
+                    background: (theme) =>
+                        `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                }}
             >
                 <Typography
-                    variant="h4"
+                    variant="h3"
                     component="h1"
                     gutterBottom
-                    sx={{ width: "100%", textAlign: "center" }}
+                    sx={{ fontWeight: 700 }}
                 >
                     {t("pages.gallery.title")}
                 </Typography>
                 <Typography
                     variant="subtitle1"
-                    color="text.secondary"
-                    sx={{ width: "100%", textAlign: "center" }}
+                    sx={{ color: "text.secondary" }}
                 >
                     {t("pages.gallery.subtitle")}
                 </Typography>
             </Box>
-            {!images.length && !isLoading && (
+            {!images.length && !isLoading && !isFetching && (
                 <Box
                     sx={{
                         display: "flex",
@@ -572,42 +630,45 @@ export default function Gallery(): React.ReactElement | null {
                                         },
                                     }}
                                 >
-                                    <IconButton
-                                        className="delete-button"
-                                        onClick={() =>
-                                            handleDeleteImage(
-                                                imageData.id,
-                                                image.src
-                                            )
-                                        } // Ensure correct ID and URL are passed
-                                        disabled={
-                                            deletingImageId === imageData?.id
-                                        }
-                                        sx={{
-                                            position: "absolute",
-                                            top: 8,
-                                            right: 8,
-                                            backgroundColor:
-                                                "rgba(0, 0, 0, 0.5)",
-                                            color: "white",
-                                            opacity: 0,
-                                            transition: "opacity 0.2s ease",
-                                            zIndex: 3,
-                                            "&:hover": {
+                                    {
+                                        isAuthenticated && !isLoading && image.user_sub === user?.sub &&
+                                        <IconButton
+                                            className="delete-button"
+                                            onClick={() =>
+                                                handleOpenDeleteModal(
+                                                    imageData.id,
+                                                    image.src
+                                                )
+                                            } // Ensure correct ID and URL are passed
+                                            disabled={
+                                                deletingImageId === imageData?.id
+                                            }
+                                            sx={{
+                                                position: "absolute",
+                                                top: 8,
+                                                right: 8,
                                                 backgroundColor:
-                                                    "rgba(0, 0, 0, 0.7)",
-                                            },
-                                        }}
-                                    >
-                                        {deletingImageId === imageData?.id ? (
-                                            <CircularProgress
-                                                size={24}
-                                                color="inherit"
-                                            />
-                                        ) : (
-                                            <DeleteIcon />
-                                        )}
-                                    </IconButton>
+                                                    "rgba(0, 0, 0, 0.5)",
+                                                color: "white",
+                                                opacity: 0,
+                                                transition: "opacity 0.2s ease",
+                                                zIndex: 3,
+                                                "&:hover": {
+                                                    backgroundColor:
+                                                        "rgba(0, 0, 0, 0.7)",
+                                                },
+                                            }}
+                                        >
+                                            {deletingImageId === imageData?.id ? (
+                                                <CircularProgress
+                                                    size={24}
+                                                    color="inherit"
+                                                />
+                                            ) : (
+                                                <DeleteIcon />
+                                            )}
+                                        </IconButton>
+                                    }
                                     {deleteError &&
                                         deletingImageId === imageData?.id && (
                                             <Box
@@ -642,64 +703,64 @@ export default function Gallery(): React.ReactElement | null {
                                     {(imageData?.text ||
                                         imageData?.description ||
                                         imageData?.date) && (
-                                        <Box
-                                            className="image-data"
-                                            sx={{
-                                                position: "absolute",
-                                                bottom: 0,
-                                                left: 0,
-                                                right: 0,
-                                                bgcolor: "rgba(0,0,0,0.6)",
-                                                color: "#fff",
-                                                p: 2,
-                                                zIndex: 2,
-                                                opacity: 0,
-                                                transition: "opacity 0.3s ease",
-                                            }}
-                                        >
-                                            {imageData?.text && (
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    sx={{
-                                                        fontWeight: "bold",
-                                                    }}
-                                                >
-                                                    {imageData.text}
-                                                </Typography>
-                                            )}
-                                            {imageData?.description && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ mt: 1 }}
-                                                >
-                                                    {imageData.description}
-                                                </Typography>
-                                            )}
-                                            {imageData?.date && (
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        display: "block",
-                                                        mt: 1,
-                                                        opacity: 0.7,
-                                                    }}
-                                                >
-                                                    {new Date(
-                                                        imageData.date
-                                                    ).toLocaleString(
-                                                        undefined,
-                                                        {
-                                                            year: "numeric",
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        }
-                                                    )}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    )}
+                                            <Box
+                                                className="image-data"
+                                                sx={{
+                                                    position: "absolute",
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bgcolor: "rgba(0,0,0,0.6)",
+                                                    color: "#fff",
+                                                    p: 2,
+                                                    zIndex: 2,
+                                                    opacity: 0,
+                                                    transition: "opacity 0.3s ease",
+                                                }}
+                                            >
+                                                {imageData?.text && (
+                                                    <Typography
+                                                        variant="subtitle1"
+                                                        sx={{
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    >
+                                                        {imageData.text}
+                                                    </Typography>
+                                                )}
+                                                {imageData?.description && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{ mt: 1 }}
+                                                    >
+                                                        {imageData.description}
+                                                    </Typography>
+                                                )}
+                                                {imageData?.date && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            display: "block",
+                                                            mt: 1,
+                                                            opacity: 0.7,
+                                                        }}
+                                                    >
+                                                        {new Date(
+                                                            imageData.date
+                                                        ).toLocaleString(
+                                                            undefined,
+                                                            {
+                                                                year: "numeric",
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            }
+                                                        )}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        )}
                                 </Box>
                             </Box>
                         );
@@ -780,160 +841,177 @@ export default function Gallery(): React.ReactElement | null {
             >
                 <AddIcon />
             </Fab>
-            <Modal
+            <ReusableModal
                 open={isModalOpen}
                 onClose={handleCloseModal}
-                aria-labelledby="upload-modal-title"
-            >
-                <Box
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: { xs: "90%", sm: "400px" },
-                        bgcolor: "background.paper",
-                        boxShadow: 24,
-                        p: 4,
-                        borderRadius: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 3,
-                    }}
-                >
-                    <Typography
-                        variant="h6"
-                        component="h2"
-                        id="upload-modal-title"
-                        sx={{ textAlign: "center", fontWeight: "bold" }}
-                    >
-                        Upload Image
-                    </Typography>
-                    {imageFile && (
+                title="Upload Image"
+                description="Share a moment with the community by uploading an image."
+                cancelText="Cancel"
+                confirmText="Submit"
+                onConfirm={handleSubmit}
+                isConfirmDisabled={!imageFile || uploading}
+                children={
+                    <>
+                        {imageFile && (
+                            <Box
+                                sx={{
+                                    width: "100%",
+                                    height: "200px",
+                                    borderRadius: 2,
+                                    overflow: "hidden",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    border: "1px solid",
+                                    borderColor: "divider",
+                                    mb: 2,
+                                    position: "relative",
+                                }}
+                            >
+                                <img
+                                    src={URL.createObjectURL(imageFile)}
+                                    alt="Preview"
+                                    style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "100%",
+                                        objectFit: "contain",
+                                    }}
+                                />
+                                <Button
+                                    onClick={handleUnselectFile}
+                                    variant="contained"
+                                    color="error"
+                                    size="small"
+                                    sx={{
+                                        position: "absolute",
+                                        top: 8,
+                                        right: 8,
+                                        textTransform: "none",
+                                    }}
+                                >
+                                    Remove
+                                </Button>
+                            </Box>
+                        )}
                         <Box
                             sx={{
-                                width: "100%",
-                                height: "200px",
-                                borderRadius: 2,
-                                overflow: "hidden",
                                 display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                border: "1px solid",
-                                borderColor: "divider",
-                                mb: 2,
+                                flexDirection: "column",
+                                gap: 2,
                             }}
                         >
-                            <img
-                                src={URL.createObjectURL(imageFile)}
-                                alt="Preview"
-                                style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
+                            <Box
+                                sx={{
+                                    position: "relative",
+                                    border: "2px dashed",
+                                    borderColor: "divider",
+                                    borderRadius: 2,
+                                    p: 2,
+                                    textAlign: "center",
+                                    cursor: "pointer",
+                                    "&:hover": {
+                                        borderColor: "primary.main",
+                                        bgcolor: "action.hover",
+                                    },
+                                }}
+                            >
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        opacity: 0,
+                                        cursor: "pointer",
+                                    }}
+                                />
+                                <Typography
+                                    variant="body1"
+                                    color="text.secondary"
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 1,
+                                    }}
+                                >
+                                    <AddIcon color="primary" />
+                                    Click or drag to upload an image
+                                </Typography>
+                            </Box>
+                            <TextField
+                                label="Title"
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                                fullWidth
+                                variant="outlined"
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: 2,
+                                    },
+                                }}
+                            />
+                            <TextField
+                                label="Description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                fullWidth
+                                multiline
+                                rows={4}
+                                variant="outlined"
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: 2,
+                                    },
                                 }}
                             />
                         </Box>
-                    )}
-                    <TextField
-                        type="file"
-                        inputProps={{ accept: "image/*" }}
-                        onChange={handleFileChange}
-                        fullWidth
-                        sx={{
-                            "& .MuiInputBase-root": {
-                                borderRadius: 2,
-                            },
-                        }}
-                    />
-                    <TextField
-                        label="Title"
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        fullWidth
-                        sx={{
-                            "& .MuiInputBase-root": {
-                                borderRadius: 2,
-                            },
-                        }}
-                    />
-                    <TextField
-                        label="Description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        sx={{
-                            "& .MuiInputBase-root": {
-                                borderRadius: 2,
-                            },
-                        }}
-                    />
-                    {uploadError && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                                p: 2,
-                                borderRadius: 2,
-                                bgcolor: "error.light",
-                                color: "error.contrastText",
-                                boxShadow: 1,
-                            }}
-                        >
-                            <Typography
-                                variant="body2"
+                        {uploadError && (
+                            <Box
                                 sx={{
-                                    fontWeight: "bold",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    p: 2,
+                                    borderRadius: 2,
+                                    bgcolor: "error.light",
+                                    color: "error.contrastText",
+                                    boxShadow: 1,
                                 }}
                             >
-                                Error:
-                            </Typography>
-                            <Typography variant="body2">
-                                {uploadError}
-                            </Typography>
-                        </Box>
-                    )}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 2,
-                        }}
-                    >
-                        <Button
-                            onClick={handleCloseModal}
-                            color="secondary"
-                            variant="outlined"
-                            disabled={uploading}
-                            sx={{
-                                borderRadius: 2,
-                                textTransform: "none",
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            color="primary"
-                            variant="contained"
-                            disabled={uploading}
-                            sx={{
-                                borderRadius: 2,
-                                textTransform: "none",
-                            }}
-                        >
-                            {uploading ? (
-                                <CircularProgress size={24} />
-                            ) : (
-                                "Submit"
-                            )}
-                        </Button>
-                    </Box>
-                </Box>
-            </Modal>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    Error:
+                                </Typography>
+                                <Typography variant="body2">
+                                    {uploadError}
+                                </Typography>
+                            </Box>
+                        )}
+                    </>
+                }
+                titleColor="primary.main"
+            />
+            <ReusableModal
+                open={isDeleteModalOpen}
+                onClose={handleCloseDeleteModal}
+                title="Delete Image"
+                description="Are you sure you want to delete this image? This action is irreversible."
+                cancelText="Cancel"
+                confirmText="Delete"
+                onConfirm={handleConfirmDelete}
+                isConfirmDisabled={deletingImageId === imageToDelete?.id}
+                confirmColor="error.main"
+                titleColor="error.main"
+            />
         </Container>
     );
 }

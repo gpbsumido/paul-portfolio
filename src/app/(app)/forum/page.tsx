@@ -26,6 +26,9 @@ import TextAlign from "@tiptap/extension-text-align";
 import Image from "@tiptap/extension-image";
 import DOMPurify from "dompurify";
 import parse from "html-react-parser";
+import FloatingPill from "@/components/shared/FloatingPill";
+import { useAuth0 } from "@auth0/auth0-react";
+import ReusableModal from "@/components/common/ReusableModal";
 
 interface PostForum {
     id: number;
@@ -36,6 +39,8 @@ interface PostForum {
 
 export default function ForumPage() {
     const { t } = useLanguage();
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
+        useAuth0();
     const [posts, setPosts] = useState<PostForum[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -100,7 +105,10 @@ export default function ForumPage() {
                     body: JSON.stringify({
                         title: newPostTitle,
                         text: rawHtml,
-                        username: newPostUsername,
+                        username:
+                            isAuthenticated && user?.name
+                                ? user.name
+                                : "Anonymous",
                     }),
                 }
             );
@@ -117,8 +125,15 @@ export default function ForumPage() {
         }
     };
 
+    function isHtmlEmpty() {
+        const html = editor?.getHTML()?.trim() || "";
+        return /^<p>\s*<\/p>$/.test(html)
+    }
+
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
+            <FloatingPill redirectUrl={`${window.location.origin}/forum`} />
+
             {/* Fixed Buttons */}
             <Box
                 sx={{
@@ -275,96 +290,94 @@ export default function ForumPage() {
             </Fab>
 
             {/* Create Post Modal */}
-            <Modal open={isModalOpen} onClose={handleCloseModal}>
-                <Box
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: { xs: "90%", sm: "600px" },
-                        bgcolor: "background.paper",
-                        boxShadow: 24,
-                        p: 4,
-                        borderRadius: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 3,
-                    }}
-                >
-                    <Typography
-                        variant="h6"
-                        component="h2"
-                        sx={{
-                            textAlign: "center",
-                            fontWeight: 600,
-                            color: "primary.main",
-                        }}
-                    >
-                        {t("pages.forum.createPost")}
-                    </Typography>
+            <ReusableModal
+                open={isModalOpen}
+                onClose={handleCloseModal}
+                title={t("pages.forum.createPost")}
+                confirmColor="primary"
+                onConfirm={handleSubmit}
+                confirmText={t("pages.forum.createPost")}
+                cancelText={t("pages.forum.cancel")}
+                cancelColor="secondary"
+                titleColor="primary.main"
+                isConfirmDisabled={
+                    !newPostTitle || !editor?.getHTML() || isHtmlEmpty() || isSubmitting
+                }
+                children={
+                    <>
 
-                    <TextField
-                        label={t("pages.forum.newPostTitle")}
-                        name="title"
-                        value={newPostTitle}
-                        onChange={(e) => setNewPostTitle(e.target.value)}
-                        fullWidth
-                        variant="outlined"
-                    />
+                        <Box>
+                            <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: "text.secondary" }}
+                            >
+                                {t("pages.forum.newPostTitle")}
+                            </Typography>
+                            <TextField
+                                name="title"
+                                value={newPostTitle}
+                                onChange={(e) => setNewPostTitle(e.target.value)}
+                                fullWidth
+                                variant="outlined"
+                            />
+                        </Box>
 
-                    <Box
-                        sx={{
-                            border: "1px solid",
-                            borderColor: "grey.400",
-                            borderRadius: 1,
-                            p: 2,
-                            minHeight: "150px",
-                            maxHeight: "300px",
-                            overflowY: "auto",
-                        }}
-                    >
-                        <EditorContent editor={editor} />
-                    </Box>
+                        <Box>
+                            <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: "text.secondary" }}
+                            >
+                                {t("pages.forum.newPostContent")}
+                            </Typography>
+                            <Box
+                                sx={{
+                                    border: "1px solid",
+                                    borderColor: "grey.400",
+                                    borderRadius: 1,
+                                    p: 2,
+                                    minHeight: "150px",
+                                    maxHeight: "300px",
+                                    overflowY: "auto",
+                                }}
+                            >
+                                <EditorContent editor={editor} />
+                            </Box>
+                        </Box>
 
-                    <TextField
-                        label={t("pages.forum.username")}
-                        name="username"
-                        value={newPostUsername}
-                        onChange={(e) => setNewPostUsername(e.target.value)}
-                        fullWidth
-                        variant="outlined"
-                    />
-
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 2,
-                        }}
-                    >
-                        <Button
-                            onClick={handleCloseModal}
-                            color="secondary"
-                            variant="outlined"
-                        >
-                            {t("pages.forum.cancel")}
-                        </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            color="primary"
-                            variant="contained"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? (
-                                <CircularProgress size={24} />
-                            ) : (
-                                t("pages.forum.submit")
-                            )}
-                        </Button>
-                    </Box>
-                </Box>
-            </Modal>
+                        <Box>
+                            <Typography
+                                variant="body2"
+                                sx={{ mb: 1, color: "text.secondary" }}
+                            >
+                                {t("pages.forum.username")}
+                            </Typography>
+                            <TextField
+                                name="username"
+                                value={
+                                    isAuthenticated && user?.name
+                                        ? user.name
+                                        : "Anonymous"
+                                }
+                                onChange={(e) => setNewPostUsername(e.target.value)}
+                                fullWidth
+                                variant="outlined"
+                                disabled={true}
+                                sx={{
+                                    "& .MuiInputBase-root.Mui-disabled": {
+                                        cursor: "not-allowed",
+                                    },
+                                    "& .MuiInputBase-root.Mui-disabled input": {
+                                        cursor: "not-allowed",
+                                    },
+                                    "& .MuiOutlinedInput-notchedOutline": {
+                                        borderColor: "#ccc",
+                                    },
+                                }}
+                            />
+                        </Box>
+                    </>
+                }
+            />
         </Container>
     );
 }

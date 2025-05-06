@@ -179,6 +179,7 @@ const translations = {
                 text: "Text",
                 username: "Username",
                 newPostTitle: "Title",
+                newPostContent: "Content",
             },
             maps: {
                 title: "Map",
@@ -345,6 +346,7 @@ const translations = {
                 newPostTitle: "Título",
                 subtitle: "Únete a la discusión y comparte tus pensamientos.",
                 postedBy: "Publicado por",
+                newPostContent: "Contenido",
             },
             maps: {
                 title: "Carte",
@@ -512,6 +514,7 @@ const translations = {
                 newPostTitle: "Titre",
                 subtitle: "Rejoignez la discussion et partagez vos pensées.",
                 postedBy: "Publié par",
+                newPostContent: "Contenu",
             },
             maps: {
                 title: "Carte",
