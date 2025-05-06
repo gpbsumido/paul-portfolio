@@ -92,6 +92,7 @@ export default function Home() {
             }}
         >
             <FloatingPill />
+
             {HOME_PAGE_SECTIONS.map((section, index) => {
                 const isActive = index === activeIndex;
                 const shapeProps = getShapeProps(index);

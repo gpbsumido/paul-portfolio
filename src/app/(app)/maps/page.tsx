@@ -60,7 +60,7 @@ function MapPage() {
     const { t } = useLanguage();
 
     return (
-        <Container maxWidth="lg" sx={{ py: 2, px: { xs: 0, sm: 2 } }}>
+        <Container maxWidth="lg" sx={{ py: 2, px: { xs: 0, sm: 2 }, flex: 1 }}>
             <Box
                 sx={{
                     position: "fixed",
@@ -82,19 +82,27 @@ function MapPage() {
                 <LanguageSwitcher />
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box
+                sx={{
+                    mb: 5,
+                    textAlign: "center",
+                    background: (theme) =>
+                        `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                }}
+            >
                 <Typography
-                    variant="h4"
+                    variant="h3"
                     component="h1"
                     gutterBottom
-                    sx={{ width: "100%", textAlign: "center" }}
+                    sx={{ fontWeight: 700 }}
                 >
                     {t("pages.maps.title")}
                 </Typography>
                 <Typography
                     variant="subtitle1"
-                    color="text.secondary"
-                    sx={{ width: "100%", textAlign: "center" }}
+                    sx={{ color: "text.secondary" }}
                 >
                     {t("pages.maps.subtitle")}
                 </Typography>

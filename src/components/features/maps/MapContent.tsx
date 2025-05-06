@@ -66,11 +66,7 @@ export default function MapContent({ location }: MapContentProps) {
                 throw new Error("Failed to load markers");
             }
 
-            console.log("response", response);
-
             const apiMarkers: ApiMarker[] = await response.json();
-
-            console.log("apiMarkers", apiMarkers);
 
             const convertedMarkers: CustomMarker[] = apiMarkers.map(
                 (marker) => ({
@@ -339,12 +335,13 @@ export default function MapContent({ location }: MapContentProps) {
                 display: "flex",
                 flexDirection: "column",
                 height: "100%",
+                gap: 2,
             }}
         >
             <Box
                 sx={{
                     position: "relative",
-                    height: { xs: "40vh", sm: "45vh" },
+                    height: { xs: "35vh", sm: "40vh" },
                 }}
             >
                 <div

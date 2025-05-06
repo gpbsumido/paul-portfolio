@@ -9,9 +9,6 @@ import {
     TextField,
     Button,
     Grid,
-    FormControl,
-    Select,
-    MenuItem,
     IconButton,
     Tooltip,
     Table,
@@ -21,11 +18,6 @@ import {
     TableHead,
     TableRow,
     Chip,
-    OutlinedInput,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     useTheme,
     alpha,
     Divider,
@@ -40,7 +32,6 @@ import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect, useRef, useMemo } from "react";
-import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -53,13 +44,7 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import ChecklistIcon from "@mui/icons-material/Checklist";
-import {
-    CANMEDS_ROLES,
-    LEARNING_OBJECTIVES,
-    LEARNING_OBJECTIVES_DROPDOWN,
-    LOCATIONS,
-    ROTATIONS,
-} from "@/constants/medical-journal";
+import { LEARNING_OBJECTIVES, ROTATIONS } from "@/constants/medical-journal";
 import { useAuth0 } from "@auth0/auth0-react";
 import FloatingPill from "@/components/shared/FloatingPill";
 import React from "react";
