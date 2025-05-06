@@ -127,7 +127,7 @@ export default function ForumPage() {
 
     function isHtmlEmpty() {
         const html = editor?.getHTML()?.trim() || "";
-        return /^<p>\s*<\/p>$/.test(html)
+        return /^<p>\s*<\/p>$/.test(html);
     }
 
     return (
@@ -301,11 +301,13 @@ export default function ForumPage() {
                 cancelColor="secondary"
                 titleColor="primary.main"
                 isConfirmDisabled={
-                    !newPostTitle || !editor?.getHTML() || isHtmlEmpty() || isSubmitting
+                    !newPostTitle ||
+                    !editor?.getHTML() ||
+                    isHtmlEmpty() ||
+                    isSubmitting
                 }
                 children={
                     <>
-
                         <Box>
                             <Typography
                                 variant="body2"
@@ -316,7 +318,9 @@ export default function ForumPage() {
                             <TextField
                                 name="title"
                                 value={newPostTitle}
-                                onChange={(e) => setNewPostTitle(e.target.value)}
+                                onChange={(e) =>
+                                    setNewPostTitle(e.target.value)
+                                }
                                 fullWidth
                                 variant="outlined"
                             />
@@ -358,7 +362,9 @@ export default function ForumPage() {
                                         ? user.name
                                         : "Anonymous"
                                 }
-                                onChange={(e) => setNewPostUsername(e.target.value)}
+                                onChange={(e) =>
+                                    setNewPostUsername(e.target.value)
+                                }
                                 fullWidth
                                 variant="outlined"
                                 disabled={true}

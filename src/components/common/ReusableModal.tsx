@@ -61,7 +61,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                         color: titleColor || "primary.main",
                         mb: 1,
                         fontSize: "1.5rem",
-                        mx: 'auto'
+                        mx: "auto",
                     }}
                 >
                     {title}
@@ -110,7 +110,8 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                                 bgcolor: confirmColor,
                                 boxShadow: "0px 4px 10px rgba(255, 0, 0, 0.2)",
                                 "&:hover": {
-                                    boxShadow: "0px 6px 14px rgba(255, 0, 0, 0.3)",
+                                    boxShadow:
+                                        "0px 6px 14px rgba(255, 0, 0, 0.3)",
                                 },
                             }}
                         >

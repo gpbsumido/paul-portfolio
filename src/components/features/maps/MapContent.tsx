@@ -335,7 +335,7 @@ export default function MapContent({ location }: MapContentProps) {
                 display: "flex",
                 flexDirection: "column",
                 height: "100%",
-                gap: 2
+                gap: 2,
             }}
         >
             <Box

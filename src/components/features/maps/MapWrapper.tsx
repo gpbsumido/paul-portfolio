@@ -88,7 +88,12 @@ export default function MapWrapper() {
 
     return (
         <Box
-            sx={{ height: "fit-content", borderRadius: 1, overflow: "hidden", mt: 2 }}
+            sx={{
+                height: "fit-content",
+                borderRadius: 1,
+                overflow: "hidden",
+                mt: 2,
+            }}
         >
             <MapContent location={location} />
         </Box>

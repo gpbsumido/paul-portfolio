@@ -36,8 +36,6 @@ interface ImageData {
 }
 
 export default function Gallery(): React.ReactElement | null {
-
-
     const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
         useAuth0();
 
@@ -67,7 +65,10 @@ export default function Gallery(): React.ReactElement | null {
     const [deleteError, setDeleteError] = useState<string | null>(null); // State to track delete errors
     const [fetchError, setFetchError] = useState<string | null>(null); // State to track fetch errors
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [imageToDelete, setImageToDelete] = useState<{ id: string; src: string } | null>(null);
+    const [imageToDelete, setImageToDelete] = useState<{
+        id: string;
+        src: string;
+    } | null>(null);
 
     const preloadImage = (src: string): Promise<void> => {
         // Skip preloading for unsupported formats like .HEIC
@@ -322,7 +323,7 @@ export default function Gallery(): React.ReactElement | null {
             } catch (error: any) {
                 setFetchError(
                     error.message ||
-                    "An unexpected error occurred while fetching posts."
+                        "An unexpected error occurred while fetching posts."
                 );
             } finally {
                 setIsFetching(false);
@@ -499,7 +500,7 @@ export default function Gallery(): React.ReactElement | null {
         } catch (error: any) {
             setDeleteError(
                 error.message ||
-                "An unexpected error occurred while deleting the post."
+                    "An unexpected error occurred while deleting the post."
             );
         } finally {
             setDeletingImageId(null);
@@ -509,7 +510,6 @@ export default function Gallery(): React.ReactElement | null {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
-
             <FloatingPill redirectUrl={`${window.location.origin}/gallery`} />
 
             <Box
@@ -630,45 +630,49 @@ export default function Gallery(): React.ReactElement | null {
                                         },
                                     }}
                                 >
-                                    {
-                                        isAuthenticated && !isLoading && image.user_sub === user?.sub &&
-                                        <IconButton
-                                            className="delete-button"
-                                            onClick={() =>
-                                                handleOpenDeleteModal(
-                                                    imageData.id,
-                                                    image.src
-                                                )
-                                            } // Ensure correct ID and URL are passed
-                                            disabled={
-                                                deletingImageId === imageData?.id
-                                            }
-                                            sx={{
-                                                position: "absolute",
-                                                top: 8,
-                                                right: 8,
-                                                backgroundColor:
-                                                    "rgba(0, 0, 0, 0.5)",
-                                                color: "white",
-                                                opacity: 0,
-                                                transition: "opacity 0.2s ease",
-                                                zIndex: 3,
-                                                "&:hover": {
+                                    {isAuthenticated &&
+                                        !isLoading &&
+                                        image.user_sub === user?.sub && (
+                                            <IconButton
+                                                className="delete-button"
+                                                onClick={() =>
+                                                    handleOpenDeleteModal(
+                                                        imageData.id,
+                                                        image.src
+                                                    )
+                                                } // Ensure correct ID and URL are passed
+                                                disabled={
+                                                    deletingImageId ===
+                                                    imageData?.id
+                                                }
+                                                sx={{
+                                                    position: "absolute",
+                                                    top: 8,
+                                                    right: 8,
                                                     backgroundColor:
-                                                        "rgba(0, 0, 0, 0.7)",
-                                                },
-                                            }}
-                                        >
-                                            {deletingImageId === imageData?.id ? (
-                                                <CircularProgress
-                                                    size={24}
-                                                    color="inherit"
-                                                />
-                                            ) : (
-                                                <DeleteIcon />
-                                            )}
-                                        </IconButton>
-                                    }
+                                                        "rgba(0, 0, 0, 0.5)",
+                                                    color: "white",
+                                                    opacity: 0,
+                                                    transition:
+                                                        "opacity 0.2s ease",
+                                                    zIndex: 3,
+                                                    "&:hover": {
+                                                        backgroundColor:
+                                                            "rgba(0, 0, 0, 0.7)",
+                                                    },
+                                                }}
+                                            >
+                                                {deletingImageId ===
+                                                imageData?.id ? (
+                                                    <CircularProgress
+                                                        size={24}
+                                                        color="inherit"
+                                                    />
+                                                ) : (
+                                                    <DeleteIcon />
+                                                )}
+                                            </IconButton>
+                                        )}
                                     {deleteError &&
                                         deletingImageId === imageData?.id && (
                                             <Box
@@ -703,64 +707,64 @@ export default function Gallery(): React.ReactElement | null {
                                     {(imageData?.text ||
                                         imageData?.description ||
                                         imageData?.date) && (
-                                            <Box
-                                                className="image-data"
-                                                sx={{
-                                                    position: "absolute",
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    bgcolor: "rgba(0,0,0,0.6)",
-                                                    color: "#fff",
-                                                    p: 2,
-                                                    zIndex: 2,
-                                                    opacity: 0,
-                                                    transition: "opacity 0.3s ease",
-                                                }}
-                                            >
-                                                {imageData?.text && (
-                                                    <Typography
-                                                        variant="subtitle1"
-                                                        sx={{
-                                                            fontWeight: "bold",
-                                                        }}
-                                                    >
-                                                        {imageData.text}
-                                                    </Typography>
-                                                )}
-                                                {imageData?.description && (
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{ mt: 1 }}
-                                                    >
-                                                        {imageData.description}
-                                                    </Typography>
-                                                )}
-                                                {imageData?.date && (
-                                                    <Typography
-                                                        variant="caption"
-                                                        sx={{
-                                                            display: "block",
-                                                            mt: 1,
-                                                            opacity: 0.7,
-                                                        }}
-                                                    >
-                                                        {new Date(
-                                                            imageData.date
-                                                        ).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                year: "numeric",
-                                                                month: "short",
-                                                                day: "numeric",
-                                                                hour: "2-digit",
-                                                                minute: "2-digit",
-                                                            }
-                                                        )}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        )}
+                                        <Box
+                                            className="image-data"
+                                            sx={{
+                                                position: "absolute",
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                bgcolor: "rgba(0,0,0,0.6)",
+                                                color: "#fff",
+                                                p: 2,
+                                                zIndex: 2,
+                                                opacity: 0,
+                                                transition: "opacity 0.3s ease",
+                                            }}
+                                        >
+                                            {imageData?.text && (
+                                                <Typography
+                                                    variant="subtitle1"
+                                                    sx={{
+                                                        fontWeight: "bold",
+                                                    }}
+                                                >
+                                                    {imageData.text}
+                                                </Typography>
+                                            )}
+                                            {imageData?.description && (
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{ mt: 1 }}
+                                                >
+                                                    {imageData.description}
+                                                </Typography>
+                                            )}
+                                            {imageData?.date && (
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        display: "block",
+                                                        mt: 1,
+                                                        opacity: 0.7,
+                                                    }}
+                                                >
+                                                    {new Date(
+                                                        imageData.date
+                                                    ).toLocaleString(
+                                                        undefined,
+                                                        {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        }
+                                                    )}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    )}
                                 </Box>
                             </Box>
                         );
