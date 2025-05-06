@@ -257,18 +257,8 @@ export default function Gallery(): React.ReactElement | null {
             setIsFetching(true);
             setFetchError(null);
             try {
-                const token = await getAccessTokenSilently({
-                    authorizationParams: {
-                        audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
-                    },
-                });
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
+                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`
                 );
                 if (!response.ok) {
                     const errorData = await response.json();
