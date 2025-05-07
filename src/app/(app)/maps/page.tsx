@@ -86,23 +86,33 @@ function MapPage() {
                 sx={{
                     mb: 5,
                     textAlign: "center",
-                    background: (theme) =>
-                        `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
+                    color: "text.primary", // Ensures text is visible in dark mode
                 }}
             >
                 <Typography
                     variant="h3"
                     component="h1"
                     gutterBottom
-                    sx={{ fontWeight: 700 }}
+                    sx={{
+                        fontWeight: 700,
+                        color: "text.primary",
+                        background: (theme) =>
+                            `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                    }}
                 >
                     {t("pages.maps.title")}
                 </Typography>
                 <Typography
                     variant="subtitle1"
-                    sx={{ color: "text.secondary" }}
+                    sx={{
+                        color: "text.secondary",
+                        background: (theme) =>
+                            `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                    }}
                 >
                     {t("pages.maps.subtitle")}
                 </Typography>

@@ -424,13 +424,14 @@ export default function MapContent({ location }: MapContentProps) {
                             gutterBottom
                             sx={{
                                 whiteSpace: "nowrap",
+                                color: "text.primary",
                             }}
                         >
                             Saved Locations
                         </Typography>
                         <InfoIcon
                             fontSize="small"
-                            sx={{ mr: 1 }}
+                            sx={{ mr: 1, color: "text.secondary" }}
                             data-tooltip-id="info-tooltip"
                             data-tooltip-content="Click on the map to add a marker. Use the form to save it or cancel. You can also delete saved markers from the table below."
                         />
