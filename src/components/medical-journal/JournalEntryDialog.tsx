@@ -24,6 +24,14 @@ import {
     ROTATIONS,
 } from "@/constants/medical-journal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useState, useEffect, useRef } from "react";
+
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
 
 interface JournalEntryDialogProps {
     open: boolean;
@@ -59,6 +67,155 @@ export default function JournalEntryDialog({
 }: JournalEntryDialogProps) {
     const theme = useTheme();
     const { t } = useLanguage();
+
+    const [transcript, setTranscript] = useState("");
+    const [isListening, setIsListening] = useState(false);
+    const [listeningField, setListeningField] = useState<string | null>(null);
+    const recognitionRef = useRef<any>(null);
+    const [listeningStates, setListeningStates] = useState<
+        Record<string, boolean>
+    >({});
+
+    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+        console.log("SpeechRecognition API is supported.");
+    } else {
+        console.log("SpeechRecognition API is not supported.");
+    }
+
+    useEffect(() => {
+        if (
+            !("SpeechRecognition" in window) &&
+            !("webkitSpeechRecognition" in window)
+        ) {
+            alert("Speech Recognition API not supported in this browser");
+            return;
+        }
+
+        navigator.permissions
+            .query({ name: "microphone" as PermissionName })
+            .then((permissionStatus) => {
+                if (permissionStatus.state === "denied") {
+                    alert(
+                        "Microphone access is denied. Please enable it in your browser settings."
+                    );
+                }
+            })
+            .catch((error) => {
+                console.error("Error checking microphone permissions:", error);
+            });
+
+        recognitionRef.current = new (window.SpeechRecognition ||
+            window.webkitSpeechRecognition)();
+        recognitionRef.current.lang = "en-US";
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.continuous = true; // Ensure continuous listening
+        recognitionRef.current.onresult = (event: Event) => {
+            const speechEvent = event as any; // Cast to any to safely access results
+            let newTranscript = "";
+
+            for (
+                let i = speechEvent.resultIndex;
+                i < speechEvent.results.length;
+                i++
+            ) {
+                const result = speechEvent.results[i];
+                if (result.isFinal) {
+                    newTranscript += result[0].transcript;
+                }
+            }
+
+            if (newTranscript) {
+                setTranscript((prev) => prev + newTranscript);
+            }
+        };
+
+        recognitionRef.current.onerror = (event: any) => {
+            console.error("Speech recognition error:", event.error);
+            alert(`Speech recognition error: ${event.error}`);
+        };
+
+        recognitionRef.current.onend = () => {
+            if (isListening) {
+                console.log("Speech recognition restarted");
+                recognitionRef.current.start(); // Restart listening if manually stopped
+            } else {
+                console.log("Speech recognition ended");
+                setIsListening(false);
+            }
+        };
+
+        return () => {
+            recognitionRef.current?.stop();
+        };
+    }, []);
+
+    const startListening = () => {
+        if (recognitionRef.current) {
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    };
+
+    const stopListening = () => {
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        }
+    };
+
+    const handleVoiceInputToggle = (field: string) => {
+        if (listeningStates[field]) {
+            stopListening();
+            setListeningStates((prev) => ({ ...prev, [field]: false }));
+            setTranscript("");
+            if (listeningField) {
+                switch (listeningField) {
+                    case "patientSetting":
+                        onInputChange(
+                            "patientSetting",
+                            currentEntry.patientSetting + transcript
+                        );
+                        break;
+                    case "interaction":
+                        onInputChange(
+                            "interaction",
+                            currentEntry.interaction + transcript
+                        );
+                        break;
+                    case "whatIDidWell":
+                        onInputChange(
+                            "whatIDidWell",
+                            currentEntry.whatIDidWell + transcript
+                        );
+                        break;
+                    case "whatICouldImprove":
+                        onInputChange(
+                            "whatICouldImprove",
+                            currentEntry.whatICouldImprove + transcript
+                        );
+                        break;
+                    case "feedback":
+                        onInputChange("feedback", [
+                            {
+                                text:
+                                    currentEntry.feedback?.[0]?.text +
+                                    transcript,
+                                rotation: currentEntry.rotation,
+                            },
+                        ]);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            setTranscript("");
+        } else {
+            stopListening();
+            setListeningStates((prev) => ({ ...prev, [field]: true }));
+            startListening();
+            setListeningField(field);
+        }
+    };
 
     return (
         <Dialog
@@ -236,7 +393,13 @@ export default function JournalEntryDialog({
                             fullWidth
                             multiline
                             rows={2}
-                            value={currentEntry.patientSetting}
+                            value={
+                                currentEntry.patientSetting +
+                                (isListening &&
+                                listeningField === "patientSetting"
+                                    ? transcript
+                                    : "")
+                            }
                             onChange={(e) =>
                                 onInputChange("patientSetting", e.target.value)
                             }
@@ -247,6 +410,23 @@ export default function JournalEntryDialog({
                                     : ""
                             }
                         />
+                        <Button
+                            onClick={() =>
+                                handleVoiceInputToggle("patientSetting")
+                            }
+                            variant="outlined"
+                            color={
+                                isListening &&
+                                listeningField === "patientSetting"
+                                    ? "secondary"
+                                    : "primary"
+                            }
+                            sx={{ mt: 1 }}
+                        >
+                            {isListening && listeningField === "patientSetting"
+                                ? "🛑 Stop"
+                                : "🎤 Speak"}
+                        </Button>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography
@@ -259,7 +439,12 @@ export default function JournalEntryDialog({
                             fullWidth
                             multiline
                             rows={3}
-                            value={currentEntry.interaction}
+                            value={
+                                currentEntry.interaction +
+                                (isListening && listeningField === "interaction"
+                                    ? transcript
+                                    : "")
+                            }
                             onChange={(e) =>
                                 onInputChange("interaction", e.target.value)
                             }
@@ -270,6 +455,22 @@ export default function JournalEntryDialog({
                                     : ""
                             }
                         />
+                        <Button
+                            onClick={() =>
+                                handleVoiceInputToggle("interaction")
+                            }
+                            variant="outlined"
+                            color={
+                                isListening && listeningField === "interaction"
+                                    ? "secondary"
+                                    : "primary"
+                            }
+                            sx={{ mt: 1 }}
+                        >
+                            {isListening && listeningField === "interaction"
+                                ? "🛑 Stop"
+                                : "🎤 Speak"}
+                        </Button>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <Typography
@@ -374,12 +575,34 @@ export default function JournalEntryDialog({
                             fullWidth
                             multiline
                             rows={3}
-                            value={currentEntry.whatIDidWell || ""}
+                            value={
+                                currentEntry.whatIDidWell +
+                                (isListening &&
+                                listeningField === "whatIDidWell"
+                                    ? transcript
+                                    : "")
+                            }
                             onChange={(e) =>
                                 onInputChange("whatIDidWell", e.target.value)
                             }
                             placeholder="Enter what you did well..."
                         />
+                        <Button
+                            onClick={() =>
+                                handleVoiceInputToggle("whatIDidWell")
+                            }
+                            variant="outlined"
+                            color={
+                                isListening && listeningField === "whatIDidWell"
+                                    ? "secondary"
+                                    : "primary"
+                            }
+                            sx={{ mt: 1 }}
+                        >
+                            {isListening && listeningField === "whatIDidWell"
+                                ? "🛑 Stop"
+                                : "🎤 Speak"}
+                        </Button>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography
@@ -392,7 +615,13 @@ export default function JournalEntryDialog({
                             fullWidth
                             multiline
                             rows={3}
-                            value={currentEntry.whatICouldImprove || ""}
+                            value={
+                                currentEntry.whatICouldImprove +
+                                (isListening &&
+                                listeningField === "whatICouldImprove"
+                                    ? transcript
+                                    : "")
+                            }
                             onChange={(e) =>
                                 onInputChange(
                                     "whatICouldImprove",
@@ -401,6 +630,24 @@ export default function JournalEntryDialog({
                             }
                             placeholder="Enter what you could improve..."
                         />
+                        <Button
+                            onClick={() =>
+                                handleVoiceInputToggle("whatICouldImprove")
+                            }
+                            variant="outlined"
+                            color={
+                                isListening &&
+                                listeningField === "whatICouldImprove"
+                                    ? "secondary"
+                                    : "primary"
+                            }
+                            sx={{ mt: 1 }}
+                        >
+                            {isListening &&
+                            listeningField === "whatICouldImprove"
+                                ? "🛑 Stop"
+                                : "🎤 Speak"}
+                        </Button>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography
@@ -413,7 +660,12 @@ export default function JournalEntryDialog({
                             fullWidth
                             multiline
                             rows={3}
-                            value={currentEntry.feedback?.[0]?.text || ""}
+                            value={
+                                (currentEntry.feedback?.[0]?.text || "") +
+                                (isListening && listeningField === "feedback"
+                                    ? transcript
+                                    : "")
+                            }
                             onChange={(e) => {
                                 const text = e.target.value;
                                 if (text.trim()) {
@@ -429,6 +681,20 @@ export default function JournalEntryDialog({
                             }}
                             placeholder="Enter feedback for this entry..."
                         />
+                        <Button
+                            onClick={() => handleVoiceInputToggle("feedback")}
+                            variant="outlined"
+                            color={
+                                isListening && listeningField === "feedback"
+                                    ? "secondary"
+                                    : "primary"
+                            }
+                            sx={{ mt: 1 }}
+                        >
+                            {isListening && listeningField === "feedback"
+                                ? "🛑 Stop"
+                                : "🎤 Speak"}
+                        </Button>
                     </Grid>
                 </Grid>
             </DialogContent>
