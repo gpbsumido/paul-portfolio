@@ -152,6 +152,13 @@ export default function JournalEntryDialog({
         };
     }, []);
 
+    const startListening = () => {
+        if (recognitionRef.current) {
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    };
+
     const stopListening = () => {
         if (recognitionRef.current) {
             recognitionRef.current.stop();
@@ -206,9 +213,10 @@ export default function JournalEntryDialog({
             }
             setTranscript("");
         } else {
+            stopListening();
             setListeningStates((prev) => ({ ...prev, [field]: true }));
+            startListening();
             setListeningField(field);
-            recognitionRef.current?.start();
         }
     };
 
