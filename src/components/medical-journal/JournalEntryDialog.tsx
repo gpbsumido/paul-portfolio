@@ -25,6 +25,7 @@ import {
 } from "@/constants/medical-journal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect, useRef } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 declare global {
     interface Window {
@@ -67,6 +68,8 @@ export default function JournalEntryDialog({
 }: JournalEntryDialogProps) {
     const theme = useTheme();
     const { t } = useLanguage();
+
+    const { getAccessTokenSilently } = useAuth0();
 
     const [transcript, setTranscript] = useState("");
     const [isListening, setIsListening] = useState(false);
@@ -149,13 +152,6 @@ export default function JournalEntryDialog({
         };
     }, []);
 
-    const startListening = () => {
-        if (recognitionRef.current) {
-            recognitionRef.current.start();
-            setIsListening(true);
-        }
-    };
-
     const stopListening = () => {
         if (recognitionRef.current) {
             recognitionRef.current.stop();
@@ -210,10 +206,62 @@ export default function JournalEntryDialog({
             }
             setTranscript("");
         } else {
-            stopListening();
             setListeningStates((prev) => ({ ...prev, [field]: true }));
-            startListening();
             setListeningField(field);
+            recognitionRef.current?.start();
+        }
+    };
+
+    const summarizeWithOpenAI = async (
+        text: string | null | undefined,
+        listeningField: keyof LearningEntry
+    ) => {
+        try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || ""}/api/chatgpt/summarize`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        text,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to add feedback.");
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            } else if (!data.reply) {
+                throw new Error("No reply from OpenAI.");
+            }
+
+            if (listeningField === "feedback") {
+                onInputChange("feedback", [
+                    {
+                        text: data.reply,
+                        rotation: currentEntry.rotation,
+                    },
+                ]);
+            } else if (listeningField) {
+                onInputChange(listeningField, data.reply);
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -427,6 +475,19 @@ export default function JournalEntryDialog({
                                 ? "🛑 Stop"
                                 : "🎤 Speak"}
                         </Button>
+                        <Button
+                            onClick={() =>
+                                summarizeWithOpenAI(
+                                    currentEntry.patientSetting,
+                                    "patientSetting"
+                                )
+                            }
+                            variant="outlined"
+                            color="primary"
+                            sx={{ mt: 1, ml: 1 }}
+                        >
+                            Summarize
+                        </Button>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography
@@ -470,6 +531,19 @@ export default function JournalEntryDialog({
                             {isListening && listeningField === "interaction"
                                 ? "🛑 Stop"
                                 : "🎤 Speak"}
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                summarizeWithOpenAI(
+                                    currentEntry.interaction,
+                                    "interaction"
+                                )
+                            }
+                            variant="outlined"
+                            color="primary"
+                            sx={{ mt: 1, ml: 1 }}
+                        >
+                            Summarize
                         </Button>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -603,6 +677,19 @@ export default function JournalEntryDialog({
                                 ? "🛑 Stop"
                                 : "🎤 Speak"}
                         </Button>
+                        <Button
+                            onClick={() =>
+                                summarizeWithOpenAI(
+                                    currentEntry.whatIDidWell,
+                                    "whatIDidWell"
+                                )
+                            }
+                            variant="outlined"
+                            color="primary"
+                            sx={{ mt: 1, ml: 1 }}
+                        >
+                            Summarize
+                        </Button>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography
@@ -647,6 +734,19 @@ export default function JournalEntryDialog({
                             listeningField === "whatICouldImprove"
                                 ? "🛑 Stop"
                                 : "🎤 Speak"}
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                summarizeWithOpenAI(
+                                    currentEntry.whatICouldImprove,
+                                    "whatICouldImprove"
+                                )
+                            }
+                            variant="outlined"
+                            color="primary"
+                            sx={{ mt: 1, ml: 1 }}
+                        >
+                            Summarize
                         </Button>
                     </Grid>
                     <Grid item xs={12}>
@@ -694,6 +794,19 @@ export default function JournalEntryDialog({
                             {isListening && listeningField === "feedback"
                                 ? "🛑 Stop"
                                 : "🎤 Speak"}
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                summarizeWithOpenAI(
+                                    currentEntry.feedback?.[0]?.text,
+                                    "feedback"
+                                )
+                            }
+                            variant="outlined"
+                            color="primary"
+                            sx={{ mt: 1, ml: 1 }}
+                        >
+                            Summarize
                         </Button>
                     </Grid>
                 </Grid>
