@@ -27,7 +27,7 @@ export default function Home() {
     const [hoveredSection, setHoveredSection] = useState<number | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const { isLoading, loginWithRedirect, logout } = useAuth0();
+    const { isLoading } = useAuth0();
 
     const activeIndex =
         hoveredSection !== null ? hoveredSection : currentImageIndex;

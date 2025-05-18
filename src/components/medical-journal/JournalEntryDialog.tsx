@@ -79,11 +79,17 @@ export default function JournalEntryDialog({
         Record<string, boolean>
     >({});
 
-    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
-        console.log("SpeechRecognition API is supported.");
-    } else {
-        console.log("SpeechRecognition API is not supported.");
-    }
+    // display if the SpeechRecognition API is supported
+    useEffect(() => {
+        if (
+            "SpeechRecognition" in window ||
+            "webkitSpeechRecognition" in window
+        ) {
+            console.log("SpeechRecognition API is supported.");
+        } else {
+            console.log("SpeechRecognition API is not supported.");
+        }
+    }, []);
 
     useEffect(() => {
         if (

@@ -54,28 +54,32 @@ import { Feedback, LearningEntry } from "@/types/medical-journal";
 import JournalEntryDialog from "@/components/medical-journal/JournalEntryDialog";
 import SearchIcon from "@mui/icons-material/Search";
 
+// Extracted initial state for currentEntry
+const INITIAL_ENTRY: LearningEntry = {
+    id: "",
+    patientSetting: "",
+    interaction: "",
+    canmedsRoles: [],
+    learningObjectives: [],
+    rotation: "",
+    date: new Date().toISOString().split("T")[0],
+    location: "",
+    hospital: "",
+    doctor: "",
+    whatIDidWell: "",
+    whatICouldImprove: "",
+    feedback: [],
+};
+
 export default function MedicalJournalPage() {
     const theme = useTheme();
-    const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
+    const { user, isAuthenticated, isLoading, getAccessTokenSilently, logout } =
         useAuth0();
 
     const { t } = useLanguage();
     const [entries, setEntries] = useState<LearningEntry[]>([]);
-    const [currentEntry, setCurrentEntry] = useState<LearningEntry>({
-        id: "",
-        patientSetting: "",
-        interaction: "",
-        canmedsRoles: [],
-        learningObjectives: [],
-        rotation: "",
-        date: new Date().toISOString().split("T")[0],
-        location: "",
-        hospital: "",
-        doctor: "",
-        whatIDidWell: "",
-        whatICouldImprove: "",
-        feedback: [],
-    });
+    const [currentEntry, setCurrentEntry] =
+        useState<LearningEntry>(INITIAL_ENTRY);
     const [editingEntry, setEditingEntry] = useState<string | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
@@ -239,68 +243,67 @@ export default function MedicalJournalPage() {
         if (isLoading || !isAuthenticated || !user?.email_verified) return;
 
         const fetchData = async () => {
-            await handleFetchEntries();
-            await handleFetchFeedback(
-                feedbackPage,
-                feedbackLimit,
-                feedbackRotationFilter,
-                feedbackSearchTerm
-            );
+            try {
+                await handleFetchEntries();
+                await handleFetchFeedback(
+                    feedbackPage,
+                    feedbackLimit,
+                    feedbackRotationFilter,
+                    feedbackSearchTerm
+                );
+            } catch (e) {
+                const redirectUrl =
+                    window.location.href + window.location.pathname;
+                logout({
+                    logoutParams: {
+                        returnTo: redirectUrl || window.location.href, // Return to the provided redirect URL or current location
+                    },
+                });
+            }
         };
 
         fetchData();
-    }, [isLoading, isAuthenticated, user?.email_verified]);
+    }, [isLoading, isAuthenticated, user?.email_verified, page, limit]);
 
-    // Update measurements when feedbacks change
-    useEffect(() => {
-        if (filteredAndSortedFeedbacks.length > 0) {
-            const timer = setTimeout(() => {
-                updateMeasurements();
-            }, 50);
-            return () => clearTimeout(timer);
-        }
-    }, [filteredAndSortedFeedbacks]);
-
-    // Update measurements on mount
+    // Consolidated updateMeasurements effects
     useEffect(() => {
         const timer = setTimeout(() => {
             updateMeasurements();
         }, 50);
         return () => clearTimeout(timer);
-    }, []);
+    }, [
+        filteredAndSortedFeedbacks,
+        feedbackSearchTerm,
+        feedbackRotationFilter,
+        expandedFeedbackText,
+        activeTab,
+    ]);
 
-    // Setup ResizeObserver when component mounts
+    // Consolidated feedback fetching effect
     useEffect(() => {
-        const tableCell = document.querySelector(".feedback-text-cell");
-        if (!tableCell) return;
+        if (isLoading || !isAuthenticated || !user?.email_verified) return;
+        handleFetchFeedback(
+            feedbackPage,
+            feedbackLimit,
+            feedbackRotationFilter,
+            feedbackSearchTerm
+        );
+    }, [
+        feedbackPage,
+        feedbackLimit,
+        feedbackRotationFilter,
+        feedbackSearchTerm,
+        isLoading,
+        isAuthenticated,
+        user?.email_verified,
+    ]);
 
-        // Clean up previous observer if it exists
-        if (resizeObserverRef.current) {
-            resizeObserverRef.current.disconnect();
+    // Update activeTab when authentication status changes
+    useEffect(() => {
+        if (!isLoading) {
+            setActiveTab(isAuthenticated ? 1 : 0);
         }
-
-        // Create new observer
-        resizeObserverRef.current = new ResizeObserver(() => {
-            if (resizeTimeoutRef.current) {
-                clearTimeout(resizeTimeoutRef.current);
-            }
-            // Reduce the timeout to make it more responsive
-            resizeTimeoutRef.current = setTimeout(updateMeasurements, 50);
-        });
-
-        // Start observing
-        resizeObserverRef.current.observe(tableCell);
-
-        // Cleanup
-        return () => {
-            if (resizeObserverRef.current) {
-                resizeObserverRef.current.disconnect();
-            }
-            if (resizeTimeoutRef.current) {
-                clearTimeout(resizeTimeoutRef.current);
-            }
-        };
-    }, [filteredAndSortedFeedbacks]);
+    }, [isAuthenticated, isLoading]);
 
     const handleSort = (field: keyof LearningEntry) => {
         if (sortField === field) {
@@ -365,12 +368,7 @@ export default function MedicalJournalPage() {
                 setEntries(data.entries);
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to fetch entries."
-            );
+            handleError(error, "Failed to fetch entries.");
         } finally {
             setIsFetching(false);
         }
@@ -444,31 +442,12 @@ export default function MedicalJournalPage() {
                     );
                 }
 
-                setCurrentEntry({
-                    id: "",
-                    patientSetting: "",
-                    interaction: "",
-                    canmedsRoles: [],
-                    learningObjectives: [],
-                    rotation: "",
-                    date: new Date().toISOString().split("T")[0],
-                    location: "",
-                    hospital: "",
-                    doctor: "",
-                    whatIDidWell: "",
-                    whatICouldImprove: "",
-                    feedback: [],
-                });
+                setCurrentEntry(INITIAL_ENTRY);
                 setIsEditDialogOpen(false);
                 setErrorMessage(null);
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to save the entry."
-            );
+            handleError(error, "Failed to save the entry.");
         }
     };
 
@@ -503,12 +482,7 @@ export default function MedicalJournalPage() {
                 setErrorMessage(null);
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to delete the entry."
-            );
+            handleError(error, "Failed to delete the entry.");
         }
     };
 
@@ -557,8 +531,7 @@ export default function MedicalJournalPage() {
             setEditingEntry(entry.id);
             setIsEditDialogOpen(true);
         } catch (error) {
-            console.error(error);
-            setErrorMessage("Failed to fetch the entry for editing.");
+            handleError(error, "Failed to fetch the entry for editing.");
         }
     };
 
@@ -602,12 +575,7 @@ export default function MedicalJournalPage() {
                 setFeedbackTotalCount(data.totalCount);
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to fetch feedback."
-            );
+            handleError(error, "Failed to fetch feedback.");
         }
     };
 
@@ -667,12 +635,7 @@ export default function MedicalJournalPage() {
                 }
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to add feedback."
-            );
+            handleError(error, "Failed to add feedback.");
         }
     };
 
@@ -738,12 +701,7 @@ export default function MedicalJournalPage() {
                 }
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to update feedback."
-            );
+            handleError(error, "Failed to update feedback.");
         }
     };
 
@@ -795,12 +753,7 @@ export default function MedicalJournalPage() {
                 );
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to delete feedback."
-            );
+            handleError(error, "Failed to delete feedback.");
         }
     };
 
@@ -859,126 +812,6 @@ export default function MedicalJournalPage() {
             const newState = { ...prev, [id]: needsTruncation };
             return newState;
         });
-    };
-
-    // Update measurements when feedback search or filter changes
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            updateMeasurements();
-        }, 50);
-        return () => clearTimeout(timer);
-    }, [feedbackSearchTerm, feedbackRotationFilter]);
-
-    // Update measurements when expanded feedback changes
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            updateMeasurements();
-        }, 50);
-        return () => clearTimeout(timer);
-    }, [expandedFeedbackText]);
-
-    // Update measurements when the table is visible
-    useEffect(() => {
-        if (activeTab === 2) {
-            const timer = setTimeout(() => {
-                updateMeasurements();
-            }, 50);
-            return () => clearTimeout(timer);
-        }
-    }, [activeTab]);
-
-    useEffect(() => {
-        if (filteredAndSortedFeedbacks.length > 0) {
-            updateMeasurements();
-        }
-    }, [filteredAndSortedFeedbacks]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            updateMeasurements();
-        }, 50); // Small delay to ensure DOM is ready
-        return () => clearTimeout(timer);
-    }, []);
-
-    useEffect(() => {
-        if (isLoading || !isAuthenticated || !user?.email_verified) return;
-        handleFetchFeedback(
-            feedbackPage,
-            feedbackLimit,
-            feedbackRotationFilter,
-            feedbackSearchTerm
-        );
-    }, [
-        feedbackPage,
-        feedbackLimit,
-        feedbackRotationFilter,
-        feedbackSearchTerm,
-        isLoading,
-        isAuthenticated,
-        user?.email_verified,
-    ]);
-
-    useEffect(() => {
-        if (isLoading || !isAuthenticated || !user?.email_verified) return;
-        handleFetchEntries();
-    }, [page, limit, isLoading, isAuthenticated, user?.email_verified]);
-
-    useEffect(() => {
-        if (isLoading || !isAuthenticated || !user?.email_verified) return;
-        handleFetchFeedback(
-            feedbackPage,
-            feedbackLimit,
-            feedbackRotationFilter,
-            feedbackSearchTerm
-        );
-    }, [
-        feedbackPage,
-        feedbackLimit,
-        feedbackRotationFilter,
-        feedbackSearchTerm,
-        isLoading,
-        isAuthenticated,
-        user?.email_verified,
-    ]);
-
-    // Update activeTab when authentication status changes
-    useEffect(() => {
-        if (!isLoading) {
-            setActiveTab(isAuthenticated ? 1 : 0);
-        }
-    }, [isAuthenticated, isLoading]);
-
-    const handleCloseEditDialog = () => {
-        setIsEditDialogOpen(false);
-        setEditingEntry(null);
-        setCurrentEntry({
-            id: "",
-            patientSetting: "",
-            interaction: "",
-            canmedsRoles: [],
-            learningObjectives: [],
-            rotation: "",
-            date: new Date().toISOString().split("T")[0],
-            location: "",
-            hospital: "",
-            doctor: "",
-            whatIDidWell: "",
-            whatICouldImprove: "",
-            feedback: [], // Reset feedback field
-        });
-    };
-
-    const getCanMEDSColor = (role: string) => {
-        const colors: { [key: string]: string } = {
-            "Medical Expert": theme.palette.primary.main,
-            Scholar: theme.palette.secondary.main,
-            Communicator: "#4CAF50",
-            Professional: "#9C27B0",
-            Leader: "#FF9800",
-            "Health Advocate": "#E91E63",
-            Collaborator: "#00BCD4",
-        };
-        return colors[role] || theme.palette.grey[500];
     };
 
     const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -1041,12 +874,7 @@ export default function MedicalJournalPage() {
                 setEntries(data.entries);
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to fetch entries."
-            );
+            handleError(error, "Failed to fetch entries.");
         } finally {
             setIsSearching(false);
         }
@@ -1081,15 +909,34 @@ export default function MedicalJournalPage() {
                 setFeedbackTotalCount(data.totalCount);
             }
         } catch (error) {
-            console.error(error);
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Failed to fetch feedback."
-            );
+            handleError(error, "Failed to fetch feedback.");
         } finally {
             setIsFeedbackSearching(false);
         }
+    };
+
+    const handleCloseEditDialog = () => {
+        setIsEditDialogOpen(false);
+        setEditingEntry(null);
+        setCurrentEntry(INITIAL_ENTRY);
+    };
+
+    const getCanMEDSColor = (role: string) => {
+        const colors: { [key: string]: string } = {
+            "Medical Expert": theme.palette.primary.main,
+            Scholar: theme.palette.secondary.main,
+            Communicator: "#4CAF50",
+            Professional: "#9C27B0",
+            Leader: "#FF9800",
+            "Health Advocate": "#E91E63",
+            Collaborator: "#00BCD4",
+        };
+        return colors[role] || theme.palette.grey[500];
+    };
+
+    const handleError = (error: unknown, fallbackMsg: string) => {
+        console.error(error);
+        setErrorMessage(error instanceof Error ? error.message : fallbackMsg);
     };
 
     return (
@@ -2804,10 +2651,7 @@ export default function MedicalJournalPage() {
             {/* Feedback Dialog */}
             <FeedbackDialog
                 open={isFeedbackDialogOpen}
-                onClose={() => {
-                    setIsFeedbackDialogOpen(false);
-                    setSelectedFeedback(null);
-                }}
+                onClose={() => setIsFeedbackDialogOpen(false)}
                 selectedFeedback={selectedFeedback}
                 currentEntry={currentEntry}
                 onSave={handleSaveFeedback}

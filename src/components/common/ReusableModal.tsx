@@ -35,6 +35,9 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
             open={open}
             onClose={onClose}
             aria-labelledby="reusable-modal-title"
+            sx={{
+                zIndex: (theme) => theme.zIndex.fab + 2, // Ensure modal is above any MUI FAB
+            }}
         >
             <Box
                 sx={{
@@ -50,6 +53,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                     display: "flex",
                     flexDirection: "column",
                     gap: 3,
+                    zIndex: (theme) => theme.zIndex.fab + 2, // Ensure modal is above any MUI FAB
                 }}
             >
                 <Typography

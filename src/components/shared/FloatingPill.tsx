@@ -75,7 +75,7 @@ export default function FloatingPill({
                 top: { xs: "8px", sm: "8px" }, // Top center of the screen
                 left: "50%",
                 transform: "translateX(-50%)", // Center horizontally
-                zIndex: 9999,
+                zIndex: 200,
                 background:
                     theme.palette.mode === "dark"
                         ? "rgba(15, 23, 42, 0.95)" // Dark blue pastel
@@ -163,6 +163,9 @@ export default function FloatingPill({
                     }}
                     onClick={() =>
                         loginWithRedirect({
+                            authorizationParams: {
+                                scope: "openid profile email offline_access",
+                            },
                             appState: {
                                 returnTo: redirectUrl || window.location.href,
                             },
