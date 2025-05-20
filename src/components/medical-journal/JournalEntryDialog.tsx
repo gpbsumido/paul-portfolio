@@ -119,9 +119,8 @@ export default function JournalEntryDialog({
         recognitionRef.current.interimResults = true;
         recognitionRef.current.continuous = true; // Ensure continuous listening
         recognitionRef.current.onresult = (event: Event) => {
-            const speechEvent = event as any; // Cast to any to safely access results
+            const speechEvent = event as any;
             let newTranscript = "";
-
             for (
                 let i = speechEvent.resultIndex;
                 i < speechEvent.results.length;
@@ -132,8 +131,28 @@ export default function JournalEntryDialog({
                     newTranscript += result[0].transcript;
                 }
             }
-
-            if (newTranscript) {
+            if (newTranscript && listeningField) {
+                // Immediately append to the correct field and clear transcript
+                if (listeningField === "feedback") {
+                    onInputChange("feedback", [
+                        {
+                            text:
+                                (currentEntry.feedback?.[0]?.text || "") +
+                                newTranscript,
+                            rotation: currentEntry.rotation,
+                        },
+                    ]);
+                } else {
+                    const prev = (currentEntry[
+                        listeningField as keyof LearningEntry
+                    ] || "") as string;
+                    onInputChange(
+                        listeningField as keyof LearningEntry,
+                        prev + newTranscript
+                    );
+                }
+                setTranscript("");
+            } else if (!listeningField && newTranscript) {
                 setTranscript((prev) => prev + newTranscript);
             }
         };
@@ -176,47 +195,6 @@ export default function JournalEntryDialog({
         if (listeningStates[field]) {
             stopListening();
             setListeningStates((prev) => ({ ...prev, [field]: false }));
-            setTranscript("");
-            if (listeningField) {
-                switch (listeningField) {
-                    case "patientSetting":
-                        onInputChange(
-                            "patientSetting",
-                            currentEntry.patientSetting + transcript
-                        );
-                        break;
-                    case "interaction":
-                        onInputChange(
-                            "interaction",
-                            currentEntry.interaction + transcript
-                        );
-                        break;
-                    case "whatIDidWell":
-                        onInputChange(
-                            "whatIDidWell",
-                            currentEntry.whatIDidWell + transcript
-                        );
-                        break;
-                    case "whatICouldImprove":
-                        onInputChange(
-                            "whatICouldImprove",
-                            currentEntry.whatICouldImprove + transcript
-                        );
-                        break;
-                    case "feedback":
-                        onInputChange("feedback", [
-                            {
-                                text:
-                                    currentEntry.feedback?.[0]?.text +
-                                    transcript,
-                                rotation: currentEntry.rotation,
-                            },
-                        ]);
-                        break;
-                    default:
-                        break;
-                }
-            }
             setTranscript("");
         } else {
             stopListening();
@@ -456,21 +434,28 @@ export default function JournalEntryDialog({
                             multiline
                             rows={2}
                             value={
-                                currentEntry.patientSetting +
-                                (isListening &&
+                                isListening &&
                                 listeningField === "patientSetting"
-                                    ? transcript
-                                    : "")
+                                    ? (currentEntry.patientSetting || "") +
+                                      transcript
+                                    : currentEntry.patientSetting
                             }
-                            onChange={(e) =>
-                                onInputChange("patientSetting", e.target.value)
-                            }
+                            onChange={(e) => {
+                                onInputChange("patientSetting", e.target.value);
+                                if (
+                                    isListening &&
+                                    listeningField === "patientSetting"
+                                ) {
+                                    setTranscript("");
+                                }
+                            }}
                             error={!!errors.patientSetting}
                             helperText={
                                 errors.patientSetting
                                     ? t("medicalJournal.requiredFieldError")
                                     : ""
                             }
+                            // disabled={isListening && listeningField === "patientSetting"}
                         />
                         <Button
                             onClick={() =>
@@ -515,20 +500,27 @@ export default function JournalEntryDialog({
                             multiline
                             rows={3}
                             value={
-                                currentEntry.interaction +
-                                (isListening && listeningField === "interaction"
-                                    ? transcript
-                                    : "")
+                                isListening && listeningField === "interaction"
+                                    ? (currentEntry.interaction || "") +
+                                      transcript
+                                    : currentEntry.interaction
                             }
-                            onChange={(e) =>
-                                onInputChange("interaction", e.target.value)
-                            }
+                            onChange={(e) => {
+                                onInputChange("interaction", e.target.value);
+                                if (
+                                    isListening &&
+                                    listeningField === "interaction"
+                                ) {
+                                    setTranscript("");
+                                }
+                            }}
                             error={!!errors.interaction}
                             helperText={
                                 errors.interaction
                                     ? t("medicalJournal.requiredFieldError")
                                     : ""
                             }
+                            // disabled={isListening && listeningField === "interaction"}
                         />
                         <Button
                             onClick={() =>
@@ -664,16 +656,22 @@ export default function JournalEntryDialog({
                             multiline
                             rows={3}
                             value={
-                                currentEntry.whatIDidWell +
-                                (isListening &&
-                                listeningField === "whatIDidWell"
-                                    ? transcript
-                                    : "")
+                                isListening && listeningField === "whatIDidWell"
+                                    ? (currentEntry.whatIDidWell || "") +
+                                      transcript
+                                    : currentEntry.whatIDidWell
                             }
-                            onChange={(e) =>
-                                onInputChange("whatIDidWell", e.target.value)
-                            }
+                            onChange={(e) => {
+                                onInputChange("whatIDidWell", e.target.value);
+                                if (
+                                    isListening &&
+                                    listeningField === "whatIDidWell"
+                                ) {
+                                    setTranscript("");
+                                }
+                            }}
                             placeholder="Enter what you did well..."
+                            // disabled={isListening && listeningField === "whatIDidWell"}
                         />
                         <Button
                             onClick={() =>
@@ -717,19 +715,26 @@ export default function JournalEntryDialog({
                             multiline
                             rows={3}
                             value={
-                                currentEntry.whatICouldImprove +
-                                (isListening &&
+                                isListening &&
                                 listeningField === "whatICouldImprove"
-                                    ? transcript
-                                    : "")
+                                    ? (currentEntry.whatICouldImprove || "") +
+                                      transcript
+                                    : currentEntry.whatICouldImprove
                             }
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 onInputChange(
                                     "whatICouldImprove",
                                     e.target.value
-                                )
-                            }
+                                );
+                                if (
+                                    isListening &&
+                                    listeningField === "whatICouldImprove"
+                                ) {
+                                    setTranscript("");
+                                }
+                            }}
                             placeholder="Enter what you could improve..."
+                            // disabled={isListening && listeningField === "whatICouldImprove"}
                         />
                         <Button
                             onClick={() =>
@@ -775,13 +780,19 @@ export default function JournalEntryDialog({
                             multiline
                             rows={3}
                             value={
-                                (currentEntry.feedback?.[0]?.text || "") +
-                                (isListening && listeningField === "feedback"
-                                    ? transcript
-                                    : "")
+                                isListening && listeningField === "feedback"
+                                    ? (currentEntry.feedback?.[0]?.text || "") +
+                                      transcript
+                                    : currentEntry.feedback?.[0]?.text || ""
                             }
                             onChange={(e) => {
                                 const text = e.target.value;
+                                if (
+                                    isListening &&
+                                    listeningField === "feedback"
+                                ) {
+                                    setTranscript("");
+                                }
                                 if (text.trim()) {
                                     onInputChange("feedback", [
                                         {
@@ -794,6 +805,7 @@ export default function JournalEntryDialog({
                                 }
                             }}
                             placeholder="Enter feedback for this entry..."
+                            // disabled={isListening && listeningField === "feedback"}
                         />
                         <Button
                             onClick={() => handleVoiceInputToggle("feedback")}
