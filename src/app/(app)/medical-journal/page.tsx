@@ -394,7 +394,6 @@ export default function MedicalJournalPage() {
                     },
                     body: JSON.stringify({
                         ...currentEntry,
-                        date: new Date().toISOString(),
                         whatIDidWell: currentEntry.whatIDidWell,
                         whatICouldImprove: currentEntry.whatICouldImprove,
                         feedbackText: currentEntry.feedback?.[0]?.text || "",
