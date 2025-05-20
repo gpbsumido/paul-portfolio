@@ -252,13 +252,7 @@ export default function MedicalJournalPage() {
                     feedbackSearchTerm
                 );
             } catch (e) {
-                const redirectUrl =
-                    window.location.href + window.location.pathname;
-                logout({
-                    logoutParams: {
-                        returnTo: redirectUrl || window.location.href, // Return to the provided redirect URL or current location
-                    },
-                });
+                console.error(e);
             }
         };
 
@@ -332,6 +326,16 @@ export default function MedicalJournalPage() {
         return Object.keys(newErrors).length === 0;
     };
 
+    async function accessErrorHandler(error: any) {
+        console.error(error);
+        const redirectUrl = window.location.href;
+        logout({
+            logoutParams: {
+                returnTo: redirectUrl, // Return to the provided redirect URL or current location
+            },
+        });
+    }
+
     const handleFetchEntries = async () => {
         try {
             setIsFetching(true);
@@ -340,6 +344,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const queryParams = new URLSearchParams({
@@ -382,6 +389,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -456,6 +466,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -491,6 +504,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -545,6 +561,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const queryParams = new URLSearchParams({
@@ -588,6 +607,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -649,6 +671,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -710,6 +735,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -852,6 +880,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
@@ -886,6 +917,9 @@ export default function MedicalJournalPage() {
                 authorizationParams: {
                     audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
                 },
+            }).catch((error) => {
+                accessErrorHandler(error);
+                return;
             });
 
             const response = await fetch(
