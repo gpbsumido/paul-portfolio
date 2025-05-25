@@ -282,8 +282,7 @@ export default function ForumPage() {
                     position: "fixed",
                     bottom: { xs: "16px", sm: "32px" },
                     right: { xs: "16px", sm: "32px" },
-                    zIndex: 9999,
-                    boxShadow: (theme) => theme.shadows[6],
+                    display: isModalOpen ? "none" : "flex",
                 }}
             >
                 <AddIcon />

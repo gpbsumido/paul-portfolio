@@ -835,8 +835,7 @@ export default function Gallery(): React.ReactElement | null {
                     position: "fixed",
                     bottom: { xs: "16px", sm: "32px" },
                     right: { xs: "16px", sm: "32px" },
-                    zIndex: 9999,
-                    display: !_.isEmpty(images) ? "flex" : "none",
+                    display: isModalOpen ? "none" : "flex",
                 }}
             >
                 <AddIcon />
