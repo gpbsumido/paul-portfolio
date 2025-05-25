@@ -979,7 +979,7 @@ export default function MedicalJournalPage() {
                     {errorMessage}
                 </Alert>
             )}
-            <FloatingPill />
+            <FloatingPill hide={isEditDialogOpen || isFeedbackDialogOpen} />
             <Box
                 sx={{
                     position: "fixed",

@@ -506,7 +506,10 @@ export default function Gallery(): React.ReactElement | null {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
-            <FloatingPill redirectUrl={`${window.location.origin}/gallery`} />
+            <FloatingPill
+                redirectUrl={`${window.location.origin}/gallery`}
+                hide={isModalOpen || isDeleteModalOpen}
+            />
 
             <Box
                 sx={{
