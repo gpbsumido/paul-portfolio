@@ -852,6 +852,7 @@ export default function Gallery(): React.ReactElement | null {
                 confirmText="Submit"
                 onConfirm={handleSubmit}
                 isConfirmDisabled={!imageFile || uploading}
+                loading={uploading}
                 children={
                     <>
                         {imageFile && (
@@ -884,6 +885,7 @@ export default function Gallery(): React.ReactElement | null {
                                     variant="contained"
                                     color="error"
                                     size="small"
+                                    disabled={uploading}
                                     sx={{
                                         position: "absolute",
                                         top: 8,
@@ -910,14 +912,22 @@ export default function Gallery(): React.ReactElement | null {
                                     borderRadius: 2,
                                     p: 2,
                                     textAlign: "center",
-                                    cursor: "pointer",
+                                    cursor: uploading
+                                        ? "not-allowed"
+                                        : "pointer",
+                                    opacity: uploading ? 0.6 : 1,
                                     "&:hover": {
-                                        borderColor: "primary.main",
-                                        bgcolor: "action.hover",
+                                        borderColor: uploading
+                                            ? "divider"
+                                            : "primary.main",
+                                        bgcolor: uploading
+                                            ? "transparent"
+                                            : "action.hover",
                                     },
                                 }}
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={(e) => {
+                                    if (uploading) return;
                                     e.preventDefault();
                                     if (
                                         e.dataTransfer.files &&
@@ -936,6 +946,7 @@ export default function Gallery(): React.ReactElement | null {
                                     type="file"
                                     accept="image/*"
                                     onChange={handleFileChange}
+                                    disabled={uploading}
                                     style={{
                                         position: "absolute",
                                         top: 0,
@@ -943,7 +954,9 @@ export default function Gallery(): React.ReactElement | null {
                                         width: "100%",
                                         height: "100%",
                                         opacity: 0,
-                                        cursor: "pointer",
+                                        cursor: uploading
+                                            ? "not-allowed"
+                                            : "pointer",
                                     }}
                                 />
                                 <Typography
@@ -957,7 +970,9 @@ export default function Gallery(): React.ReactElement | null {
                                     }}
                                 >
                                     <AddIcon color="primary" />
-                                    Click or drag to upload an image
+                                    {uploading
+                                        ? "Uploading..."
+                                        : "Click or drag to upload an image"}
                                 </Typography>
                             </Box>
                             <TextField
@@ -966,6 +981,7 @@ export default function Gallery(): React.ReactElement | null {
                                 onChange={(e) => setText(e.target.value)}
                                 fullWidth
                                 variant="outlined"
+                                disabled={uploading}
                                 InputProps={{
                                     sx: {
                                         borderRadius: 2,
@@ -980,6 +996,7 @@ export default function Gallery(): React.ReactElement | null {
                                 multiline
                                 rows={4}
                                 variant="outlined"
+                                disabled={uploading}
                                 InputProps={{
                                     sx: {
                                         borderRadius: 2,
@@ -1018,6 +1035,7 @@ export default function Gallery(): React.ReactElement | null {
                 confirmText="Delete"
                 onConfirm={handleConfirmDelete}
                 isConfirmDisabled={deletingImageId === imageToDelete?.id}
+                loading={deletingImageId === imageToDelete?.id}
                 confirmColor="error.main"
                 titleColor="error.main"
             />

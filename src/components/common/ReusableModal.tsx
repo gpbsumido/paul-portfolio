@@ -1,5 +1,11 @@
 import React from "react";
-import { Box, Button, Modal, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Modal,
+    Typography,
+    CircularProgress,
+} from "@mui/material";
 
 interface ReusableModalProps {
     open: boolean;
@@ -10,6 +16,7 @@ interface ReusableModalProps {
     confirmText?: string;
     cancelText?: string;
     isConfirmDisabled?: boolean;
+    loading?: boolean;
     children?: React.ReactNode;
     confirmColor?: string;
     cancelColor?: string;
@@ -25,6 +32,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
     confirmText = "Confirm",
     cancelText = "Cancel",
     isConfirmDisabled = false,
+    loading = false,
     children,
     confirmColor = "primary",
     cancelColor = "secondary",
@@ -33,7 +41,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
     return (
         <Modal
             open={open}
-            onClose={onClose}
+            onClose={loading ? undefined : onClose}
             aria-labelledby="reusable-modal-title"
             sx={{
                 zIndex: (theme) => theme.zIndex.fab + 2, // Ensure modal is above any MUI FAB
@@ -87,6 +95,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                         onClick={onClose}
                         color="secondary"
                         variant="outlined"
+                        disabled={loading}
                         sx={{
                             borderRadius: 50,
                             textTransform: "none",
@@ -106,7 +115,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                             onClick={onConfirm}
                             color="primary"
                             variant="contained"
-                            disabled={isConfirmDisabled}
+                            disabled={isConfirmDisabled || loading}
                             sx={{
                                 borderRadius: 50,
                                 textTransform: "none",
@@ -119,7 +128,11 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                                 },
                             }}
                         >
-                            {confirmText}
+                            {loading ? (
+                                <CircularProgress size={20} color="inherit" />
+                            ) : (
+                                confirmText
+                            )}
                         </Button>
                     )}
                 </Box>
