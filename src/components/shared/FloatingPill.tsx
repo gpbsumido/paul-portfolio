@@ -13,8 +13,10 @@ import React, { useState, useEffect, useRef } from "react";
 
 export default function FloatingPill({
     redirectUrl,
+    hide = false,
 }: {
     redirectUrl?: string;
+    hide?: boolean;
 }) {
     const theme = useTheme();
     const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
@@ -86,7 +88,7 @@ export default function FloatingPill({
                     isLoggedIn && isMobile && minimized ? "50%" : "20px",
                 padding:
                     isLoggedIn && isMobile && minimized ? "8px" : "8px 16px",
-                display: "flex",
+                display: hide ? "none" : "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 gap: isLoggedIn && isMobile && minimized ? 0 : 2,

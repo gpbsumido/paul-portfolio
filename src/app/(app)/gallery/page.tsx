@@ -506,7 +506,10 @@ export default function Gallery(): React.ReactElement | null {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
-            <FloatingPill redirectUrl={`${window.location.origin}/gallery`} />
+            <FloatingPill
+                redirectUrl={`${window.location.origin}/gallery`}
+                hide={isModalOpen || isDeleteModalOpen}
+            />
 
             <Box
                 sx={{
@@ -835,8 +838,7 @@ export default function Gallery(): React.ReactElement | null {
                     position: "fixed",
                     bottom: { xs: "16px", sm: "32px" },
                     right: { xs: "16px", sm: "32px" },
-                    zIndex: 9999,
-                    display: !_.isEmpty(images) ? "flex" : "none",
+                    display: isModalOpen ? "none" : "flex",
                 }}
             >
                 <AddIcon />

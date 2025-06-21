@@ -132,7 +132,10 @@ export default function ForumPage() {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
-            <FloatingPill redirectUrl={`${window.location.origin}/forum`} />
+            <FloatingPill
+                redirectUrl={`${window.location.origin}/forum`}
+                hide={isModalOpen}
+            />
 
             {/* Fixed Buttons */}
             <Box
@@ -282,8 +285,7 @@ export default function ForumPage() {
                     position: "fixed",
                     bottom: { xs: "16px", sm: "32px" },
                     right: { xs: "16px", sm: "32px" },
-                    zIndex: 9999,
-                    boxShadow: (theme) => theme.shadows[6],
+                    display: isModalOpen ? "none" : "flex",
                 }}
             >
                 <AddIcon />
