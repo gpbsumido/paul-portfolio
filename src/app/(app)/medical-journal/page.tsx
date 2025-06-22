@@ -327,13 +327,40 @@ export default function MedicalJournalPage() {
     };
 
     async function accessErrorHandler(error: any) {
-        console.error(error);
-        const redirectUrl = window.location.href;
-        logout({
-            logoutParams: {
-                returnTo: redirectUrl, // Return to the provided redirect URL or current location
-            },
-        });
+        console.error("Access error:", error);
+        
+        try {
+            // Safely get the current URL, handling SSR cases
+            let redirectUrl: string;
+            
+            if (typeof window !== "undefined" && window.location) {
+                redirectUrl = window.location.href;
+            } else {
+                // Fallback for SSR or when window.location is not available
+                redirectUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+                    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/medical-journal`
+                    : "http://localhost:3009/medical-journal";
+            }
+            
+            // Log the error for debugging
+            console.error("Redirecting to:", redirectUrl);
+            
+            // Perform logout with proper error handling
+            await logout({
+                logoutParams: {
+                    returnTo: redirectUrl,
+                },
+            }).catch((logoutError) => {
+                console.error("Logout failed:", logoutError);
+                // If logout fails, we can't do much more, but at least log it
+                // The user will need to manually logout or refresh the page
+            });
+            
+        } catch (handlerError) {
+            console.error("Error in accessErrorHandler:", handlerError);
+            // If everything fails, set an error message for the user
+            setErrorMessage("Authentication error. Please try logging out and logging back in.");
+        }
     }
 
     const handleFetchEntries = async () => {
