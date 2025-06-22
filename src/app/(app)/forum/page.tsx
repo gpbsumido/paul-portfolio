@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     Box,
     Container,
@@ -64,6 +64,8 @@ export default function ForumPage() {
         ],
         content: "",
     });
+
+    const editorRef = useRef<any>(null);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -339,7 +341,7 @@ export default function ForumPage() {
                                 </Typography>
                                 <Editor
                                     apiKey="your-tinymce-api-key"
-                                    onInit={(evt, editor) =>
+                                    onInit={(evt: any, editor: any) =>
                                         (editorRef.current = editor)
                                     }
                                     initialValue=""

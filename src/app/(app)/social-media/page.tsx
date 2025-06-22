@@ -15,7 +15,7 @@ import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PostCard } from "@/components/features/social-media/PostCard";
+import PostCard from "@/components/features/social-media/PostCard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 interface Post {
