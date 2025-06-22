@@ -132,10 +132,7 @@ export default function ForumPage() {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
-            <FloatingPill
-                redirectUrl={`${window.location.origin}/forum`}
-                hide={isModalOpen}
-            />
+            <FloatingPill hide={isModalOpen} />
 
             {/* Fixed Buttons */}
             <Box
