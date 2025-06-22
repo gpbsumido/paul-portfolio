@@ -13,6 +13,7 @@ import {
     Box,
     Chip,
     OutlinedInput,
+    Alert,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import SaveIcon from "@mui/icons-material/Save";
@@ -24,7 +25,7 @@ import {
     ROTATIONS,
 } from "@/constants/medical-journal";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
 declare global {
@@ -74,135 +75,206 @@ export default function JournalEntryDialog({
     const [transcript, setTranscript] = useState("");
     const [isListening, setIsListening] = useState(false);
     const [listeningField, setListeningField] = useState<string | null>(null);
+    const [speechError, setSpeechError] = useState<string | null>(null);
     const recognitionRef = useRef<any>(null);
+    const isInitializedRef = useRef(false);
     const [listeningStates, setListeningStates] = useState<
         Record<string, boolean>
     >({});
 
-    // display if the SpeechRecognition API is supported
-    useEffect(() => {
-        if (
-            "SpeechRecognition" in window ||
-            "webkitSpeechRecognition" in window
-        ) {
-            console.log("SpeechRecognition API is supported.");
-        } else {
-            console.log("SpeechRecognition API is not supported.");
-        }
+    // Check if SpeechRecognition API is supported
+    const isSpeechRecognitionSupported = useCallback(() => {
+        return (
+            typeof window !== "undefined" &&
+            ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+        );
     }, []);
 
+    // Initialize speech recognition instance
+    const initializeSpeechRecognition = useCallback(() => {
+        if (!isSpeechRecognitionSupported() || isInitializedRef.current) {
+            return false;
+        }
+
+        try {
+            // Clean up any existing instance
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+                recognitionRef.current = null;
+            }
+
+            recognitionRef.current = new (window.SpeechRecognition ||
+                window.webkitSpeechRecognition)();
+            
+            recognitionRef.current.lang = "en-US";
+            recognitionRef.current.interimResults = true;
+            recognitionRef.current.continuous = true;
+
+            recognitionRef.current.onresult = (event: Event) => {
+                const speechEvent = event as any;
+                let newTranscript = "";
+                for (
+                    let i = speechEvent.resultIndex;
+                    i < speechEvent.results.length;
+                    i++
+                ) {
+                    const result = speechEvent.results[i];
+                    if (result.isFinal) {
+                        newTranscript += result[0].transcript;
+                    }
+                }
+                if (newTranscript && listeningField) {
+                    // Immediately append to the correct field and clear transcript
+                    if (listeningField === "feedback") {
+                        onInputChange("feedback", [
+                            {
+                                text:
+                                    (currentEntry.feedback?.[0]?.text || "") +
+                                    newTranscript,
+                                rotation: currentEntry.rotation,
+                            },
+                        ]);
+                    } else {
+                        const prev = (currentEntry[
+                            listeningField as keyof LearningEntry
+                        ] || "") as string;
+                        onInputChange(
+                            listeningField as keyof LearningEntry,
+                            prev + newTranscript
+                        );
+                    }
+                    setTranscript("");
+                } else if (!listeningField && newTranscript) {
+                    setTranscript((prev) => prev + newTranscript);
+                }
+            };
+
+            recognitionRef.current.onerror = (event: any) => {
+                console.error("Speech recognition error:", event.error);
+                setSpeechError(`Speech recognition error: ${event.error}`);
+                setIsListening(false);
+                setListeningStates({});
+                setListeningField(null);
+            };
+
+            recognitionRef.current.onend = () => {
+                if (isListening) {
+                    console.log("Speech recognition restarted");
+                    try {
+                        recognitionRef.current?.start();
+                    } catch (error) {
+                        console.error("Failed to restart speech recognition:", error);
+                        setIsListening(false);
+                        setListeningStates({});
+                        setListeningField(null);
+                    }
+                } else {
+                    console.log("Speech recognition ended");
+                    setIsListening(false);
+                }
+            };
+
+            isInitializedRef.current = true;
+            return true;
+        } catch (error) {
+            console.error("Failed to initialize speech recognition:", error);
+            setSpeechError("Failed to initialize speech recognition");
+            return false;
+        }
+    }, [isSpeechRecognitionSupported, listeningField, currentEntry, onInputChange, isListening]);
+
+    // Check microphone permissions
     useEffect(() => {
-        if (
-            !("SpeechRecognition" in window) &&
-            !("webkitSpeechRecognition" in window)
-        ) {
-            alert("Speech Recognition API not supported in this browser");
+        if (!isSpeechRecognitionSupported()) {
+            setSpeechError("Speech Recognition API not supported in this browser");
             return;
         }
 
-        navigator.permissions
-            .query({ name: "microphone" as PermissionName })
-            .then((permissionStatus) => {
-                if (permissionStatus.state === "denied") {
-                    alert(
-                        "Microphone access is denied. Please enable it in your browser settings."
-                    );
-                }
-            })
-            .catch((error) => {
-                console.error("Error checking microphone permissions:", error);
-            });
+        if (typeof navigator !== "undefined" && navigator.permissions) {
+            navigator.permissions
+                .query({ name: "microphone" as PermissionName })
+                .then((permissionStatus) => {
+                    if (permissionStatus.state === "denied") {
+                        setSpeechError("Microphone access is denied. Please enable it in your browser settings.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error checking microphone permissions:", error);
+                });
+        }
+    }, [isSpeechRecognitionSupported]);
 
-        recognitionRef.current = new (window.SpeechRecognition ||
-            window.webkitSpeechRecognition)();
-        recognitionRef.current.lang = "en-US";
-        recognitionRef.current.interimResults = true;
-        recognitionRef.current.continuous = true; // Ensure continuous listening
-        recognitionRef.current.onresult = (event: Event) => {
-            const speechEvent = event as any;
-            let newTranscript = "";
-            for (
-                let i = speechEvent.resultIndex;
-                i < speechEvent.results.length;
-                i++
-            ) {
-                const result = speechEvent.results[i];
-                if (result.isFinal) {
-                    newTranscript += result[0].transcript;
-                }
-            }
-            if (newTranscript && listeningField) {
-                // Immediately append to the correct field and clear transcript
-                if (listeningField === "feedback") {
-                    onInputChange("feedback", [
-                        {
-                            text:
-                                (currentEntry.feedback?.[0]?.text || "") +
-                                newTranscript,
-                            rotation: currentEntry.rotation,
-                        },
-                    ]);
-                } else {
-                    const prev = (currentEntry[
-                        listeningField as keyof LearningEntry
-                    ] || "") as string;
-                    onInputChange(
-                        listeningField as keyof LearningEntry,
-                        prev + newTranscript
-                    );
-                }
-                setTranscript("");
-            } else if (!listeningField && newTranscript) {
-                setTranscript((prev) => prev + newTranscript);
-            }
-        };
+    // Initialize speech recognition when dialog opens
+    useEffect(() => {
+        if (open && !isInitializedRef.current) {
+            initializeSpeechRecognition();
+        }
+    }, [open, initializeSpeechRecognition]);
 
-        recognitionRef.current.onerror = (event: any) => {
-            console.error("Speech recognition error:", event.error);
-            alert(`Speech recognition error: ${event.error}`);
-        };
-
-        recognitionRef.current.onend = () => {
-            if (isListening) {
-                console.log("Speech recognition restarted");
-                recognitionRef.current.start(); // Restart listening if manually stopped
-            } else {
-                console.log("Speech recognition ended");
-                setIsListening(false);
-            }
-        };
-
+    // Cleanup speech recognition when dialog closes or component unmounts
+    useEffect(() => {
         return () => {
-            recognitionRef.current?.stop();
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.stop();
+                } catch (error) {
+                    console.error("Error stopping speech recognition:", error);
+                }
+                recognitionRef.current = null;
+            }
+            isInitializedRef.current = false;
+            setIsListening(false);
+            setListeningStates({});
+            setListeningField(null);
         };
     }, []);
 
-    const startListening = () => {
-        if (recognitionRef.current) {
+    const startListening = useCallback(() => {
+        if (!recognitionRef.current || !isInitializedRef.current) {
+            if (!initializeSpeechRecognition()) {
+                return;
+            }
+        }
+
+        try {
             recognitionRef.current.start();
             setIsListening(true);
+            setSpeechError(null);
+        } catch (error) {
+            console.error("Failed to start speech recognition:", error);
+            setSpeechError("Failed to start speech recognition");
         }
-    };
+    }, [initializeSpeechRecognition]);
 
-    const stopListening = () => {
+    const stopListening = useCallback(() => {
         if (recognitionRef.current) {
-            recognitionRef.current.stop();
-            setIsListening(false);
+            try {
+                recognitionRef.current.stop();
+            } catch (error) {
+                console.error("Error stopping speech recognition:", error);
+            }
         }
-    };
+        setIsListening(false);
+    }, []);
 
-    const handleVoiceInputToggle = (field: string) => {
+    const handleVoiceInputToggle = useCallback((field: string) => {
         if (listeningStates[field]) {
             stopListening();
             setListeningStates((prev) => ({ ...prev, [field]: false }));
             setTranscript("");
+            setListeningField(null);
         } else {
+            // Stop any current listening
             stopListening();
+            setListeningStates({});
+            setListeningField(null);
+            
+            // Start listening for the new field
             setListeningStates((prev) => ({ ...prev, [field]: true }));
-            startListening();
             setListeningField(field);
+            startListening();
         }
-    };
+    }, [listeningStates, stopListening, startListening]);
 
     const summarizeWithOpenAI = async (
         text: string | null | undefined,
@@ -290,6 +362,17 @@ export default function JournalEntryDialog({
                         : t("medicalJournal.addNewEntryTitle")}
                 </Typography>
             </DialogTitle>
+            
+            {speechError && (
+                <Alert 
+                    severity="error" 
+                    sx={{ mx: 3, mb: 2 }}
+                    onClose={() => setSpeechError(null)}
+                >
+                    {speechError}
+                </Alert>
+            )}
+            
             <DialogContent sx={{ pt: 3 }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
