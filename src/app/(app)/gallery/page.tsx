@@ -80,10 +80,35 @@ export default function Gallery(): React.ReactElement | null {
 
         return new Promise((resolve, reject) => {
             const img = new Image();
+            let isCancelled = false;
+
+            const cleanup = () => {
+                img.onload = null;
+                img.onerror = null;
+                img.src = "";
+            };
+
+            img.onload = () => {
+                if (!isCancelled) {
+                    cleanup();
+                    resolve();
+                }
+            };
+
+            img.onerror = () => {
+                if (!isCancelled) {
+                    cleanup();
+                    reject(new Error(`Failed to preload image: ${src}`));
+                }
+            };
+
             img.src = src;
-            img.onload = () => resolve();
-            img.onerror = () =>
-                reject(new Error(`Failed to preload image: ${src}`));
+
+            // Return cleanup function for cancellation
+            return () => {
+                isCancelled = true;
+                cleanup();
+            };
         });
     };
 
@@ -103,13 +128,29 @@ export default function Gallery(): React.ReactElement | null {
             const [isVisible, setIsVisible] = useState(index < 3); // Always visible for first 3 images
             const containerRef = useRef<HTMLDivElement>(null);
             const imgRef = useRef<HTMLImageElement | null>(null);
+            const loadingRef = useRef<HTMLImageElement | null>(null);
+            const isMountedRef = useRef(true);
+
+            useEffect(() => {
+                isMountedRef.current = true;
+                return () => {
+                    isMountedRef.current = false;
+                    // Cleanup loading image if component unmounts
+                    if (loadingRef.current) {
+                        loadingRef.current.onload = null;
+                        loadingRef.current.onerror = null;
+                        loadingRef.current.src = "";
+                        loadingRef.current = null;
+                    }
+                };
+            }, []);
 
             useEffect(() => {
                 if (index < 3) return; // Skip intersection observer for first 3 images
 
                 const observer = new IntersectionObserver(
                     ([entry]) => {
-                        if (entry.isIntersecting) {
+                        if (entry.isIntersecting && isMountedRef.current) {
                             setIsVisible(true);
                             observer.disconnect();
                         }
@@ -124,40 +165,68 @@ export default function Gallery(): React.ReactElement | null {
                     observer.observe(containerRef.current);
                 }
 
-                return () => observer.disconnect();
+                return () => {
+                    observer.disconnect();
+                };
             }, [index]);
 
             useEffect(() => {
-                if (!isVisible) return;
+                if (!isVisible || !isMountedRef.current) return;
 
                 const load = async () => {
                     if (imageCache.current[image.src]?.loaded) {
-                        setIsLoaded(true);
+                        if (isMountedRef.current) {
+                            setIsLoaded(true);
+                        }
                         return;
                     }
 
                     try {
                         const img = new Image();
-                        img.src = image.src;
+                        loadingRef.current = img;
 
                         img.onload = () => {
-                            imageCache.current[image.src] = {
-                                element: img,
-                                loaded: true,
-                            };
-                            setIsLoaded(true);
+                            if (isMountedRef.current) {
+                                imageCache.current[image.src] = {
+                                    element: img,
+                                    loaded: true,
+                                };
+                                setIsLoaded(true);
+                            }
+                            loadingRef.current = null;
                         };
 
                         img.onerror = () => {
-                            console.error("Error loading image:", image.src);
-                            delete imageCache.current[image.src];
+                            if (isMountedRef.current) {
+                                console.error(
+                                    "Error loading image:",
+                                    image.src
+                                );
+                                delete imageCache.current[image.src];
+                            }
+                            loadingRef.current = null;
                         };
+
+                        img.src = image.src;
                     } catch (error) {
-                        console.error("Error loading image:", error);
+                        if (isMountedRef.current) {
+                            console.error("Error loading image:", error);
+                        }
+                        loadingRef.current = null;
                     }
                 };
 
                 load();
+
+                // Cleanup function
+                return () => {
+                    if (loadingRef.current) {
+                        loadingRef.current.onload = null;
+                        loadingRef.current.onerror = null;
+                        loadingRef.current.src = "";
+                        loadingRef.current = null;
+                    }
+                };
             }, [image.src, isVisible]);
 
             return (
@@ -260,10 +329,18 @@ export default function Gallery(): React.ReactElement | null {
 
             setIsFetching(true);
             setFetchError(null);
+
+            // Create an AbortController for this request
+            const abortController = new AbortController();
+
             try {
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`
+                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`,
+                    {
+                        signal: abortController.signal,
+                    }
                 );
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(
@@ -272,42 +349,58 @@ export default function Gallery(): React.ReactElement | null {
                 }
 
                 const data = await response.json();
-                const formattedImages = await Promise.all(
-                    data
+
+                // Preload images for first page only, with proper cleanup
+                if (pageNumber === 1) {
+                    const preloadPromises = data
                         .filter(
                             (item: { imageUrl: string }) =>
                                 !item.imageUrl.toLowerCase().endsWith(".heic")
                         )
-                        .map(
-                            async (item: {
-                                key: string;
-                                imageUrl: string;
-                                blurDataURL?: string;
-                                user_sub?: string;
-                            }) => {
-                                if (
-                                    pageNumber === 1 &&
-                                    data.indexOf(item) < 3
-                                ) {
-                                    await preloadImage(item.imageUrl);
-                                }
-                                return {
-                                    src: item.imageUrl,
-                                    width: 0,
-                                    height: 0,
-                                    originalWidth: 0,
-                                    originalHeight: 0,
-                                    blurDataURL: item.blurDataURL,
-                                    user_sub: item.user_sub,
-                                };
+                        .slice(0, 3) // Only preload first 3 images
+                        .map(async (item: { imageUrl: string }) => {
+                            try {
+                                await preloadImage(item.imageUrl);
+                            } catch (error) {
+                                console.warn(
+                                    `Failed to preload image: ${item.imageUrl}`,
+                                    error
+                                );
                             }
-                        )
-                );
+                        });
+
+                    // Wait for preloading to complete, but don't block the main flow
+                    Promise.all(preloadPromises).catch((error) => {
+                        console.warn("Some images failed to preload:", error);
+                    });
+                }
+
+                const formattedImages = data
+                    .filter(
+                        (item: { imageUrl: string }) =>
+                            !item.imageUrl.toLowerCase().endsWith(".heic")
+                    )
+                    .map(
+                        (item: {
+                            key: string;
+                            imageUrl: string;
+                            blurDataURL?: string;
+                            user_sub?: string;
+                        }) => ({
+                            src: item.imageUrl,
+                            width: 0,
+                            height: 0,
+                            originalWidth: 0,
+                            originalHeight: 0,
+                            blurDataURL: item.blurDataURL,
+                            user_sub: item.user_sub,
+                        })
+                    );
 
                 setImages((prev) => {
                     const existingUrls = new Set(prev.map((img) => img.src));
                     const uniqueImages = formattedImages.filter(
-                        (img) => !existingUrls.has(img.src)
+                        (img: any) => !existingUrls.has(img.src)
                     );
                     return [...prev, ...uniqueImages];
                 });
@@ -315,19 +408,40 @@ export default function Gallery(): React.ReactElement | null {
                 setHasMore(formattedImages.length === 4);
                 lastFetchedPage.current = pageNumber;
             } catch (error: any) {
-                setFetchError(
-                    error.message ||
-                        "An unexpected error occurred while fetching posts."
-                );
+                // Don't set error if the request was aborted
+                if (error.name !== "AbortError") {
+                    setFetchError(
+                        error.message ||
+                            "An unexpected error occurred while fetching posts."
+                    );
+                }
             } finally {
                 setIsFetching(false);
             }
+
+            // Return abort function for cleanup
+            return () => {
+                abortController.abort();
+            };
         },
         [isFetching, fetchError]
     );
 
     useEffect(() => {
-        fetchImages(page);
+        let abortFunction: (() => void) | undefined;
+
+        const loadImages = async () => {
+            abortFunction = await fetchImages(page);
+        };
+
+        loadImages();
+
+        // Cleanup function
+        return () => {
+            if (abortFunction) {
+                abortFunction();
+            }
+        };
     }, [page, fetchImages]);
 
     useEffect(() => {
@@ -364,16 +478,31 @@ export default function Gallery(): React.ReactElement | null {
     // Additional cleanup effect for component unmount
     useEffect(() => {
         return () => {
+            // Cleanup intersection observer
             if (observer.current) {
                 observer.current.disconnect();
                 observer.current = null;
             }
-            
+
             // Clear image cache to free memory
+            Object.values(imageCache.current).forEach((cacheEntry) => {
+                if (cacheEntry.element) {
+                    cacheEntry.element.onload = null;
+                    cacheEntry.element.onerror = null;
+                    cacheEntry.element.src = "";
+                }
+            });
             imageCache.current = {};
-            
+
             // Reset refs
             lastFetchedPage.current = 0;
+
+            // Clear any pending state updates
+            setIsFetching(false);
+            setFetchError(null);
+            setUploading(false);
+            setUploadError(null);
+            setDeleteError(null);
         };
     }, []);
 
@@ -411,6 +540,9 @@ export default function Gallery(): React.ReactElement | null {
         formData.append("description", description);
         formData.append("date", currentDate.toISOString());
 
+        // Create an AbortController for this request
+        const abortController = new AbortController();
+
         try {
             const token = await getAccessTokenSilently({
                 authorizationParams: {
@@ -425,6 +557,7 @@ export default function Gallery(): React.ReactElement | null {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    signal: abortController.signal,
                 }
             );
 
@@ -467,16 +600,26 @@ export default function Gallery(): React.ReactElement | null {
             setImageFile(null);
             handleCloseModal();
         } catch (err: any) {
-            if (err.message.includes("Missing Refresh Token")) {
-                setUploadError(
-                    "Authentication error: Missing refresh token. Please login to resolve the issue. If already logged in, try logging out and then logging back in."
-                );
-            } else {
-                setUploadError(err.message || "An unexpected error occurred");
+            // Don't set error if the request was aborted
+            if (err.name !== "AbortError") {
+                if (err.message.includes("Missing Refresh Token")) {
+                    setUploadError(
+                        "Authentication error: Missing refresh token. Please login to resolve the issue. If already logged in, try logging out and then logging back in."
+                    );
+                } else {
+                    setUploadError(
+                        err.message || "An unexpected error occurred"
+                    );
+                }
             }
         } finally {
             setUploading(false);
         }
+
+        // Return abort function for cleanup
+        return () => {
+            abortController.abort();
+        };
     };
 
     const handleOpenDeleteModal = (imageId: string, imageUrl: string) => {
@@ -496,13 +639,16 @@ export default function Gallery(): React.ReactElement | null {
         setDeletingImageId(id);
         setDeleteError(null);
 
-        const token = await getAccessTokenSilently({
-            authorizationParams: {
-                audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
-            },
-        });
+        // Create an AbortController for this request
+        const abortController = new AbortController();
 
         try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`,
                 {
@@ -510,6 +656,7 @@ export default function Gallery(): React.ReactElement | null {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    signal: abortController.signal,
                 }
             );
 
@@ -522,14 +669,22 @@ export default function Gallery(): React.ReactElement | null {
             setFetchedImages((prev) => prev.filter((img) => img.id !== id));
             delete imageCache.current[src];
         } catch (error: any) {
-            setDeleteError(
-                error.message ||
-                    "An unexpected error occurred while deleting the post."
-            );
+            // Don't set error if the request was aborted
+            if (error.name !== "AbortError") {
+                setDeleteError(
+                    error.message ||
+                        "An unexpected error occurred while deleting the post."
+                );
+            }
         } finally {
             setDeletingImageId(null);
             handleCloseDeleteModal();
         }
+
+        // Return abort function for cleanup
+        return () => {
+            abortController.abort();
+        };
     };
 
     return (
@@ -699,7 +854,8 @@ export default function Gallery(): React.ReactElement | null {
                                                 </IconButton>
                                             )}
                                         {deleteError &&
-                                            deletingImageId === imageData?.id && (
+                                            deletingImageId ===
+                                                imageData?.id && (
                                                 <Box
                                                     sx={{
                                                         position: "absolute",
@@ -744,7 +900,8 @@ export default function Gallery(): React.ReactElement | null {
                                                     color: "white",
                                                     padding: 2,
                                                     opacity: 0,
-                                                    transition: "opacity 0.2s ease",
+                                                    transition:
+                                                        "opacity 0.2s ease",
                                                 }}
                                             >
                                                 {imageData.text && (
@@ -874,9 +1031,7 @@ export default function Gallery(): React.ReactElement | null {
                     cancelText="Cancel"
                     cancelColor="secondary"
                     titleColor="primary.main"
-                    isConfirmDisabled={
-                        !imageFile || uploading || !text.trim()
-                    }
+                    isConfirmDisabled={!imageFile || uploading || !text.trim()}
                     children={
                         <Box sx={{ p: 2 }}>
                             <TextField
@@ -891,9 +1046,7 @@ export default function Gallery(): React.ReactElement | null {
                                 fullWidth
                                 label="Description"
                                 value={description}
-                                onChange={(e) =>
-                                    setDescription(e.target.value)
-                                }
+                                onChange={(e) => setDescription(e.target.value)}
                                 multiline
                                 rows={3}
                                 sx={{ mb: 2 }}
@@ -946,8 +1099,8 @@ export default function Gallery(): React.ReactElement | null {
                     children={
                         <Box sx={{ p: 2 }}>
                             <Typography>
-                                Are you sure you want to delete this image?
-                                This action cannot be undone.
+                                Are you sure you want to delete this image? This
+                                action cannot be undone.
                             </Typography>
                         </Box>
                     }
