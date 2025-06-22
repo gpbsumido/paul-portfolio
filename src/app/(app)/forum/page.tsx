@@ -348,6 +348,8 @@ export default function ForumPage() {
                                     init={{
                                         height: 300,
                                         menubar: false,
+                                        skin: "oxide-dark",
+                                        content_css: "dark",
                                         plugins: [
                                             "advlist",
                                             "autolink",
@@ -373,8 +375,22 @@ export default function ForumPage() {
                                             "bold italic forecolor | alignleft aligncenter " +
                                             "alignright alignjustify | bullist numlist outdent indent | " +
                                             "removeformat | help",
-                                        content_style:
-                                            "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                                        content_style: `
+                                            body { 
+                                                font-family: Helvetica, Arial, sans-serif; 
+                                                font-size: 14px;
+                                                background-color: #1e1e1e !important;
+                                                color: #ffffff !important;
+                                            }
+                                            p { color: #ffffff !important; }
+                                            h1, h2, h3, h4, h5, h6 { color: #ffffff !important; }
+                                            a { color: #4fc3f7 !important; }
+                                            ul, ol { color: #ffffff !important; }
+                                            blockquote { 
+                                                border-left: 3px solid #4fc3f7 !important;
+                                                color: #cccccc !important;
+                                            }
+                                        `,
                                     }}
                                 />
                             </Box>
