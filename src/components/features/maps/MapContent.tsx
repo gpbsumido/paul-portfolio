@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme, Button, Alert } from "@mui/material";
 import { ApiMarker, CustomMarker, MapContentProps } from "@/types/maps";
 import { MapControls } from "./controls/MapControls";
 import { CurrentLocationMarker } from "../markers/CurrentLocationMarker";
@@ -13,6 +13,8 @@ import { LocationsTable } from "../tables/LocationsTable";
 import { RouteManager } from "../routes/RouteManager";
 import InfoIcon from "@mui/icons-material/Info";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { useAuth0 } from "@auth0/auth0-react";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 export default function MapContent({ location }: MapContentProps) {
     const theme = useTheme();
@@ -330,167 +332,169 @@ export default function MapContent({ location }: MapContentProps) {
     }
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                gap: 2,
-            }}
-        >
+        <ErrorBoundary>
             <Box
-                sx={{
-                    position: "relative",
-                    height: { xs: "35vh", sm: "40vh" },
-                }}
-            >
-                <div
-                    ref={mapContainer}
-                    style={{ width: "100%", height: "100%" }}
-                />
-                <MapControls
-                    showCurrentLocation={showCurrentLocation}
-                    setShowCurrentLocation={setShowCurrentLocation}
-                />
-                {showCurrentLocation && (
-                    <CurrentLocationMarker
-                        lngLat={[location.lng, location.lat]}
-                        onSave={() => setIsCurrentLocationForm(true)}
-                        map={map.current}
-                    />
-                )}
-                {markers.map((marker) => (
-                    <MapMarker
-                        key={marker.id}
-                        lngLat={marker.lngLat}
-                        text={marker.text}
-                        id={marker.id}
-                        onDelete={handleDeleteMarker}
-                        deletingMarkerId={deletingMarkerId}
-                        map={map.current}
-                        theme={theme.palette.mode}
-                    />
-                ))}
-                <MarkerForm
-                    position={newMarkerPosition}
-                    text={newMarkerText}
-                    isCurrentLocationForm={isCurrentLocationForm}
-                    error={error}
-                    loading={loading}
-                    onTextChange={setNewMarkerText}
-                    onCancel={() => {
-                        setNewMarkerPosition(null);
-                        setNewMarkerText("");
-                        setError(null);
-                        setIsCurrentLocationForm(false);
-                    }}
-                    onSave={handleSaveMarker}
-                />
-            </Box>
-            <Box
-                id="maps-data"
                 sx={{
                     display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
+                    flexDirection: "column",
+                    height: "100%",
                     gap: 2,
-                    height: { xs: "auto", md: "40vh" },
-                    flexWrap: "wrap",
-                    overflow: "auto",
                 }}
             >
                 <Box
-                    id="locations-box"
                     sx={{
-                        flex: 1,
-                        backgroundColor: "background.paper",
-                        borderRadius: 1,
-                        boxShadow: 1,
-                        p: 2,
-                        height: { xs: "auto", md: "100%" },
-                        display: "flex",
-                        flexDirection: "column",
+                        position: "relative",
+                        height: { xs: "35vh", sm: "40vh" },
                     }}
                 >
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            mb: 2,
-                        }}
-                    >
-                        <Typography
-                            variant="h6"
-                            gutterBottom
-                            sx={{
-                                whiteSpace: "nowrap",
-                                color: "text.primary",
-                            }}
-                        >
-                            Saved Locations
-                        </Typography>
-                        <InfoIcon
-                            fontSize="small"
-                            sx={{ mr: 1, color: "text.secondary" }}
-                            data-tooltip-id="info-tooltip"
-                            data-tooltip-content="Click on the map to add a marker. Use the form to save it or cancel. You can also delete saved markers from the table below."
+                    <div
+                        ref={mapContainer}
+                        style={{ width: "100%", height: "100%" }}
+                    />
+                    <MapControls
+                        showCurrentLocation={showCurrentLocation}
+                        setShowCurrentLocation={setShowCurrentLocation}
+                    />
+                    {showCurrentLocation && (
+                        <CurrentLocationMarker
+                            lngLat={[location.lng, location.lat]}
+                            onSave={() => setIsCurrentLocationForm(true)}
+                            map={map.current}
                         />
-                        <ReactTooltip id="info-tooltip" place="top" />
-                    </Box>
-                    <Box sx={{ height: "100%", overflow: "auto" }}>
-                        {/* Ensure LocationsTable fills the remaining height */}
-                        <LocationsTable
-                            locations={markers.map((marker) => ({
-                                id: marker.id,
-                                text: marker.text,
-                                latitude: marker.lngLat[1],
-                                longitude: marker.lngLat[0],
-                            }))}
+                    )}
+                    {markers.map((marker) => (
+                        <MapMarker
+                            key={marker.id}
+                            lngLat={marker.lngLat}
+                            text={marker.text}
+                            id={marker.id}
                             onDelete={handleDeleteMarker}
                             deletingMarkerId={deletingMarkerId}
+                            map={map.current}
+                            theme={theme.palette.mode}
                         />
-                    </Box>
+                    ))}
+                    <MarkerForm
+                        position={newMarkerPosition}
+                        text={newMarkerText}
+                        isCurrentLocationForm={isCurrentLocationForm}
+                        error={error}
+                        loading={loading}
+                        onTextChange={setNewMarkerText}
+                        onCancel={() => {
+                            setNewMarkerPosition(null);
+                            setNewMarkerText("");
+                            setError(null);
+                            setIsCurrentLocationForm(false);
+                        }}
+                        onSave={handleSaveMarker}
+                    />
                 </Box>
                 <Box
+                    id="maps-data"
                     sx={{
-                        flex: 1,
                         display: "flex",
-                        flexDirection: "column",
-                        height: { xs: "auto", md: "100%" },
-                        backgroundColor: "background.paper",
-                        borderRadius: 1,
-                        boxShadow: 1,
-                        p: 2,
+                        flexDirection: { xs: "column", md: "row" },
+                        gap: 2,
+                        height: { xs: "auto", md: "40vh" },
+                        flexWrap: "wrap",
+                        overflow: "auto",
                     }}
                 >
                     <Box
+                        id="locations-box"
                         sx={{
+                            flex: 1,
+                            backgroundColor: "background.paper",
+                            borderRadius: 1,
+                            boxShadow: 1,
+                            p: 2,
+                            height: { xs: "auto", md: "100%" },
                             display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            mb: 2,
+                            flexDirection: "column",
                         }}
                     >
-                        <Typography
-                            variant="h6"
-                            gutterBottom
+                        <Box
                             sx={{
-                                whiteSpace: "nowrap",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                mb: 2,
                             }}
                         >
-                            Route Planner
-                        </Typography>
-                        <InfoIcon
-                            fontSize="small"
-                            sx={{ mr: 1 }}
-                            data-tooltip-id="route-tooltip"
-                            data-tooltip-content="Click 'Plan Route' to start. Select two points on the map to create a route. You can change the travel mode or clear the route to start over."
-                        />
-                        <ReactTooltip id="route-tooltip" place="top" />
+                            <Typography
+                                variant="h6"
+                                gutterBottom
+                                sx={{
+                                    whiteSpace: "nowrap",
+                                    color: "text.primary",
+                                }}
+                            >
+                                Saved Locations
+                            </Typography>
+                            <InfoIcon
+                                fontSize="small"
+                                sx={{ mr: 1, color: "text.secondary" }}
+                                data-tooltip-id="info-tooltip"
+                                data-tooltip-content="Click on the map to add a marker. Use the form to save it or cancel. You can also delete saved markers from the table below."
+                            />
+                            <ReactTooltip id="info-tooltip" place="top" />
+                        </Box>
+                        <Box sx={{ height: "100%", overflow: "auto" }}>
+                            {/* Ensure LocationsTable fills the remaining height */}
+                            <LocationsTable
+                                locations={markers.map((marker) => ({
+                                    id: marker.id,
+                                    text: marker.text,
+                                    latitude: marker.lngLat[1],
+                                    longitude: marker.lngLat[0],
+                                }))}
+                                onDelete={handleDeleteMarker}
+                                deletingMarkerId={deletingMarkerId}
+                            />
+                        </Box>
                     </Box>
-                    {map.current && <RouteManager map={map.current} />}
+                    <Box
+                        sx={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            height: { xs: "auto", md: "100%" },
+                            backgroundColor: "background.paper",
+                            borderRadius: 1,
+                            boxShadow: 1,
+                            p: 2,
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                mb: 2,
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                gutterBottom
+                                sx={{
+                                    whiteSpace: "nowrap",
+                                }}
+                            >
+                                Route Planner
+                            </Typography>
+                            <InfoIcon
+                                fontSize="small"
+                                sx={{ mr: 1 }}
+                                data-tooltip-id="route-tooltip"
+                                data-tooltip-content="Click 'Plan Route' to start. Select two points on the map to create a route. You can change the travel mode or clear the route to start over."
+                            />
+                            <ReactTooltip id="route-tooltip" place="top" />
+                        </Box>
+                        {map.current && <RouteManager map={map.current} />}
+                    </Box>
                 </Box>
             </Box>
-        </Box>
+        </ErrorBoundary>
     );
 }

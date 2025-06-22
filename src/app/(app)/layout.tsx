@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-
 import { Auth0Provider } from "@auth0/auth0-react";
+import AuthContext from "@/contexts/AuthContext";
 
 interface RootLayoutProps {
     children: React.ReactNode;
@@ -26,18 +26,14 @@ export default function RootLayout({
             authorizationParams={{
                 redirect_uri:
                     typeof window !== "undefined"
-                        ? `${window.location.origin}`
+                        ? `${window.location.origin}/login`
                         : "",
                 audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
-            }}
-            onRedirectCallback={(appState) => {
-                const returnTo = appState?.returnTo || "/";
-                window.location.replace(returnTo);
             }}
             useRefreshTokens={true}
             cacheLocation="localstorage"
         >
-            {children}
+            <AuthContext>{children}</AuthContext>
         </Auth0Provider>
     );
 }

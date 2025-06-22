@@ -53,6 +53,7 @@ import FeedbackDialog from "@/components/medical-journal/FeedbackDialog";
 import { Feedback, LearningEntry } from "@/types/medical-journal";
 import JournalEntryDialog from "@/components/medical-journal/JournalEntryDialog";
 import SearchIcon from "@mui/icons-material/Search";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 // Extracted initial state for currentEntry
 const INITIAL_ENTRY: LearningEntry = {
@@ -327,13 +328,41 @@ export default function MedicalJournalPage() {
     };
 
     async function accessErrorHandler(error: any) {
-        console.error(error);
-        const redirectUrl = window.location.href;
-        logout({
-            logoutParams: {
-                returnTo: redirectUrl, // Return to the provided redirect URL or current location
-            },
-        });
+        console.error("Access error:", error);
+
+        try {
+            // Safely get the current URL, handling SSR cases
+            let redirectUrl: string;
+
+            if (typeof window !== "undefined" && window.location) {
+                redirectUrl = window.location.href;
+            } else {
+                // Fallback for SSR or when window.location is not available
+                redirectUrl = process.env.NEXT_PUBLIC_VERCEL_URL
+                    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/medical-journal`
+                    : "http://localhost:3009/medical-journal";
+            }
+
+            // Log the error for debugging
+            console.error("Redirecting to:", redirectUrl);
+
+            // Perform logout with proper error handling
+            await logout({
+                logoutParams: {
+                    returnTo: redirectUrl,
+                },
+            }).catch((logoutError) => {
+                console.error("Logout failed:", logoutError);
+                // If logout fails, we can't do much more, but at least log it
+                // The user will need to manually logout or refresh the page
+            });
+        } catch (handlerError) {
+            console.error("Error in accessErrorHandler:", handlerError);
+            // If everything fails, set an error message for the user
+            setErrorMessage(
+                "Authentication error. Please try logging out and logging back in."
+            );
+        }
     }
 
     const handleFetchEntries = async () => {
@@ -973,1095 +1002,394 @@ export default function MedicalJournalPage() {
     };
 
     return (
-        <Container maxWidth="lg">
-            {errorMessage && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                    {errorMessage}
-                </Alert>
-            )}
-            <FloatingPill hide={isEditDialogOpen || isFeedbackDialogOpen} />
-            <Box
-                sx={{
-                    position: "fixed",
-                    top: { xs: "8px", sm: "16px" },
-                    right: { xs: "8px", sm: "16px" },
-                    zIndex: 9999,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "48px",
-                }}
-            >
-                <LanguageSwitcher />
-            </Box>
-            <Box
-                sx={{
-                    position: "fixed",
-                    top: { xs: "8px", sm: "16px" },
-                    left: { xs: "8px", sm: "16px" },
-                    zIndex: 9999,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "48px",
-                }}
-            >
-                <HomeButton component={Link} href="/" />
-            </Box>
-            <Box
-                sx={{
-                    mt: 8,
-                    mb: 4,
-                    background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.1)}, ${alpha(theme.palette.secondary.main, 0.1)})`,
-                    borderRadius: 2,
-                    p: 4,
-                    boxShadow: theme.shadows[1],
-                }}
-            >
-                <Typography
-                    variant="h3"
-                    component="h1"
-                    gutterBottom
-                    align="center"
+        <ErrorBoundary>
+            <Container maxWidth="lg">
+                {errorMessage && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {errorMessage}
+                    </Alert>
+                )}
+                <FloatingPill hide={isEditDialogOpen || isFeedbackDialogOpen} />
+                <Box
                     sx={{
-                        fontWeight: 700,
-                        background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        minHeight: "3rem", // Ensure consistent height
+                        position: "fixed",
+                        top: { xs: "8px", sm: "16px" },
+                        right: { xs: "8px", sm: "16px" },
+                        zIndex: 9999,
                         display: "flex",
-                        alignItems: "center",
                         justifyContent: "center",
+                        alignItems: "center",
+                        height: "48px",
                     }}
                 >
-                    {t("medicalJournal.title")}
-                </Typography>
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-                    <Tabs
-                        value={activeTab}
-                        onChange={handleTabChange}
+                    <LanguageSwitcher />
+                </Box>
+                <Box
+                    sx={{
+                        position: "fixed",
+                        top: { xs: "8px", sm: "16px" },
+                        left: { xs: "8px", sm: "16px" },
+                        zIndex: 9999,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "48px",
+                    }}
+                >
+                    <HomeButton component={Link} href="/" />
+                </Box>
+                <Box
+                    sx={{
+                        mt: 8,
+                        mb: 4,
+                        background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.1)}, ${alpha(theme.palette.secondary.main, 0.1)})`,
+                        borderRadius: 2,
+                        p: 4,
+                        boxShadow: theme.shadows[1],
+                    }}
+                >
+                    <Typography
+                        variant="h3"
+                        component="h1"
+                        gutterBottom
+                        align="center"
                         sx={{
-                            "& .MuiTab-root": {
-                                minWidth: 120,
-                                fontWeight: 600,
-                            },
-                            flexWrap: "wrap",
-                            maxWidth: "100%",
-                            "& .MuiTabs-flexContainer": {
-                                flexWrap: "wrap",
-                                gap: 1,
-                            },
-                            "& .MuiTabs-indicator": {
-                                display: "none",
-                            },
-                            "& .Mui-selected": {
-                                color: theme.palette.primary.main,
-                                backgroundColor: alpha(
-                                    theme.palette.primary.main,
-                                    0.1
-                                ),
-                                borderRadius: 1,
-                            },
+                            fontWeight: 700,
+                            background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            minHeight: "3rem", // Ensure consistent height
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                         }}
                     >
-                        <Tab
-                            icon={<AssignmentIcon />}
-                            label={t("medicalJournal.objectivesTitle")}
-                            iconPosition="start"
-                        />
-                        {isAuthenticated && user && (
-                            <Tab
-                                icon={<TimelineIcon />}
-                                label={t("medicalJournal.encountersTitle")}
-                                iconPosition="start"
-                            />
-                        )}
-                        {isAuthenticated && user && (
-                            <Tab
-                                icon={<FeedbackIcon />}
-                                label="Feedback"
-                                iconPosition="start"
-                            />
-                        )}
-                    </Tabs>
-                </Box>
-                {!isAuthenticated && (
+                        {t("medicalJournal.title")}
+                    </Typography>
                     <Box
                         sx={{
                             display: "flex",
                             justifyContent: "center",
-                            mt: 2,
+                            mt: 3,
                         }}
                     >
-                        <Typography
-                            variant="body2"
+                        <Tabs
+                            value={activeTab}
+                            onChange={handleTabChange}
                             sx={{
-                                fontWeight: 500,
-                                color: theme.palette.text.secondary,
-                            }}
-                        >
-                            {t("medicalJournal.loginPrompt")}
-                        </Typography>
-                    </Box>
-                )}
-            </Box>
-            <Fade in={activeTab === 0}>
-                <Box
-                    sx={{ display: activeTab === 0 ? "block" : "none", mb: 4 }}
-                >
-                    {/* Learning Objectives Section */}
-                    <Grid container spacing={3}>
-                        {LEARNING_OBJECTIVES.map((category, index) => (
-                            <Grid item xs={12} sm={6} md={4} key={index}>
-                                <Card
-                                    sx={{
-                                        height: "100%",
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "space-between",
-                                        transition: "transform 0.2s",
-                                        "&:hover": {
-                                            transform: "translateY(-4px)",
-                                            boxShadow: theme.shadows[8],
-                                        },
-                                    }}
-                                >
-                                    <CardContent
-                                        sx={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            justifyContent: "space-between",
-                                            height: "100%",
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                mb: 2,
-                                                minHeight: {
-                                                    xs: "3rem",
-                                                    sm: "4rem",
-                                                },
-                                                gap: 2,
-                                            }}
-                                        >
-                                            {index === 0 && (
-                                                <PsychologyIcon
-                                                    sx={{
-                                                        mr: 1,
-                                                        color: theme.palette
-                                                            .primary.main,
-                                                        fontSize: "2rem",
-                                                    }}
-                                                />
-                                            )}
-                                            {index === 1 && (
-                                                <AutoStoriesIcon
-                                                    sx={{
-                                                        mr: 1,
-                                                        color: theme.palette
-                                                            .secondary.main,
-                                                        fontSize: "2rem",
-                                                    }}
-                                                />
-                                            )}
-                                            {index === 2 && (
-                                                <ChecklistIcon
-                                                    sx={{
-                                                        mr: 1,
-                                                        color: theme.palette
-                                                            .success.main,
-                                                        fontSize: "2rem",
-                                                    }}
-                                                />
-                                            )}
-                                            <Typography
-                                                variant="h6"
-                                                component="h2"
-                                                sx={{
-                                                    fontWeight: 600,
-                                                    fontSize: "1.25rem",
-                                                    flex: 1,
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                }}
-                                            >
-                                                {category.category}
-                                            </Typography>
-                                        </Box>
-                                        <Divider sx={{ mb: 2 }} />
-                                        <Box
-                                            component="ul"
-                                            sx={{
-                                                pl: 2,
-                                                m: 0,
-                                                listStyle: "none",
-                                                flexGrow: 1,
-                                            }}
-                                        >
-                                            {category.objectives.map(
-                                                (objective, objIndex) => (
-                                                    <Box
-                                                        component="li"
-                                                        key={objIndex}
-                                                        sx={{
-                                                            mb: 1.5,
-                                                            color: theme.palette
-                                                                .text.secondary,
-                                                            fontSize:
-                                                                "0.875rem",
-                                                            ...(objective.startsWith(
-                                                                "1."
-                                                            ) ||
-                                                            objective.startsWith(
-                                                                "2."
-                                                            ) ||
-                                                            objective.startsWith(
-                                                                "3."
-                                                            ) ||
-                                                            objective.startsWith(
-                                                                "4."
-                                                            ) ||
-                                                            objective.startsWith(
-                                                                "5."
-                                                            )
-                                                                ? {
-                                                                      color: theme
-                                                                          .palette
-                                                                          .text
-                                                                          .primary,
-                                                                      fontWeight: 600,
-                                                                      fontSize:
-                                                                          "1rem",
-                                                                      mt: 2,
-                                                                  }
-                                                                : {}),
-                                                            ...(objective === ""
-                                                                ? {
-                                                                      mb: 0.5,
-                                                                  }
-                                                                : {}),
-                                                            ...(objective.startsWith(
-                                                                "   •"
-                                                            )
-                                                                ? {
-                                                                      pl: 2,
-                                                                  }
-                                                                : {}),
-                                                        }}
-                                                    >
-                                                        {objective}
-                                                    </Box>
-                                                )
-                                            )}
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Box>
-            </Fade>
-
-            <Fade in={activeTab === 1}>
-                <Box sx={{ display: activeTab === 1 ? "block" : "none" }}>
-                    {/* Entries Table */}
-                    <Card
-                        sx={{
-                            mb: 4,
-                            overflow: "hidden",
-                            boxShadow: theme.shadows[3],
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                p: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                                gap: 2,
-                            }}
-                        >
-                            <Typography
-                                variant="h6"
-                                sx={{
+                                "& .MuiTab-root": {
+                                    minWidth: 120,
                                     fontWeight: 600,
-                                    whiteSpace: "nowrap",
-                                }}
-                            >
-                                {t("medicalJournal.clinicalEncountersTitle")}
-                            </Typography>
-
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        fontWeight: 500,
-                                        color: theme.palette.text.secondary,
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: {
-                                            xs: undefined,
-                                            md: 3,
-                                        },
-                                        WebkitBoxOrient: "vertical",
-                                    }}
-                                >
-                                    {t("medicalJournal.reflectionNote")}
-                                </Typography>
-                            </Box>
-                            <Tooltip
-                                title={t("medicalJournal.addEntryTooltip")}
-                            >
-                                <IconButton
-                                    color="primary"
-                                    onClick={() => setIsEditDialogOpen(true)}
-                                    sx={{
-                                        borderRadius: 2,
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <AddIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                        <Box
-                            sx={{
-                                p: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                                gap: 2,
+                                },
                                 flexWrap: "wrap",
+                                maxWidth: "100%",
+                                "& .MuiTabs-flexContainer": {
+                                    flexWrap: "wrap",
+                                    gap: 1,
+                                },
+                                "& .MuiTabs-indicator": {
+                                    display: "none",
+                                },
+                                "& .Mui-selected": {
+                                    color: theme.palette.primary.main,
+                                    backgroundColor: alpha(
+                                        theme.palette.primary.main,
+                                        0.1
+                                    ),
+                                    borderRadius: 1,
+                                },
                             }}
                         >
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 2,
-                                    flex: 1,
-                                    maxWidth: 400,
-                                }}
-                            >
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    placeholder="Search entries..."
-                                    value={searchTerm}
-                                    onChange={(e) =>
-                                        setSearchTerm(e.target.value)
-                                    }
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            handleSearch();
-                                        }
-                                    }}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <SearchIcon
-                                                    sx={{
-                                                        color: theme.palette
-                                                            .primary.main,
-                                                    }}
-                                                />
-                                            </InputAdornment>
-                                        ),
-                                        sx: {
-                                            borderRadius: 2,
-                                            backgroundColor: alpha(
-                                                theme.palette.background.paper,
-                                                0.8
-                                            ),
-                                            "&:hover": {
-                                                backgroundColor: alpha(
-                                                    theme.palette.background
-                                                        .paper,
-                                                    0.9
-                                                ),
-                                            },
-                                            "&.Mui-focused": {
-                                                backgroundColor:
-                                                    theme.palette.background
-                                                        .paper,
-                                            },
-                                        },
-                                    }}
+                            <Tab
+                                icon={<AssignmentIcon />}
+                                label={t("medicalJournal.objectivesTitle")}
+                                iconPosition="start"
+                            />
+                            {isAuthenticated && user && (
+                                <Tab
+                                    icon={<TimelineIcon />}
+                                    label={t("medicalJournal.encountersTitle")}
+                                    iconPosition="start"
                                 />
-                                <Button
-                                    variant="contained"
-                                    onClick={handleSearch}
-                                    disabled={isSearching}
-                                    startIcon={<SearchIcon />}
-                                    sx={{
-                                        textTransform: "none",
-                                        fontWeight: 500,
-                                        borderRadius: 2,
-                                        px: 3,
-                                        boxShadow: theme.shadows[1],
-                                        "&:hover": {
-                                            boxShadow: theme.shadows[2],
-                                        },
-                                    }}
-                                >
-                                    {isSearching ? "Searching..." : "Search"}
-                                </Button>
-                            </Box>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: 2,
-                                    justifyContent: "flex-start",
-                                }}
-                            >
-                                <DropdownComponent
-                                    title="Filter by Rotation"
-                                    titleLocation="left"
-                                    currentSelected={filters.rotation || ""}
-                                    items={[
-                                        {
-                                            label: "- No Filter -",
-                                            value: "",
-                                            key: "no-filter",
-                                        },
-                                        ...ROTATIONS.map((rotation) => ({
-                                            label: rotation,
-                                            value: rotation,
-                                            key: rotation,
-                                        })),
-                                    ]}
-                                    onChange={(value) => {
-                                        setFilters((prev) => ({
-                                            ...prev,
-                                            rotation: value,
-                                        }));
-                                        setPage(1); // Reset to first page when filter changes
-                                    }}
-                                    minWidth="12em"
+                            )}
+                            {isAuthenticated && user && (
+                                <Tab
+                                    icon={<FeedbackIcon />}
+                                    label="Feedback"
+                                    iconPosition="start"
                                 />
-                            </Box>
-                        </Box>
-                        <TableContainer sx={{ overflowX: "scroll" }}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                whiteSpace: "nowrap",
-                                            }} // Reduced width
-                                            onClick={() => handleSort("date")}
-                                        >
-                                            {t("medicalJournal.dateColumn")}{" "}
-                                            {sortField === "date" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                whiteSpace: "nowrap",
-                                            }} // Reduced width
-                                            onClick={() =>
-                                                handleSort("rotation")
-                                            }
-                                        >
-                                            {t("medicalJournal.rotationColumn")}{" "}
-                                            {sortField === "rotation" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                minWidth: 140,
-                                            }} // Reduced width
-                                            onClick={() =>
-                                                handleSort("patientSetting")
-                                            }
-                                        >
-                                            {t(
-                                                "medicalJournal.patientSettingColumn"
-                                            )}{" "}
-                                            {sortField === "patientSetting" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                minWidth: 140,
-                                            }} // Reduced width
-                                            onClick={() =>
-                                                handleSort("interaction")
-                                            }
-                                        >
-                                            {t(
-                                                "medicalJournal.interactionColumn"
-                                            )}{" "}
-                                            {sortField === "interaction" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                whiteSpace: "nowrap",
-                                            }} // Reduced width
-                                            onClick={() =>
-                                                handleSort("hospital")
-                                            }
-                                        >
-                                            {t("medicalJournal.hospitalColumn")}{" "}
-                                            {sortField === "hospital" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                whiteSpace: "nowrap",
-                                            }} // Reduced width
-                                            onClick={() => handleSort("doctor")}
-                                        >
-                                            {t("medicalJournal.doctorColumn")}{" "}
-                                            {sortField === "doctor" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                minWidth: 180,
-                                            }} // Reduced width
-                                            onClick={() =>
-                                                handleSort("canmedsRoles")
-                                            }
-                                        >
-                                            {t(
-                                                "medicalJournal.canmedsRolesColumn"
-                                            )}{" "}
-                                            {sortField === "canmedsRoles" &&
-                                                (sortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            align="right"
-                                            sx={{ whiteSpace: "nowrap" }}
-                                        >
-                                            {t("medicalJournal.actionsColumn")}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {paginatedEntries.map((entry) => (
-                                        <React.Fragment key={entry.id}>
-                                            <TableRow
-                                                key={`entry-${entry.id}`}
-                                                sx={{
-                                                    borderBottom: `1px solid ${theme.palette.divider}`,
-                                                    "&:hover": {
-                                                        backgroundColor: alpha(
-                                                            theme.palette
-                                                                .primary.main,
-                                                            0.04
-                                                        ),
-                                                    },
-                                                }}
-                                            >
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    {new Date(
-                                                        entry.date
-                                                    ).toLocaleDateString()}
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    <Chip
-                                                        label={entry.rotation}
-                                                        size="small"
-                                                        sx={{
-                                                            backgroundColor:
-                                                                alpha(
-                                                                    theme
-                                                                        .palette
-                                                                        .primary
-                                                                        .main,
-                                                                    0.1
-                                                                ),
-                                                            color: theme.palette
-                                                                .primary.main,
-                                                            fontWeight: 500,
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    <Box
-                                                        sx={{
-                                                            maxWidth: 200,
-                                                            overflow: "hidden",
-                                                            textOverflow:
-                                                                "ellipsis",
-                                                            display:
-                                                                "-webkit-box",
-                                                            WebkitLineClamp: 5,
-                                                            WebkitBoxOrient:
-                                                                "vertical",
-                                                        }}
-                                                    >
-                                                        {entry.patientSetting ||
-                                                            "N/A"}
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    <Box
-                                                        sx={{
-                                                            maxWidth: 200,
-                                                            overflow: "hidden",
-                                                            textOverflow:
-                                                                "ellipsis",
-                                                            display:
-                                                                "-webkit-box",
-                                                            WebkitLineClamp: 5,
-                                                            WebkitBoxOrient:
-                                                                "vertical",
-                                                        }}
-                                                    >
-                                                        {entry.interaction ||
-                                                            "N/A"}
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    {entry.hospital || "N/A"}
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    {entry.doctor || "N/A"}
-                                                </TableCell>
-                                                <TableCell
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            flexDirection:
-                                                                "column",
-                                                            flexWrap: "wrap",
-                                                            gap: 0.5,
-                                                        }}
-                                                    >
-                                                        {entry.canmedsRoles
-                                                            ?.length > 0
-                                                            ? entry.canmedsRoles.map(
-                                                                  (role) => (
-                                                                      <Chip
-                                                                          key={
-                                                                              role
-                                                                          }
-                                                                          label={
-                                                                              role
-                                                                          }
-                                                                          size="small"
-                                                                          sx={{
-                                                                              backgroundColor:
-                                                                                  alpha(
-                                                                                      getCanMEDSColor(
-                                                                                          role
-                                                                                      ),
-                                                                                      0.1
-                                                                                  ),
-                                                                              color: getCanMEDSColor(
-                                                                                  role
-                                                                              ),
-                                                                              fontWeight: 500,
-                                                                          }}
-                                                                      />
-                                                                  )
-                                                              )
-                                                            : "N/A"}
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell
-                                                    align="right"
-                                                    sx={{
-                                                        verticalAlign: "middle",
-                                                    }}
-                                                >
-                                                    <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            flexDirection:
-                                                                "column",
-                                                            gap: 1,
-                                                            justifyContent:
-                                                                "flex-end",
-                                                        }}
-                                                    >
-                                                        <Tooltip
-                                                            title={t(
-                                                                "medicalJournal.editEntryTooltip"
-                                                            )}
-                                                        >
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleEditEntry(
-                                                                        entry.id
-                                                                    )
-                                                                }
-                                                                size="small"
-                                                                sx={{
-                                                                    color: theme
-                                                                        .palette
-                                                                        .primary
-                                                                        .main,
-                                                                    "&:hover": {
-                                                                        backgroundColor:
-                                                                            alpha(
-                                                                                theme
-                                                                                    .palette
-                                                                                    .primary
-                                                                                    .main,
-                                                                                0.1
-                                                                            ),
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <EditIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip
-                                                            title={t(
-                                                                "medicalJournal.deleteEntryTooltip"
-                                                            )}
-                                                        >
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleDeleteEntry(
-                                                                        entry.id
-                                                                    )
-                                                                }
-                                                                size="small"
-                                                                sx={{
-                                                                    color: theme
-                                                                        .palette
-                                                                        .error
-                                                                        .main,
-                                                                    "&:hover": {
-                                                                        backgroundColor:
-                                                                            alpha(
-                                                                                theme
-                                                                                    .palette
-                                                                                    .error
-                                                                                    .main,
-                                                                                0.1
-                                                                            ),
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={() =>
-                                                                toggleRowExpansion(
-                                                                    entry.id
-                                                                )
-                                                            }
-                                                        >
-                                                            {expandedRow ===
-                                                            entry.id ? (
-                                                                <KeyboardArrowUpIcon />
-                                                            ) : (
-                                                                <KeyboardArrowDownIcon />
-                                                            )}
-                                                        </IconButton>
-                                                    </Box>
-                                                </TableCell>
-                                            </TableRow>
-                                            {expandedRow === entry.id && (
-                                                <TableRow
-                                                    key={`expanded-${entry.id}`}
-                                                >
-                                                    <TableCell
-                                                        colSpan={8}
-                                                        sx={{
-                                                            backgroundColor:
-                                                                alpha(
-                                                                    theme
-                                                                        .palette
-                                                                        .primary
-                                                                        .main,
-                                                                    0.05
-                                                                ),
-                                                            p: 2,
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                Patient Setting:
-                                                            </strong>{" "}
-                                                            {entry.patientSetting ||
-                                                                "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                Interaction:
-                                                            </strong>{" "}
-                                                            {entry.interaction ||
-                                                                "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                Hospital:
-                                                            </strong>{" "}
-                                                            {entry.hospital ||
-                                                                "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                Doctor:
-                                                            </strong>{" "}
-                                                            {entry.doctor ||
-                                                                "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                CanMEDS Roles:
-                                                            </strong>{" "}
-                                                            {entry.canmedsRoles?.join(
-                                                                ", "
-                                                            ) || "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                Learning
-                                                                Objectives:
-                                                            </strong>{" "}
-                                                            {entry.learningObjectives?.join(
-                                                                ", "
-                                                            ) || "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                What I Did Well:
-                                                            </strong>{" "}
-                                                            {entry.whatIDidWell ||
-                                                                "N/A"}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                mb: 1,
-                                                            }}
-                                                        >
-                                                            <strong>
-                                                                What I Could
-                                                                Improve:
-                                                            </strong>{" "}
-                                                            {entry.whatICouldImprove ||
-                                                                "N/A"}
-                                                        </Typography>
-                                                        {entry.feedback && (
-                                                            <Typography
-                                                                variant="body2"
-                                                                sx={{
-                                                                    fontWeight: 500,
-                                                                    mb: 1,
-                                                                    mt: 2,
-                                                                }}
-                                                            >
-                                                                <strong>
-                                                                    Feedback:
-                                                                </strong>{" "}
-                                                                {entry.feedback
-                                                                    .map(
-                                                                        (f) =>
-                                                                            f.text
-                                                                    )
-                                                                    .join(", ")}
-                                                            </Typography>
-                                                        )}
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                            )}
+                        </Tabs>
+                    </Box>
+                    {!isAuthenticated && (
                         <Box
                             sx={{
                                 display: "flex",
                                 justifyContent: "center",
-                                my: 2,
-                            }}
-                        >
-                            <Pagination
-                                count={Math.ceil(
-                                    filteredAndSortedEntries.length / limit
-                                )}
-                                page={page}
-                                onChange={handlePageChange}
-                                showFirstButton
-                                showLastButton
-                                siblingCount={1}
-                                boundaryCount={1}
-                                color="primary"
-                                size="large"
-                                variant="outlined"
-                                shape="rounded"
-                            />
-                        </Box>
-                    </Card>
-                </Box>
-            </Fade>
-
-            <Fade in={activeTab === 2}>
-                <Box sx={{ display: activeTab === 2 ? "block" : "none" }}>
-                    <Card sx={{ mb: 4 }}>
-                        <Box
-                            sx={{
-                                p: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                                gap: 2,
+                                mt: 2,
                             }}
                         >
                             <Typography
-                                variant="h6"
+                                variant="body2"
                                 sx={{
-                                    fontWeight: 600,
-                                    whiteSpace: "nowrap",
+                                    fontWeight: 500,
+                                    color: theme.palette.text.secondary,
                                 }}
                             >
-                                Feedback
+                                {t("medicalJournal.loginPrompt")}
                             </Typography>
-                            <Tooltip
-                                title={t("medicalJournal.addEntryTooltip")}
-                            >
-                                <IconButton
-                                    color="primary"
-                                    onClick={() => {
-                                        setSelectedFeedback(null);
-                                        setIsFeedbackDialogOpen(true);
-                                    }}
-                                    sx={{
-                                        borderRadius: 2,
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <AddIcon />
-                                </IconButton>
-                            </Tooltip>
                         </Box>
-                        <Box
+                    )}
+                </Box>
+                <Fade in={activeTab === 0}>
+                    <Box
+                        sx={{
+                            display: activeTab === 0 ? "block" : "none",
+                            mb: 4,
+                        }}
+                    >
+                        {/* Learning Objectives Section */}
+                        <Grid container spacing={3}>
+                            {LEARNING_OBJECTIVES.map((category, index) => (
+                                <Grid item xs={12} sm={6} md={4} key={index}>
+                                    <Card
+                                        sx={{
+                                            height: "100%",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "space-between",
+                                            transition: "transform 0.2s",
+                                            "&:hover": {
+                                                transform: "translateY(-4px)",
+                                                boxShadow: theme.shadows[8],
+                                            },
+                                        }}
+                                    >
+                                        <CardContent
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                justifyContent: "space-between",
+                                                height: "100%",
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    mb: 2,
+                                                    minHeight: {
+                                                        xs: "3rem",
+                                                        sm: "4rem",
+                                                    },
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                {index === 0 && (
+                                                    <PsychologyIcon
+                                                        sx={{
+                                                            mr: 1,
+                                                            color: theme.palette
+                                                                .primary.main,
+                                                            fontSize: "2rem",
+                                                        }}
+                                                    />
+                                                )}
+                                                {index === 1 && (
+                                                    <AutoStoriesIcon
+                                                        sx={{
+                                                            mr: 1,
+                                                            color: theme.palette
+                                                                .secondary.main,
+                                                            fontSize: "2rem",
+                                                        }}
+                                                    />
+                                                )}
+                                                {index === 2 && (
+                                                    <ChecklistIcon
+                                                        sx={{
+                                                            mr: 1,
+                                                            color: theme.palette
+                                                                .success.main,
+                                                            fontSize: "2rem",
+                                                        }}
+                                                    />
+                                                )}
+                                                <Typography
+                                                    variant="h6"
+                                                    component="h2"
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                        fontSize: "1.25rem",
+                                                        flex: 1,
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    {category.category}
+                                                </Typography>
+                                            </Box>
+                                            <Divider sx={{ mb: 2 }} />
+                                            <Box
+                                                component="ul"
+                                                sx={{
+                                                    pl: 2,
+                                                    m: 0,
+                                                    listStyle: "none",
+                                                    flexGrow: 1,
+                                                }}
+                                            >
+                                                {category.objectives.map(
+                                                    (objective, objIndex) => (
+                                                        <Box
+                                                            component="li"
+                                                            key={objIndex}
+                                                            sx={{
+                                                                mb: 1.5,
+                                                                color: theme
+                                                                    .palette
+                                                                    .text
+                                                                    .secondary,
+                                                                fontSize:
+                                                                    "0.875rem",
+                                                                ...(objective.startsWith(
+                                                                    "1."
+                                                                ) ||
+                                                                objective.startsWith(
+                                                                    "2."
+                                                                ) ||
+                                                                objective.startsWith(
+                                                                    "3."
+                                                                ) ||
+                                                                objective.startsWith(
+                                                                    "4."
+                                                                ) ||
+                                                                objective.startsWith(
+                                                                    "5."
+                                                                )
+                                                                    ? {
+                                                                          color: theme
+                                                                              .palette
+                                                                              .text
+                                                                              .primary,
+                                                                          fontWeight: 600,
+                                                                          fontSize:
+                                                                              "1rem",
+                                                                          mt: 2,
+                                                                      }
+                                                                    : {}),
+                                                                ...(objective ===
+                                                                ""
+                                                                    ? {
+                                                                          mb: 0.5,
+                                                                      }
+                                                                    : {}),
+                                                                ...(objective.startsWith(
+                                                                    "   •"
+                                                                )
+                                                                    ? {
+                                                                          pl: 2,
+                                                                      }
+                                                                    : {}),
+                                                            }}
+                                                        >
+                                                            {objective}
+                                                        </Box>
+                                                    )
+                                                )}
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                </Fade>
+
+                <Fade in={activeTab === 1}>
+                    <Box sx={{ display: activeTab === 1 ? "block" : "none" }}>
+                        {/* Entries Table */}
+                        <Card
                             sx={{
-                                p: 2,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                                gap: 2,
-                                flexWrap: "wrap",
+                                mb: 4,
+                                overflow: "hidden",
+                                boxShadow: theme.shadows[3],
                             }}
                         >
                             <Box
                                 sx={{
+                                    p: 2,
                                     display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: 2,
                                     justifyContent: "space-between",
+                                    alignItems: "center",
+                                    background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                    borderBottom: `1px solid ${theme.palette.divider}`,
+                                    gap: 2,
+                                }}
+                            >
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    {t(
+                                        "medicalJournal.clinicalEncountersTitle"
+                                    )}
+                                </Typography>
+
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            fontWeight: 500,
+                                            color: theme.palette.text.secondary,
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            display: "-webkit-box",
+                                            WebkitLineClamp: {
+                                                xs: undefined,
+                                                md: 3,
+                                            },
+                                            WebkitBoxOrient: "vertical",
+                                        }}
+                                    >
+                                        {t("medicalJournal.reflectionNote")}
+                                    </Typography>
+                                </Box>
+                                <Tooltip
+                                    title={t("medicalJournal.addEntryTooltip")}
+                                >
+                                    <IconButton
+                                        color="primary"
+                                        onClick={() =>
+                                            setIsEditDialogOpen(true)
+                                        }
+                                        sx={{
+                                            borderRadius: 2,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        <AddIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                    borderBottom: `1px solid ${theme.palette.divider}`,
+                                    gap: 2,
+                                    flexWrap: "wrap",
                                 }}
                             >
                                 <Box
@@ -2069,23 +1397,21 @@ export default function MedicalJournalPage() {
                                         display: "flex",
                                         alignItems: "center",
                                         gap: 2,
-                                        width: "100%",
+                                        flex: 1,
                                         maxWidth: 400,
                                     }}
                                 >
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        placeholder="Search feedback..."
-                                        value={feedbackSearchTerm}
+                                        placeholder="Search entries..."
+                                        value={searchTerm}
                                         onChange={(e) =>
-                                            setFeedbackSearchTerm(
-                                                e.target.value
-                                            )
+                                            setSearchTerm(e.target.value)
                                         }
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter") {
-                                                handleFeedbackSearch();
+                                                handleSearch();
                                             }
                                         }}
                                         InputProps={{
@@ -2123,8 +1449,8 @@ export default function MedicalJournalPage() {
                                     />
                                     <Button
                                         variant="contained"
-                                        onClick={handleFeedbackSearch}
-                                        disabled={isFeedbackSearching}
+                                        onClick={handleSearch}
+                                        disabled={isSearching}
                                         startIcon={<SearchIcon />}
                                         sx={{
                                             textTransform: "none",
@@ -2137,558 +1463,1341 @@ export default function MedicalJournalPage() {
                                             },
                                         }}
                                     >
-                                        {isFeedbackSearching
+                                        {isSearching
                                             ? "Searching..."
                                             : "Search"}
                                     </Button>
                                 </Box>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 2,
+                                        justifyContent: "flex-start",
+                                    }}
+                                >
+                                    <DropdownComponent
+                                        title="Filter by Rotation"
+                                        titleLocation="left"
+                                        currentSelected={filters.rotation || ""}
+                                        items={[
+                                            {
+                                                label: "- No Filter -",
+                                                value: "",
+                                                key: "no-filter",
+                                            },
+                                            ...ROTATIONS.map((rotation) => ({
+                                                label: rotation,
+                                                value: rotation,
+                                                key: rotation,
+                                            })),
+                                        ]}
+                                        onChange={(value) => {
+                                            setFilters((prev) => ({
+                                                ...prev,
+                                                rotation: value,
+                                            }));
+                                            setPage(1); // Reset to first page when filter changes
+                                        }}
+                                        minWidth="12em"
+                                    />
+                                </Box>
                             </Box>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: 2,
-                                    justifyContent: "flex-start",
-                                }}
-                            >
-                                <DropdownComponent
-                                    title="Filter by Rotation"
-                                    titleLocation="left"
-                                    currentSelected={feedbackRotationFilter}
-                                    items={[
-                                        {
-                                            label: "- No Filter -",
-                                            value: "",
-                                            key: "no-filter",
-                                        },
-                                        ...ROTATIONS.map((rotation) => ({
-                                            label: rotation,
-                                            value: rotation,
-                                            key: rotation,
-                                        })),
-                                    ]}
-                                    onChange={setFeedbackRotationFilter}
-                                    minWidth="12em"
-                                />
-                            </Box>
-                        </Box>
-                        <TableContainer sx={{ overflowX: "scroll" }}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                width: "70%",
-                                            }}
-                                            onClick={() =>
-                                                handleFeedbackSort("text")
-                                            }
-                                        >
-                                            Feedback{" "}
-                                            {feedbackSortField === "text" &&
-                                                (feedbackSortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                cursor: "pointer",
-                                                width: "15%",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                            onClick={() =>
-                                                handleFeedbackSort("rotation")
-                                            }
-                                        >
-                                            Rotation{" "}
-                                            {feedbackSortField === "rotation" &&
-                                                (feedbackSortOrder === "asc"
-                                                    ? "↑"
-                                                    : "↓")}
-                                        </TableCell>
-                                        <TableCell
-                                            sx={{
-                                                width: "15%",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                        >
-                                            Actions
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {filteredAndSortedFeedbacks.map(
-                                        (feedback) => (
-                                            <React.Fragment key={feedback.id}>
+                            <TableContainer sx={{ overflowX: "scroll" }}>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    whiteSpace: "nowrap",
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("date")
+                                                }
+                                            >
+                                                {t("medicalJournal.dateColumn")}{" "}
+                                                {sortField === "date" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    whiteSpace: "nowrap",
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("rotation")
+                                                }
+                                            >
+                                                {t(
+                                                    "medicalJournal.rotationColumn"
+                                                )}{" "}
+                                                {sortField === "rotation" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    minWidth: 140,
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("patientSetting")
+                                                }
+                                            >
+                                                {t(
+                                                    "medicalJournal.patientSettingColumn"
+                                                )}{" "}
+                                                {sortField ===
+                                                    "patientSetting" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    minWidth: 140,
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("interaction")
+                                                }
+                                            >
+                                                {t(
+                                                    "medicalJournal.interactionColumn"
+                                                )}{" "}
+                                                {sortField === "interaction" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    whiteSpace: "nowrap",
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("hospital")
+                                                }
+                                            >
+                                                {t(
+                                                    "medicalJournal.hospitalColumn"
+                                                )}{" "}
+                                                {sortField === "hospital" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    whiteSpace: "nowrap",
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("doctor")
+                                                }
+                                            >
+                                                {t(
+                                                    "medicalJournal.doctorColumn"
+                                                )}{" "}
+                                                {sortField === "doctor" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    minWidth: 180,
+                                                }} // Reduced width
+                                                onClick={() =>
+                                                    handleSort("canmedsRoles")
+                                                }
+                                            >
+                                                {t(
+                                                    "medicalJournal.canmedsRolesColumn"
+                                                )}{" "}
+                                                {sortField === "canmedsRoles" &&
+                                                    (sortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                align="right"
+                                                sx={{ whiteSpace: "nowrap" }}
+                                            >
+                                                {t(
+                                                    "medicalJournal.actionsColumn"
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {paginatedEntries.map((entry) => (
+                                            <React.Fragment key={entry.id}>
                                                 <TableRow
-                                                    hover
+                                                    key={`entry-${entry.id}`}
                                                     sx={{
+                                                        borderBottom: `1px solid ${theme.palette.divider}`,
                                                         "&:hover": {
                                                             backgroundColor:
                                                                 alpha(
                                                                     theme
                                                                         .palette
-                                                                        .action
-                                                                        .hover,
+                                                                        .primary
+                                                                        .main,
                                                                     0.04
                                                                 ),
                                                         },
                                                     }}
                                                 >
-                                                    <TableCell className="feedback-text-cell">
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
+                                                        {new Date(
+                                                            entry.date
+                                                        ).toLocaleDateString()}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
+                                                        <Chip
+                                                            label={
+                                                                entry.rotation
+                                                            }
+                                                            size="small"
+                                                            sx={{
+                                                                backgroundColor:
+                                                                    alpha(
+                                                                        theme
+                                                                            .palette
+                                                                            .primary
+                                                                            .main,
+                                                                        0.1
+                                                                    ),
+                                                                color: theme
+                                                                    .palette
+                                                                    .primary
+                                                                    .main,
+                                                                fontWeight: 500,
+                                                            }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
                                                         <Box
                                                             sx={{
-                                                                display: "flex",
-                                                                alignItems:
-                                                                    "center",
-                                                                gap: 1,
-                                                            }}
-                                                        >
-                                                            <Typography
-                                                                sx={{
-                                                                    display:
-                                                                        "-webkit-box",
-                                                                    WebkitLineClamp:
-                                                                        expandedFeedbackText ===
-                                                                        feedback.id
-                                                                            ? undefined
-                                                                            : 3,
-                                                                    WebkitBoxOrient:
-                                                                        "vertical",
-                                                                    overflow:
-                                                                        "hidden",
-                                                                    flex: 1,
-                                                                }}
-                                                            >
-                                                                {feedback.text}
-                                                            </Typography>
-                                                            {needsTruncation[
-                                                                feedback.id
-                                                            ] && (
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={(
-                                                                        e
-                                                                    ) => {
-                                                                        e.stopPropagation();
-                                                                        setExpandedFeedbackText(
-                                                                            expandedFeedbackText ===
-                                                                                feedback.id
-                                                                                ? null
-                                                                                : feedback.id
-                                                                        );
-                                                                    }}
-                                                                    sx={{
-                                                                        transform:
-                                                                            expandedFeedbackText ===
-                                                                            feedback.id
-                                                                                ? "rotate(180deg)"
-                                                                                : "none",
-                                                                        transition:
-                                                                            "transform 0.2s",
-                                                                        p: 0.5,
-                                                                    }}
-                                                                >
-                                                                    <KeyboardArrowDownIcon fontSize="small" />
-                                                                </IconButton>
-                                                            )}
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Typography
-                                                            sx={{
-                                                                whiteSpace:
-                                                                    "nowrap",
+                                                                maxWidth: 200,
                                                                 overflow:
                                                                     "hidden",
                                                                 textOverflow:
                                                                     "ellipsis",
+                                                                display:
+                                                                    "-webkit-box",
+                                                                WebkitLineClamp: 5,
+                                                                WebkitBoxOrient:
+                                                                    "vertical",
                                                             }}
                                                         >
-                                                            {feedback.rotation}
-                                                        </Typography>
+                                                            {entry.patientSetting ||
+                                                                "N/A"}
+                                                        </Box>
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
+                                                        <Box
+                                                            sx={{
+                                                                maxWidth: 200,
+                                                                overflow:
+                                                                    "hidden",
+                                                                textOverflow:
+                                                                    "ellipsis",
+                                                                display:
+                                                                    "-webkit-box",
+                                                                WebkitLineClamp: 5,
+                                                                WebkitBoxOrient:
+                                                                    "vertical",
+                                                            }}
+                                                        >
+                                                            {entry.interaction ||
+                                                                "N/A"}
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
+                                                        {entry.hospital ||
+                                                            "N/A"}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
+                                                        {entry.doctor || "N/A"}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
                                                         <Box
                                                             sx={{
                                                                 display: "flex",
-                                                                gap: 1,
-                                                                alignItems:
-                                                                    "center",
-                                                                justifyContent:
-                                                                    "flex-start",
+                                                                flexDirection:
+                                                                    "column",
+                                                                flexWrap:
+                                                                    "wrap",
+                                                                gap: 0.5,
                                                             }}
                                                         >
-                                                            <IconButton
-                                                                onClick={(
-                                                                    e
-                                                                ) => {
-                                                                    e.stopPropagation();
-                                                                    setSelectedFeedback(
-                                                                        feedback
-                                                                    );
-                                                                    setIsFeedbackDialogOpen(
-                                                                        true
-                                                                    );
-                                                                }}
-                                                                size="small"
+                                                            {entry.canmedsRoles
+                                                                ?.length > 0
+                                                                ? entry.canmedsRoles.map(
+                                                                      (
+                                                                          role
+                                                                      ) => (
+                                                                          <Chip
+                                                                              key={
+                                                                                  role
+                                                                              }
+                                                                              label={
+                                                                                  role
+                                                                              }
+                                                                              size="small"
+                                                                              sx={{
+                                                                                  backgroundColor:
+                                                                                      alpha(
+                                                                                          getCanMEDSColor(
+                                                                                              role
+                                                                                          ),
+                                                                                          0.1
+                                                                                      ),
+                                                                                  color: getCanMEDSColor(
+                                                                                      role
+                                                                                  ),
+                                                                                  fontWeight: 500,
+                                                                              }}
+                                                                          />
+                                                                      )
+                                                                  )
+                                                                : "N/A"}
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell
+                                                        align="right"
+                                                        sx={{
+                                                            verticalAlign:
+                                                                "middle",
+                                                        }}
+                                                    >
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                flexDirection:
+                                                                    "column",
+                                                                gap: 1,
+                                                                justifyContent:
+                                                                    "flex-end",
+                                                            }}
+                                                        >
+                                                            <Tooltip
+                                                                title={t(
+                                                                    "medicalJournal.editEntryTooltip"
+                                                                )}
                                                             >
-                                                                <EditIcon />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                onClick={(
-                                                                    e
-                                                                ) => {
-                                                                    e.stopPropagation();
-                                                                    handleDeleteFeedback(
-                                                                        feedback.id
-                                                                    );
-                                                                }}
-                                                                size="small"
-                                                                color="error"
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleEditEntry(
+                                                                            entry.id
+                                                                        )
+                                                                    }
+                                                                    size="small"
+                                                                    sx={{
+                                                                        color: theme
+                                                                            .palette
+                                                                            .primary
+                                                                            .main,
+                                                                        "&:hover":
+                                                                            {
+                                                                                backgroundColor:
+                                                                                    alpha(
+                                                                                        theme
+                                                                                            .palette
+                                                                                            .primary
+                                                                                            .main,
+                                                                                        0.1
+                                                                                    ),
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip
+                                                                title={t(
+                                                                    "medicalJournal.deleteEntryTooltip"
+                                                                )}
                                                             >
-                                                                <DeleteIcon />
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleDeleteEntry(
+                                                                            entry.id
+                                                                        )
+                                                                    }
+                                                                    size="small"
+                                                                    sx={{
+                                                                        color: theme
+                                                                            .palette
+                                                                            .error
+                                                                            .main,
+                                                                        "&:hover":
+                                                                            {
+                                                                                backgroundColor:
+                                                                                    alpha(
+                                                                                        theme
+                                                                                            .palette
+                                                                                            .error
+                                                                                            .main,
+                                                                                        0.1
+                                                                                    ),
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() =>
+                                                                    toggleRowExpansion(
+                                                                        entry.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                {expandedRow ===
+                                                                entry.id ? (
+                                                                    <KeyboardArrowUpIcon />
+                                                                ) : (
+                                                                    <KeyboardArrowDownIcon />
+                                                                )}
                                                             </IconButton>
-                                                            {feedback.journal && (
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                                {expandedRow === entry.id && (
+                                                    <TableRow
+                                                        key={`expanded-${entry.id}`}
+                                                    >
+                                                        <TableCell
+                                                            colSpan={8}
+                                                            sx={{
+                                                                backgroundColor:
+                                                                    alpha(
+                                                                        theme
+                                                                            .palette
+                                                                            .primary
+                                                                            .main,
+                                                                        0.05
+                                                                    ),
+                                                                p: 2,
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    Patient
+                                                                    Setting:
+                                                                </strong>{" "}
+                                                                {entry.patientSetting ||
+                                                                    "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    Interaction:
+                                                                </strong>{" "}
+                                                                {entry.interaction ||
+                                                                    "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    Hospital:
+                                                                </strong>{" "}
+                                                                {entry.hospital ||
+                                                                    "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    Doctor:
+                                                                </strong>{" "}
+                                                                {entry.doctor ||
+                                                                    "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    CanMEDS
+                                                                    Roles:
+                                                                </strong>{" "}
+                                                                {entry.canmedsRoles?.join(
+                                                                    ", "
+                                                                ) || "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    Learning
+                                                                    Objectives:
+                                                                </strong>{" "}
+                                                                {entry.learningObjectives?.join(
+                                                                    ", "
+                                                                ) || "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    What I Did
+                                                                    Well:
+                                                                </strong>{" "}
+                                                                {entry.whatIDidWell ||
+                                                                    "N/A"}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                <strong>
+                                                                    What I Could
+                                                                    Improve:
+                                                                </strong>{" "}
+                                                                {entry.whatICouldImprove ||
+                                                                    "N/A"}
+                                                            </Typography>
+                                                            {entry.feedback && (
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    sx={{
+                                                                        fontWeight: 500,
+                                                                        mb: 1,
+                                                                        mt: 2,
+                                                                    }}
+                                                                >
+                                                                    <strong>
+                                                                        Feedback:
+                                                                    </strong>{" "}
+                                                                    {entry.feedback
+                                                                        .map(
+                                                                            (
+                                                                                f
+                                                                            ) =>
+                                                                                f.text
+                                                                        )
+                                                                        .join(
+                                                                            ", "
+                                                                        )}
+                                                                </Typography>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    my: 2,
+                                }}
+                            >
+                                <Pagination
+                                    count={Math.ceil(
+                                        filteredAndSortedEntries.length / limit
+                                    )}
+                                    page={page}
+                                    onChange={handlePageChange}
+                                    showFirstButton
+                                    showLastButton
+                                    siblingCount={1}
+                                    boundaryCount={1}
+                                    color="primary"
+                                    size="large"
+                                    variant="outlined"
+                                    shape="rounded"
+                                />
+                            </Box>
+                        </Card>
+                    </Box>
+                </Fade>
+
+                <Fade in={activeTab === 2}>
+                    <Box sx={{ display: activeTab === 2 ? "block" : "none" }}>
+                        <Card sx={{ mb: 4 }}>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                    borderBottom: `1px solid ${theme.palette.divider}`,
+                                    gap: 2,
+                                }}
+                            >
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    Feedback
+                                </Typography>
+                                <Tooltip
+                                    title={t("medicalJournal.addEntryTooltip")}
+                                >
+                                    <IconButton
+                                        color="primary"
+                                        onClick={() => {
+                                            setSelectedFeedback(null);
+                                            setIsFeedbackDialogOpen(true);
+                                        }}
+                                        sx={{
+                                            borderRadius: 2,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        <AddIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    background: `linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
+                                    borderBottom: `1px solid ${theme.palette.divider}`,
+                                    gap: 2,
+                                    flexWrap: "wrap",
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 2,
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 2,
+                                            width: "100%",
+                                            maxWidth: 400,
+                                        }}
+                                    >
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="Search feedback..."
+                                            value={feedbackSearchTerm}
+                                            onChange={(e) =>
+                                                setFeedbackSearchTerm(
+                                                    e.target.value
+                                                )
+                                            }
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    handleFeedbackSearch();
+                                                }
+                                            }}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <SearchIcon
+                                                            sx={{
+                                                                color: theme
+                                                                    .palette
+                                                                    .primary
+                                                                    .main,
+                                                            }}
+                                                        />
+                                                    </InputAdornment>
+                                                ),
+                                                sx: {
+                                                    borderRadius: 2,
+                                                    backgroundColor: alpha(
+                                                        theme.palette.background
+                                                            .paper,
+                                                        0.8
+                                                    ),
+                                                    "&:hover": {
+                                                        backgroundColor: alpha(
+                                                            theme.palette
+                                                                .background
+                                                                .paper,
+                                                            0.9
+                                                        ),
+                                                    },
+                                                    "&.Mui-focused": {
+                                                        backgroundColor:
+                                                            theme.palette
+                                                                .background
+                                                                .paper,
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleFeedbackSearch}
+                                            disabled={isFeedbackSearching}
+                                            startIcon={<SearchIcon />}
+                                            sx={{
+                                                textTransform: "none",
+                                                fontWeight: 500,
+                                                borderRadius: 2,
+                                                px: 3,
+                                                boxShadow: theme.shadows[1],
+                                                "&:hover": {
+                                                    boxShadow: theme.shadows[2],
+                                                },
+                                            }}
+                                        >
+                                            {isFeedbackSearching
+                                                ? "Searching..."
+                                                : "Search"}
+                                        </Button>
+                                    </Box>
+                                </Box>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 2,
+                                        justifyContent: "flex-start",
+                                    }}
+                                >
+                                    <DropdownComponent
+                                        title="Filter by Rotation"
+                                        titleLocation="left"
+                                        currentSelected={feedbackRotationFilter}
+                                        items={[
+                                            {
+                                                label: "- No Filter -",
+                                                value: "",
+                                                key: "no-filter",
+                                            },
+                                            ...ROTATIONS.map((rotation) => ({
+                                                label: rotation,
+                                                value: rotation,
+                                                key: rotation,
+                                            })),
+                                        ]}
+                                        onChange={setFeedbackRotationFilter}
+                                        minWidth="12em"
+                                    />
+                                </Box>
+                            </Box>
+                            <TableContainer sx={{ overflowX: "scroll" }}>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    width: "70%",
+                                                }}
+                                                onClick={() =>
+                                                    handleFeedbackSort("text")
+                                                }
+                                            >
+                                                Feedback{" "}
+                                                {feedbackSortField === "text" &&
+                                                    (feedbackSortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    width: "15%",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                                onClick={() =>
+                                                    handleFeedbackSort(
+                                                        "rotation"
+                                                    )
+                                                }
+                                            >
+                                                Rotation{" "}
+                                                {feedbackSortField ===
+                                                    "rotation" &&
+                                                    (feedbackSortOrder === "asc"
+                                                        ? "↑"
+                                                        : "↓")}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    width: "15%",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            >
+                                                Actions
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {filteredAndSortedFeedbacks.map(
+                                            (feedback) => (
+                                                <React.Fragment
+                                                    key={feedback.id}
+                                                >
+                                                    <TableRow
+                                                        hover
+                                                        sx={{
+                                                            "&:hover": {
+                                                                backgroundColor:
+                                                                    alpha(
+                                                                        theme
+                                                                            .palette
+                                                                            .action
+                                                                            .hover,
+                                                                        0.04
+                                                                    ),
+                                                            },
+                                                        }}
+                                                    >
+                                                        <TableCell className="feedback-text-cell">
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        "flex",
+                                                                    alignItems:
+                                                                        "center",
+                                                                    gap: 1,
+                                                                }}
+                                                            >
+                                                                <Typography
+                                                                    sx={{
+                                                                        display:
+                                                                            "-webkit-box",
+                                                                        WebkitLineClamp:
+                                                                            expandedFeedbackText ===
+                                                                            feedback.id
+                                                                                ? undefined
+                                                                                : 3,
+                                                                        WebkitBoxOrient:
+                                                                            "vertical",
+                                                                        overflow:
+                                                                            "hidden",
+                                                                        flex: 1,
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        feedback.text
+                                                                    }
+                                                                </Typography>
+                                                                {needsTruncation[
+                                                                    feedback.id
+                                                                ] && (
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={(
+                                                                            e
+                                                                        ) => {
+                                                                            e.stopPropagation();
+                                                                            setExpandedFeedbackText(
+                                                                                expandedFeedbackText ===
+                                                                                    feedback.id
+                                                                                    ? null
+                                                                                    : feedback.id
+                                                                            );
+                                                                        }}
+                                                                        sx={{
+                                                                            transform:
+                                                                                expandedFeedbackText ===
+                                                                                feedback.id
+                                                                                    ? "rotate(180deg)"
+                                                                                    : "none",
+                                                                            transition:
+                                                                                "transform 0.2s",
+                                                                            p: 0.5,
+                                                                        }}
+                                                                    >
+                                                                        <KeyboardArrowDownIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                )}
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography
+                                                                sx={{
+                                                                    whiteSpace:
+                                                                        "nowrap",
+                                                                    overflow:
+                                                                        "hidden",
+                                                                    textOverflow:
+                                                                        "ellipsis",
+                                                                }}
+                                                            >
+                                                                {
+                                                                    feedback.rotation
+                                                                }
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        "flex",
+                                                                    gap: 1,
+                                                                    alignItems:
+                                                                        "center",
+                                                                    justifyContent:
+                                                                        "flex-start",
+                                                                }}
+                                                            >
                                                                 <IconButton
                                                                     onClick={(
                                                                         e
                                                                     ) => {
                                                                         e.stopPropagation();
-                                                                        setExpandedFeedback(
-                                                                            expandedFeedback ===
-                                                                                feedback.id
-                                                                                ? null
-                                                                                : feedback.id
+                                                                        setSelectedFeedback(
+                                                                            feedback
+                                                                        );
+                                                                        setIsFeedbackDialogOpen(
+                                                                            true
                                                                         );
                                                                     }}
                                                                     size="small"
-                                                                    sx={{
-                                                                        transform:
-                                                                            expandedFeedback ===
-                                                                            feedback.id
-                                                                                ? "rotate(180deg)"
-                                                                                : "none",
-                                                                        transition:
-                                                                            "transform 0.2s",
-                                                                    }}
                                                                 >
-                                                                    <KeyboardArrowDownIcon />
+                                                                    <EditIcon />
                                                                 </IconButton>
-                                                            )}
-                                                        </Box>
-                                                    </TableCell>
-                                                </TableRow>
-                                                {expandedFeedback ===
-                                                    feedback.id &&
-                                                    feedback.journal && (
-                                                        <TableRow>
-                                                            <TableCell
-                                                                colSpan={3}
-                                                                sx={{
-                                                                    p: 2,
-                                                                    backgroundColor:
-                                                                        alpha(
-                                                                            theme
-                                                                                .palette
-                                                                                .primary
-                                                                                .main,
-                                                                            0.05
-                                                                        ),
-                                                                }}
-                                                            >
-                                                                <Box
-                                                                    sx={{
-                                                                        pl: 2,
+                                                                <IconButton
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        handleDeleteFeedback(
+                                                                            feedback.id
+                                                                        );
                                                                     }}
+                                                                    size="small"
+                                                                    color="error"
                                                                 >
-                                                                    <Typography
-                                                                        variant="subtitle1"
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                                {feedback.journal && (
+                                                                    <IconButton
+                                                                        onClick={(
+                                                                            e
+                                                                        ) => {
+                                                                            e.stopPropagation();
+                                                                            setExpandedFeedback(
+                                                                                expandedFeedback ===
+                                                                                    feedback.id
+                                                                                    ? null
+                                                                                    : feedback.id
+                                                                            );
+                                                                        }}
+                                                                        size="small"
                                                                         sx={{
-                                                                            mb: 2,
-                                                                            fontWeight: 600,
+                                                                            transform:
+                                                                                expandedFeedback ===
+                                                                                feedback.id
+                                                                                    ? "rotate(180deg)"
+                                                                                    : "none",
+                                                                            transition:
+                                                                                "transform 0.2s",
                                                                         }}
                                                                     >
-                                                                        Associated
-                                                                        Journal
-                                                                        Entry
-                                                                    </Typography>
-                                                                    <Grid
-                                                                        container
-                                                                        spacing={
-                                                                            2
-                                                                        }
+                                                                        <KeyboardArrowDownIcon />
+                                                                    </IconButton>
+                                                                )}
+                                                            </Box>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                    {expandedFeedback ===
+                                                        feedback.id &&
+                                                        feedback.journal && (
+                                                            <TableRow>
+                                                                <TableCell
+                                                                    colSpan={3}
+                                                                    sx={{
+                                                                        p: 2,
+                                                                        backgroundColor:
+                                                                            alpha(
+                                                                                theme
+                                                                                    .palette
+                                                                                    .primary
+                                                                                    .main,
+                                                                                0.05
+                                                                            ),
+                                                                    }}
+                                                                >
+                                                                    <Box
+                                                                        sx={{
+                                                                            pl: 2,
+                                                                        }}
                                                                     >
+                                                                        <Typography
+                                                                            variant="subtitle1"
+                                                                            sx={{
+                                                                                mb: 2,
+                                                                                fontWeight: 600,
+                                                                            }}
+                                                                        >
+                                                                            Associated
+                                                                            Journal
+                                                                            Entry
+                                                                        </Typography>
                                                                         <Grid
-                                                                            item
-                                                                            xs={
-                                                                                12
-                                                                            }
-                                                                            sm={
-                                                                                6
+                                                                            container
+                                                                            spacing={
+                                                                                2
                                                                             }
                                                                         >
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    Date:
-                                                                                </strong>{" "}
-                                                                                {new Date(
-                                                                                    feedback.journal.date
-                                                                                ).toLocaleDateString()}
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    Rotation:
-                                                                                </strong>{" "}
-                                                                                {
-                                                                                    feedback
-                                                                                        .journal
-                                                                                        .rotation
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
                                                                                 }
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    Location:
-                                                                                </strong>{" "}
-                                                                                {
-                                                                                    feedback
-                                                                                        .journal
-                                                                                        .location
+                                                                                sm={
+                                                                                    6
                                                                                 }
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
                                                                             >
-                                                                                <strong>
-                                                                                    Hospital:
-                                                                                </strong>{" "}
-                                                                                {feedback
-                                                                                    .journal
-                                                                                    .hospital ||
-                                                                                    "N/A"}
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Date:
+                                                                                    </strong>{" "}
+                                                                                    {new Date(
+                                                                                        feedback.journal.date
+                                                                                    ).toLocaleDateString()}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Rotation:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .rotation
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Location:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .location
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Hospital:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .hospital ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Doctor:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .doctor ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                                sm={
+                                                                                    6
+                                                                                }
                                                                             >
-                                                                                <strong>
-                                                                                    Doctor:
-                                                                                </strong>{" "}
-                                                                                {feedback
-                                                                                    .journal
-                                                                                    .doctor ||
-                                                                                    "N/A"}
-                                                                            </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Patient
+                                                                                        Setting:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .patientSetting
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Interaction:
+                                                                                    </strong>{" "}
+                                                                                    {
+                                                                                        feedback
+                                                                                            .journal
+                                                                                            .interaction
+                                                                                    }
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        CanMEDS
+                                                                                        Roles:
+                                                                                    </strong>{" "}
+                                                                                    {feedback.journal.canmedsRoles.join(
+                                                                                        ", "
+                                                                                    )}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        Learning
+                                                                                        Objectives:
+                                                                                    </strong>{" "}
+                                                                                    {feedback.journal.learningObjectives.join(
+                                                                                        ", "
+                                                                                    )}
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        What
+                                                                                        I
+                                                                                        Did
+                                                                                        Well:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .whatIDidWell ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        mb: 1,
+                                                                                    }}
+                                                                                >
+                                                                                    <strong>
+                                                                                        What
+                                                                                        I
+                                                                                        Could
+                                                                                        Improve:
+                                                                                    </strong>{" "}
+                                                                                    {feedback
+                                                                                        .journal
+                                                                                        .whatICouldImprove ||
+                                                                                        "N/A"}
+                                                                                </Typography>
+                                                                            </Grid>
                                                                         </Grid>
-                                                                        <Grid
-                                                                            item
-                                                                            xs={
-                                                                                12
-                                                                            }
-                                                                            sm={
-                                                                                6
-                                                                            }
-                                                                        >
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    Patient
-                                                                                    Setting:
-                                                                                </strong>{" "}
-                                                                                {
-                                                                                    feedback
-                                                                                        .journal
-                                                                                        .patientSetting
-                                                                                }
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    Interaction:
-                                                                                </strong>{" "}
-                                                                                {
-                                                                                    feedback
-                                                                                        .journal
-                                                                                        .interaction
-                                                                                }
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    CanMEDS
-                                                                                    Roles:
-                                                                                </strong>{" "}
-                                                                                {feedback.journal.canmedsRoles.join(
-                                                                                    ", "
-                                                                                )}
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    Learning
-                                                                                    Objectives:
-                                                                                </strong>{" "}
-                                                                                {feedback.journal.learningObjectives.join(
-                                                                                    ", "
-                                                                                )}
-                                                                            </Typography>
-                                                                        </Grid>
-                                                                        <Grid
-                                                                            item
-                                                                            xs={
-                                                                                12
-                                                                            }
-                                                                        >
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    What
-                                                                                    I
-                                                                                    Did
-                                                                                    Well:
-                                                                                </strong>{" "}
-                                                                                {feedback
-                                                                                    .journal
-                                                                                    .whatIDidWell ||
-                                                                                    "N/A"}
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    mb: 1,
-                                                                                }}
-                                                                            >
-                                                                                <strong>
-                                                                                    What
-                                                                                    I
-                                                                                    Could
-                                                                                    Improve:
-                                                                                </strong>{" "}
-                                                                                {feedback
-                                                                                    .journal
-                                                                                    .whatICouldImprove ||
-                                                                                    "N/A"}
-                                                                            </Typography>
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Box>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )}
-                                            </React.Fragment>
-                                        )
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                my: 2,
-                            }}
-                        >
-                            <Pagination
-                                count={Math.max(
-                                    1,
-                                    Math.ceil(
-                                        feedbackTotalCount / feedbackLimit
-                                    )
-                                )}
-                                page={Math.min(
-                                    feedbackPage,
-                                    Math.max(
+                                                                    </Box>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                </React.Fragment>
+                                            )
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    my: 2,
+                                }}
+                            >
+                                <Pagination
+                                    count={Math.max(
                                         1,
                                         Math.ceil(
                                             feedbackTotalCount / feedbackLimit
                                         )
-                                    )
-                                )}
-                                onChange={(_, value) => {
-                                    setFeedbackPage(value);
-                                    handleFetchFeedback(
-                                        value,
-                                        feedbackLimit,
-                                        feedbackRotationFilter,
-                                        feedbackSearchTerm
-                                    );
-                                }}
-                                showFirstButton
-                                showLastButton
-                                siblingCount={1}
-                                boundaryCount={1}
-                                color="primary"
-                                size="large"
-                                variant="outlined"
-                                shape="rounded"
-                            />
-                        </Box>
-                    </Card>
-                </Box>
-            </Fade>
+                                    )}
+                                    page={Math.min(
+                                        feedbackPage,
+                                        Math.max(
+                                            1,
+                                            Math.ceil(
+                                                feedbackTotalCount /
+                                                    feedbackLimit
+                                            )
+                                        )
+                                    )}
+                                    onChange={(_, value) => {
+                                        setFeedbackPage(value);
+                                        handleFetchFeedback(
+                                            value,
+                                            feedbackLimit,
+                                            feedbackRotationFilter,
+                                            feedbackSearchTerm
+                                        );
+                                    }}
+                                    showFirstButton
+                                    showLastButton
+                                    siblingCount={1}
+                                    boundaryCount={1}
+                                    color="primary"
+                                    size="large"
+                                    variant="outlined"
+                                    shape="rounded"
+                                />
+                            </Box>
+                        </Card>
+                    </Box>
+                </Fade>
 
-            {/* Journal Entry Dialog */}
-            <JournalEntryDialog
-                open={isEditDialogOpen}
-                onClose={handleCloseEditDialog}
-                editingEntry={editingEntry}
-                currentEntry={currentEntry}
-                errors={errors}
-                onInputChange={(field: keyof LearningEntry, value: any) =>
-                    handleInputChange(field, value)
-                }
-                onSave={handleSaveEntry}
-            />
+                {/* Journal Entry Dialog */}
+                <JournalEntryDialog
+                    open={isEditDialogOpen}
+                    onClose={handleCloseEditDialog}
+                    editingEntry={editingEntry}
+                    currentEntry={currentEntry}
+                    errors={errors}
+                    onInputChange={(field: keyof LearningEntry, value: any) =>
+                        handleInputChange(field, value)
+                    }
+                    onSave={handleSaveEntry}
+                />
 
-            {/* Feedback Dialog */}
-            <FeedbackDialog
-                open={isFeedbackDialogOpen}
-                onClose={() => setIsFeedbackDialogOpen(false)}
-                selectedFeedback={selectedFeedback}
-                currentEntry={currentEntry}
-                onSave={handleSaveFeedback}
-            />
-        </Container>
+                {/* Feedback Dialog */}
+                <FeedbackDialog
+                    open={isFeedbackDialogOpen}
+                    onClose={() => setIsFeedbackDialogOpen(false)}
+                    selectedFeedback={selectedFeedback}
+                    currentEntry={currentEntry}
+                    onSave={handleSaveFeedback}
+                />
+            </Container>
+        </ErrorBoundary>
     );
 }

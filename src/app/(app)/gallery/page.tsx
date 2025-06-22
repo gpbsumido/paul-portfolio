@@ -24,6 +24,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import FloatingPill from "@/components/shared/FloatingPill";
 import ReusableModal from "@/components/common/ReusableModal";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 interface ImageData {
     src: string;
@@ -79,10 +80,35 @@ export default function Gallery(): React.ReactElement | null {
 
         return new Promise((resolve, reject) => {
             const img = new Image();
+            let isCancelled = false;
+
+            const cleanup = () => {
+                img.onload = null;
+                img.onerror = null;
+                img.src = "";
+            };
+
+            img.onload = () => {
+                if (!isCancelled) {
+                    cleanup();
+                    resolve();
+                }
+            };
+
+            img.onerror = () => {
+                if (!isCancelled) {
+                    cleanup();
+                    reject(new Error(`Failed to preload image: ${src}`));
+                }
+            };
+
             img.src = src;
-            img.onload = () => resolve();
-            img.onerror = () =>
-                reject(new Error(`Failed to preload image: ${src}`));
+
+            // Return cleanup function for cancellation
+            return () => {
+                isCancelled = true;
+                cleanup();
+            };
         });
     };
 
@@ -102,13 +128,29 @@ export default function Gallery(): React.ReactElement | null {
             const [isVisible, setIsVisible] = useState(index < 3); // Always visible for first 3 images
             const containerRef = useRef<HTMLDivElement>(null);
             const imgRef = useRef<HTMLImageElement | null>(null);
+            const loadingRef = useRef<HTMLImageElement | null>(null);
+            const isMountedRef = useRef(true);
+
+            useEffect(() => {
+                isMountedRef.current = true;
+                return () => {
+                    isMountedRef.current = false;
+                    // Cleanup loading image if component unmounts
+                    if (loadingRef.current) {
+                        loadingRef.current.onload = null;
+                        loadingRef.current.onerror = null;
+                        loadingRef.current.src = "";
+                        loadingRef.current = null;
+                    }
+                };
+            }, []);
 
             useEffect(() => {
                 if (index < 3) return; // Skip intersection observer for first 3 images
 
                 const observer = new IntersectionObserver(
                     ([entry]) => {
-                        if (entry.isIntersecting) {
+                        if (entry.isIntersecting && isMountedRef.current) {
                             setIsVisible(true);
                             observer.disconnect();
                         }
@@ -123,40 +165,68 @@ export default function Gallery(): React.ReactElement | null {
                     observer.observe(containerRef.current);
                 }
 
-                return () => observer.disconnect();
+                return () => {
+                    observer.disconnect();
+                };
             }, [index]);
 
             useEffect(() => {
-                if (!isVisible) return;
+                if (!isVisible || !isMountedRef.current) return;
 
                 const load = async () => {
                     if (imageCache.current[image.src]?.loaded) {
-                        setIsLoaded(true);
+                        if (isMountedRef.current) {
+                            setIsLoaded(true);
+                        }
                         return;
                     }
 
                     try {
                         const img = new Image();
-                        img.src = image.src;
+                        loadingRef.current = img;
 
                         img.onload = () => {
-                            imageCache.current[image.src] = {
-                                element: img,
-                                loaded: true,
-                            };
-                            setIsLoaded(true);
+                            if (isMountedRef.current) {
+                                imageCache.current[image.src] = {
+                                    element: img,
+                                    loaded: true,
+                                };
+                                setIsLoaded(true);
+                            }
+                            loadingRef.current = null;
                         };
 
                         img.onerror = () => {
-                            console.error("Error loading image:", image.src);
-                            delete imageCache.current[image.src];
+                            if (isMountedRef.current) {
+                                console.error(
+                                    "Error loading image:",
+                                    image.src
+                                );
+                                delete imageCache.current[image.src];
+                            }
+                            loadingRef.current = null;
                         };
+
+                        img.src = image.src;
                     } catch (error) {
-                        console.error("Error loading image:", error);
+                        if (isMountedRef.current) {
+                            console.error("Error loading image:", error);
+                        }
+                        loadingRef.current = null;
                     }
                 };
 
                 load();
+
+                // Cleanup function
+                return () => {
+                    if (loadingRef.current) {
+                        loadingRef.current.onload = null;
+                        loadingRef.current.onerror = null;
+                        loadingRef.current.src = "";
+                        loadingRef.current = null;
+                    }
+                };
             }, [image.src, isVisible]);
 
             return (
@@ -241,7 +311,10 @@ export default function Gallery(): React.ReactElement | null {
 
         if (typeof window !== "undefined") {
             window.addEventListener("resize", handleResize);
-            return () => window.removeEventListener("resize", handleResize);
+            return () => {
+                window.removeEventListener("resize", handleResize);
+                clearTimeout(timeout);
+            };
         }
     }, [updateWidth]);
 
@@ -256,10 +329,18 @@ export default function Gallery(): React.ReactElement | null {
 
             setIsFetching(true);
             setFetchError(null);
+
+            // Create an AbortController for this request
+            const abortController = new AbortController();
+
             try {
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`
+                    `${process.env.NEXT_PUBLIC_API_URL || ""}/api/gallery?page=${pageNumber}&limit=4`,
+                    {
+                        signal: abortController.signal,
+                    }
                 );
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(
@@ -268,42 +349,58 @@ export default function Gallery(): React.ReactElement | null {
                 }
 
                 const data = await response.json();
-                const formattedImages = await Promise.all(
-                    data
+
+                // Preload images for first page only, with proper cleanup
+                if (pageNumber === 1) {
+                    const preloadPromises = data
                         .filter(
                             (item: { imageUrl: string }) =>
                                 !item.imageUrl.toLowerCase().endsWith(".heic")
                         )
-                        .map(
-                            async (item: {
-                                key: string;
-                                imageUrl: string;
-                                blurDataURL?: string;
-                                user_sub?: string;
-                            }) => {
-                                if (
-                                    pageNumber === 1 &&
-                                    data.indexOf(item) < 3
-                                ) {
-                                    await preloadImage(item.imageUrl);
-                                }
-                                return {
-                                    src: item.imageUrl,
-                                    width: 0,
-                                    height: 0,
-                                    originalWidth: 0,
-                                    originalHeight: 0,
-                                    blurDataURL: item.blurDataURL,
-                                    user_sub: item.user_sub,
-                                };
+                        .slice(0, 3) // Only preload first 3 images
+                        .map(async (item: { imageUrl: string }) => {
+                            try {
+                                await preloadImage(item.imageUrl);
+                            } catch (error) {
+                                console.warn(
+                                    `Failed to preload image: ${item.imageUrl}`,
+                                    error
+                                );
                             }
-                        )
-                );
+                        });
+
+                    // Wait for preloading to complete, but don't block the main flow
+                    Promise.all(preloadPromises).catch((error) => {
+                        console.warn("Some images failed to preload:", error);
+                    });
+                }
+
+                const formattedImages = data
+                    .filter(
+                        (item: { imageUrl: string }) =>
+                            !item.imageUrl.toLowerCase().endsWith(".heic")
+                    )
+                    .map(
+                        (item: {
+                            key: string;
+                            imageUrl: string;
+                            blurDataURL?: string;
+                            user_sub?: string;
+                        }) => ({
+                            src: item.imageUrl,
+                            width: 0,
+                            height: 0,
+                            originalWidth: 0,
+                            originalHeight: 0,
+                            blurDataURL: item.blurDataURL,
+                            user_sub: item.user_sub,
+                        })
+                    );
 
                 setImages((prev) => {
                     const existingUrls = new Set(prev.map((img) => img.src));
                     const uniqueImages = formattedImages.filter(
-                        (img) => !existingUrls.has(img.src)
+                        (img: any) => !existingUrls.has(img.src)
                     );
                     return [...prev, ...uniqueImages];
                 });
@@ -311,19 +408,40 @@ export default function Gallery(): React.ReactElement | null {
                 setHasMore(formattedImages.length === 4);
                 lastFetchedPage.current = pageNumber;
             } catch (error: any) {
-                setFetchError(
-                    error.message ||
-                        "An unexpected error occurred while fetching posts."
-                );
+                // Don't set error if the request was aborted
+                if (error.name !== "AbortError") {
+                    setFetchError(
+                        error.message ||
+                            "An unexpected error occurred while fetching posts."
+                    );
+                }
             } finally {
                 setIsFetching(false);
             }
+
+            // Return abort function for cleanup
+            return () => {
+                abortController.abort();
+            };
         },
         [isFetching, fetchError]
     );
 
     useEffect(() => {
-        fetchImages(page);
+        let abortFunction: (() => void) | undefined;
+
+        const loadImages = async () => {
+            abortFunction = await fetchImages(page);
+        };
+
+        loadImages();
+
+        // Cleanup function
+        return () => {
+            if (abortFunction) {
+                abortFunction();
+            }
+        };
     }, [page, fetchImages]);
 
     useEffect(() => {
@@ -334,6 +452,12 @@ export default function Gallery(): React.ReactElement | null {
             rootMargin: "100px",
             threshold: 0.1,
         };
+
+        // Clean up any existing observer before creating a new one
+        if (observer.current) {
+            observer.current.disconnect();
+            observer.current = null;
+        }
 
         observer.current = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting && hasMore && !isFetching) {
@@ -346,9 +470,41 @@ export default function Gallery(): React.ReactElement | null {
         return () => {
             if (observer.current) {
                 observer.current.disconnect();
+                observer.current = null;
             }
         };
     }, [hasMore, isFetching]);
+
+    // Additional cleanup effect for component unmount
+    useEffect(() => {
+        return () => {
+            // Cleanup intersection observer
+            if (observer.current) {
+                observer.current.disconnect();
+                observer.current = null;
+            }
+
+            // Clear image cache to free memory
+            Object.values(imageCache.current).forEach((cacheEntry) => {
+                if (cacheEntry.element) {
+                    cacheEntry.element.onload = null;
+                    cacheEntry.element.onerror = null;
+                    cacheEntry.element.src = "";
+                }
+            });
+            imageCache.current = {};
+
+            // Reset refs
+            lastFetchedPage.current = 0;
+
+            // Clear any pending state updates
+            setIsFetching(false);
+            setFetchError(null);
+            setUploading(false);
+            setUploadError(null);
+            setDeleteError(null);
+        };
+    }, []);
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => {
@@ -357,6 +513,7 @@ export default function Gallery(): React.ReactElement | null {
         setDescription("");
         setImageFile(null);
         setUploading(false);
+        setUploadError(null);
         // Close modal last
         setIsModalOpen(false);
     };
@@ -383,6 +540,9 @@ export default function Gallery(): React.ReactElement | null {
         formData.append("description", description);
         formData.append("date", currentDate.toISOString());
 
+        // Create an AbortController for this request
+        const abortController = new AbortController();
+
         try {
             const token = await getAccessTokenSilently({
                 authorizationParams: {
@@ -397,6 +557,7 @@ export default function Gallery(): React.ReactElement | null {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    signal: abortController.signal,
                 }
             );
 
@@ -439,16 +600,26 @@ export default function Gallery(): React.ReactElement | null {
             setImageFile(null);
             handleCloseModal();
         } catch (err: any) {
-            if (err.message.includes("Missing Refresh Token")) {
-                setUploadError(
-                    "Authentication error: Missing refresh token. Please login to resolve the issue. If already logged in, try logging out and then logging back in."
-                );
-            } else {
-                setUploadError(err.message || "An unexpected error occurred");
+            // Don't set error if the request was aborted
+            if (err.name !== "AbortError") {
+                if (err.message.includes("Missing Refresh Token")) {
+                    setUploadError(
+                        "Authentication error: Missing refresh token. Please login to resolve the issue. If already logged in, try logging out and then logging back in."
+                    );
+                } else {
+                    setUploadError(
+                        err.message || "An unexpected error occurred"
+                    );
+                }
             }
         } finally {
             setUploading(false);
         }
+
+        // Return abort function for cleanup
+        return () => {
+            abortController.abort();
+        };
     };
 
     const handleOpenDeleteModal = (imageId: string, imageUrl: string) => {
@@ -468,13 +639,16 @@ export default function Gallery(): React.ReactElement | null {
         setDeletingImageId(id);
         setDeleteError(null);
 
-        const token = await getAccessTokenSilently({
-            authorizationParams: {
-                audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
-            },
-        });
+        // Create an AbortController for this request
+        const abortController = new AbortController();
 
         try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: process.env.NEXT_PUBLIC_AUTH0_AUDIENCE,
+                },
+            });
+
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`,
                 {
@@ -482,6 +656,7 @@ export default function Gallery(): React.ReactElement | null {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    signal: abortController.signal,
                 }
             );
 
@@ -494,22 +669,27 @@ export default function Gallery(): React.ReactElement | null {
             setFetchedImages((prev) => prev.filter((img) => img.id !== id));
             delete imageCache.current[src];
         } catch (error: any) {
-            setDeleteError(
-                error.message ||
-                    "An unexpected error occurred while deleting the post."
-            );
+            // Don't set error if the request was aborted
+            if (error.name !== "AbortError") {
+                setDeleteError(
+                    error.message ||
+                        "An unexpected error occurred while deleting the post."
+                );
+            }
         } finally {
             setDeletingImageId(null);
             handleCloseDeleteModal();
         }
+
+        // Return abort function for cleanup
+        return () => {
+            abortController.abort();
+        };
     };
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 4 }}>
-            <FloatingPill
-                redirectUrl={`${window.location.origin}/gallery`}
-                hide={isModalOpen || isDeleteModalOpen}
-            />
+            <FloatingPill hide={isModalOpen || isDeleteModalOpen} />
 
             <Box
                 sx={{
@@ -532,245 +712,241 @@ export default function Gallery(): React.ReactElement | null {
                 <LanguageSwitcher />
             </Box>
 
-            <Box
-                sx={{
-                    mb: 5,
-                    textAlign: "center",
-                    background: (theme) =>
-                        `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                }}
-            >
-                <Typography
-                    variant="h3"
-                    component="h1"
-                    gutterBottom
-                    sx={{ fontWeight: 700 }}
-                >
-                    {t("pages.gallery.title")}
-                </Typography>
-                <Typography
-                    variant="subtitle1"
-                    sx={{ color: "text.secondary" }}
-                >
-                    {t("pages.gallery.subtitle")}
-                </Typography>
-            </Box>
-            {!images.length && !isLoading && !isFetching && (
+            <ErrorBoundary>
                 <Box
                     sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "50vh",
+                        mb: 5,
                         textAlign: "center",
-                        color: "text.secondary",
+                        background: (theme) =>
+                            `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
                     }}
                 >
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                        No posts yet.
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 3 }}>
-                        Be the first to share an image with the community!
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleOpenModal}
+                    <Typography
+                        variant="h3"
+                        component="h1"
+                        gutterBottom
+                        sx={{ fontWeight: 700 }}
                     >
-                        Upload Image
-                    </Button>
+                        {t("pages.gallery.title")}
+                    </Typography>
+                    <Typography
+                        variant="subtitle1"
+                        sx={{ color: "text.secondary" }}
+                    >
+                        {t("pages.gallery.subtitle")}
+                    </Typography>
                 </Box>
-            )}
+                {!images.length && !isLoading && !isFetching && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "50vh",
+                            textAlign: "center",
+                            color: "text.secondary",
+                        }}
+                    >
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                            No posts yet.
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 3 }}>
+                            Be the first to share an image with the community!
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleOpenModal}
+                        >
+                            Upload Image
+                        </Button>
+                    </Box>
+                )}
 
-            <Container
-                maxWidth="sm"
-                sx={{
-                    width: "100%",
-                    padding: 0,
-                    maxWidth: "1200px",
-                    margin: "0 auto",
-                }}
-            >
-                <Box ref={containerRef}>
-                    {images.map((image, index) => {
-                        const imageData = fetchedImages.find(
-                            (item) => item.imageUrl === image.src
-                        );
+                <Container
+                    maxWidth="sm"
+                    sx={{
+                        width: "100%",
+                        padding: 0,
+                        maxWidth: "1200px",
+                        margin: "0 auto",
+                    }}
+                >
+                    <Box ref={containerRef}>
+                        {images.map((image, index) => {
+                            const imageData = fetchedImages.find(
+                                (item) => item.imageUrl === image.src
+                            );
 
-                        return (
-                            <Box
-                                key={image.src}
-                                sx={{
-                                    width: "100%",
-                                    mb: 3,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    position: "relative",
-                                }}
-                            >
+                            return (
                                 <Box
+                                    key={image.src}
                                     sx={{
-                                        position: "relative",
                                         width: "100%",
-                                        aspectRatio: `${image.originalWidth} / ${image.originalHeight}`,
-                                        overflow: "hidden",
-                                        backgroundColor: "#111",
-                                        borderRadius: 2,
-                                        boxShadow: 2,
-                                        "&:hover .delete-button": {
-                                            opacity: 1,
-                                        },
-                                        "&:hover .image-data": {
-                                            opacity: 1,
-                                        },
+                                        mb: 3,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        position: "relative",
                                     }}
                                 >
-                                    {isAuthenticated &&
-                                        !isLoading &&
-                                        image.user_sub === user?.sub && (
-                                            <IconButton
-                                                className="delete-button"
-                                                onClick={() =>
-                                                    handleOpenDeleteModal(
-                                                        imageData.id,
-                                                        image.src
-                                                    )
-                                                } // Ensure correct ID and URL are passed
-                                                disabled={
-                                                    deletingImageId ===
-                                                    imageData?.id
-                                                }
+                                    <Box
+                                        sx={{
+                                            position: "relative",
+                                            width: "100%",
+                                            aspectRatio: `${image.originalWidth} / ${image.originalHeight}`,
+                                            overflow: "hidden",
+                                            backgroundColor: "#111",
+                                            borderRadius: 2,
+                                            boxShadow: 2,
+                                            "&:hover .delete-button": {
+                                                opacity: 1,
+                                            },
+                                            "&:hover .image-data": {
+                                                opacity: 1,
+                                            },
+                                        }}
+                                    >
+                                        {isAuthenticated &&
+                                            !isLoading &&
+                                            image.user_sub === user?.sub && (
+                                                <IconButton
+                                                    className="delete-button"
+                                                    onClick={() =>
+                                                        handleOpenDeleteModal(
+                                                            imageData.id,
+                                                            image.src
+                                                        )
+                                                    } // Ensure correct ID and URL are passed
+                                                    disabled={
+                                                        deletingImageId ===
+                                                        imageData?.id
+                                                    }
+                                                    sx={{
+                                                        position: "absolute",
+                                                        top: 8,
+                                                        right: 8,
+                                                        backgroundColor:
+                                                            "rgba(0, 0, 0, 0.5)",
+                                                        color: "white",
+                                                        opacity: 0,
+                                                        transition:
+                                                            "opacity 0.2s ease",
+                                                        zIndex: 3,
+                                                        "&:hover": {
+                                                            backgroundColor:
+                                                                "rgba(0, 0, 0, 0.7)",
+                                                        },
+                                                    }}
+                                                >
+                                                    {deletingImageId ===
+                                                    imageData?.id ? (
+                                                        <CircularProgress
+                                                            size={24}
+                                                            color="inherit"
+                                                        />
+                                                    ) : (
+                                                        <DeleteIcon />
+                                                    )}
+                                                </IconButton>
+                                            )}
+                                        {deleteError &&
+                                            deletingImageId ===
+                                                imageData?.id && (
+                                                <Box
+                                                    sx={{
+                                                        position: "absolute",
+                                                        top: "100%",
+                                                        left: 0,
+                                                        right: 0,
+                                                        bgcolor: "error.light",
+                                                        color: "error.contrastText",
+                                                        p: 1,
+                                                        borderRadius: 1,
+                                                        mt: 1,
+                                                        zIndex: 4,
+                                                    }}
+                                                >
+                                                    <Typography variant="body2">
+                                                        {deleteError}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        <ImageComponent
+                                            image={image}
+                                            width={containerWidth}
+                                            height={
+                                                containerWidth *
+                                                (image.originalHeight /
+                                                    image.originalWidth)
+                                            }
+                                            index={index}
+                                        />
+                                        {(imageData?.text ||
+                                            imageData?.description ||
+                                            imageData?.date) && (
+                                            <Box
+                                                className="image-data"
                                                 sx={{
                                                     position: "absolute",
-                                                    top: 8,
-                                                    right: 8,
-                                                    backgroundColor:
-                                                        "rgba(0, 0, 0, 0.5)",
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    background:
+                                                        "linear-gradient(transparent, rgba(0, 0, 0, 0.8))",
                                                     color: "white",
+                                                    padding: 2,
                                                     opacity: 0,
                                                     transition:
                                                         "opacity 0.2s ease",
-                                                    zIndex: 3,
-                                                    "&:hover": {
-                                                        backgroundColor:
-                                                            "rgba(0, 0, 0, 0.7)",
-                                                    },
                                                 }}
                                             >
-                                                {deletingImageId ===
-                                                imageData?.id ? (
-                                                    <CircularProgress
-                                                        size={24}
-                                                        color="inherit"
-                                                    />
-                                                ) : (
-                                                    <DeleteIcon />
+                                                {imageData.text && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{ mb: 1 }}
+                                                    >
+                                                        {imageData.text}
+                                                    </Typography>
                                                 )}
-                                            </IconButton>
-                                        )}
-                                    {deleteError &&
-                                        deletingImageId === imageData?.id && (
-                                            <Box
-                                                sx={{
-                                                    position: "absolute",
-                                                    top: "100%",
-                                                    left: 0,
-                                                    right: 0,
-                                                    bgcolor: "error.light",
-                                                    color: "error.contrastText",
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    mt: 1,
-                                                    zIndex: 4,
-                                                }}
-                                            >
-                                                <Typography variant="body2">
-                                                    {deleteError}
-                                                </Typography>
+                                                {imageData.description && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            display: "block",
+                                                            mb: 1,
+                                                            opacity: 0.8,
+                                                        }}
+                                                    >
+                                                        {imageData.description}
+                                                    </Typography>
+                                                )}
+                                                {imageData.date && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            opacity: 0.6,
+                                                            fontSize: "0.75rem",
+                                                        }}
+                                                    >
+                                                        {new Date(
+                                                            imageData.date
+                                                        ).toLocaleDateString()}
+                                                    </Typography>
+                                                )}
                                             </Box>
                                         )}
-                                    <ImageComponent
-                                        image={image}
-                                        width={containerWidth}
-                                        height={
-                                            containerWidth *
-                                            (image.originalHeight /
-                                                image.originalWidth)
-                                        }
-                                        index={index}
-                                    />
-                                    {(imageData?.text ||
-                                        imageData?.description ||
-                                        imageData?.date) && (
-                                        <Box
-                                            className="image-data"
-                                            sx={{
-                                                position: "absolute",
-                                                bottom: 0,
-                                                left: 0,
-                                                right: 0,
-                                                bgcolor: "rgba(0,0,0,0.6)",
-                                                color: "#fff",
-                                                p: 2,
-                                                zIndex: 2,
-                                                opacity: 0,
-                                                transition: "opacity 0.3s ease",
-                                            }}
-                                        >
-                                            {imageData?.text && (
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    sx={{
-                                                        fontWeight: "bold",
-                                                    }}
-                                                >
-                                                    {imageData.text}
-                                                </Typography>
-                                            )}
-                                            {imageData?.description && (
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ mt: 1 }}
-                                                >
-                                                    {imageData.description}
-                                                </Typography>
-                                            )}
-                                            {imageData?.date && (
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        display: "block",
-                                                        mt: 1,
-                                                        opacity: 0.7,
-                                                    }}
-                                                >
-                                                    {new Date(
-                                                        imageData.date
-                                                    ).toLocaleString(
-                                                        undefined,
-                                                        {
-                                                            year: "numeric",
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        }
-                                                    )}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    )}
+                                    </Box>
                                 </Box>
-                            </Box>
-                        );
-                    })}
-                </Box>
+                            );
+                        })}
+                    </Box>
+                </Container>
 
-                {!fetchError && hasMore && (
+                {isFetching && (
                     <Box
                         sx={{
                             display: "flex",
@@ -781,246 +957,155 @@ export default function Gallery(): React.ReactElement | null {
                         <CircularProgress />
                     </Box>
                 )}
-            </Container>
 
-            {fetchError && (
-                <Box
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        bgcolor: "error.light",
-                        color: "error.contrastText",
-                        p: 2,
-                        borderRadius: 1,
-                        mb: 2,
-                        boxShadow: 2,
-                        width: "fit-content",
-                        margin: "0 auto",
-                        maxWidth: "90%",
-                    }}
-                >
+                {fetchError && (
                     <Box
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            mr: 2,
+                            bgcolor: "error.light",
+                            color: "error.contrastText",
+                            p: 2,
+                            borderRadius: 1,
+                            mb: 2,
+                            boxShadow: 2,
+                            width: "fit-content",
+                            margin: "0 auto",
+                            maxWidth: "90%",
                         }}
                     >
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: "bold",
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                        >
-                            <span
-                                style={{
-                                    display: "inline-block",
-                                    marginRight: "8px",
-                                }}
-                            >
-                                ⚠️
-                            </span>
-                            Error
-                        </Typography>
-                    </Box>
-                    <Typography variant="body2">{fetchError}</Typography>
-                </Box>
-            )}
-
-            <Fab
-                color="primary"
-                aria-label="add"
-                onClick={handleOpenModal}
-                sx={{
-                    position: "fixed",
-                    bottom: { xs: "16px", sm: "32px" },
-                    right: { xs: "16px", sm: "32px" },
-                    display: isModalOpen ? "none" : "flex",
-                }}
-            >
-                <AddIcon />
-            </Fab>
-            <ReusableModal
-                open={isModalOpen}
-                onClose={handleCloseModal}
-                title="Upload Image"
-                description="Share a moment with the community by uploading an image."
-                cancelText="Cancel"
-                confirmText="Submit"
-                onConfirm={handleSubmit}
-                isConfirmDisabled={!imageFile || uploading}
-                children={
-                    <>
-                        {imageFile && (
-                            <Box
-                                sx={{
-                                    width: "100%",
-                                    height: "200px",
-                                    borderRadius: 2,
-                                    overflow: "hidden",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    border: "1px solid",
-                                    borderColor: "divider",
-                                    mb: 2,
-                                    position: "relative",
-                                }}
-                            >
-                                <img
-                                    src={URL.createObjectURL(imageFile)}
-                                    alt="Preview"
-                                    style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "100%",
-                                        objectFit: "contain",
-                                    }}
-                                />
-                                <Button
-                                    onClick={handleUnselectFile}
-                                    variant="contained"
-                                    color="error"
-                                    size="small"
-                                    sx={{
-                                        position: "absolute",
-                                        top: 8,
-                                        right: 8,
-                                        textTransform: "none",
-                                    }}
-                                >
-                                    Remove
-                                </Button>
-                            </Box>
-                        )}
                         <Box
                             sx={{
                                 display: "flex",
-                                flexDirection: "column",
-                                gap: 2,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                mr: 2,
                             }}
                         >
-                            <Box
+                            <Typography
+                                variant="h6"
                                 sx={{
-                                    position: "relative",
-                                    border: "2px dashed",
-                                    borderColor: "divider",
-                                    borderRadius: 2,
-                                    p: 2,
-                                    textAlign: "center",
-                                    cursor: "pointer",
-                                    "&:hover": {
-                                        borderColor: "primary.main",
-                                        bgcolor: "action.hover",
-                                    },
-                                }}
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={(e) => {
-                                    e.preventDefault();
-                                    if (
-                                        e.dataTransfer.files &&
-                                        e.dataTransfer.files.length > 0
-                                    ) {
-                                        const file = e.dataTransfer.files[0];
-                                        if (file.type.startsWith("image/")) {
-                                            setImageFile(file);
-                                        } else {
-                                            alert("Please drop an image file.");
-                                        }
-                                    }
+                                    fontWeight: "bold",
+                                    display: "flex",
+                                    alignItems: "center",
                                 }}
                             >
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
+                                <span
                                     style={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        opacity: 0,
-                                        cursor: "pointer",
-                                    }}
-                                />
-                                <Typography
-                                    variant="body1"
-                                    color="text.secondary"
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        gap: 1,
+                                        display: "inline-block",
+                                        marginRight: "8px",
                                     }}
                                 >
-                                    <AddIcon color="primary" />
-                                    Click or drag to upload an image
-                                </Typography>
-                            </Box>
+                                    ⚠️
+                                </span>
+                                Error
+                            </Typography>
+                        </Box>
+                        <Typography variant="body2">{fetchError}</Typography>
+                    </Box>
+                )}
+
+                {/* Floating Action Button */}
+                <Fab
+                    color="primary"
+                    aria-label="add"
+                    onClick={handleOpenModal}
+                    sx={{
+                        position: "fixed",
+                        bottom: { xs: "16px", sm: "32px" },
+                        right: { xs: "16px", sm: "32px" },
+                        display: isModalOpen ? "none" : "flex",
+                    }}
+                >
+                    <AddIcon />
+                </Fab>
+
+                {/* Upload Modal */}
+                <ReusableModal
+                    open={isModalOpen}
+                    onClose={handleCloseModal}
+                    title="Upload Image"
+                    confirmColor="primary"
+                    onConfirm={handleSubmit}
+                    confirmText="Upload"
+                    cancelText="Cancel"
+                    cancelColor="secondary"
+                    titleColor="primary.main"
+                    isConfirmDisabled={!imageFile || uploading || !text.trim()}
+                    children={
+                        <Box sx={{ p: 2 }}>
                             <TextField
+                                fullWidth
                                 label="Title"
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
-                                fullWidth
-                                variant="outlined"
-                                InputProps={{
-                                    sx: {
-                                        borderRadius: 2,
-                                    },
-                                }}
+                                sx={{ mb: 2 }}
+                                required
                             />
                             <TextField
+                                fullWidth
                                 label="Description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                fullWidth
                                 multiline
-                                rows={4}
-                                variant="outlined"
-                                InputProps={{
-                                    sx: {
-                                        borderRadius: 2,
-                                    },
-                                }}
+                                rows={3}
+                                sx={{ mb: 2 }}
                             />
-                        </Box>
-                        {uploadError && (
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    p: 2,
-                                    borderRadius: 2,
-                                    bgcolor: "error.light",
-                                    color: "error.contrastText",
-                                    boxShadow: 1,
-                                }}
-                            >
-                                <Typography variant="body2">
-                                    Error: {uploadError}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ marginBottom: "16px" }}
+                            />
+                            {imageFile && (
+                                <Box sx={{ mb: 2 }}>
+                                    <Typography variant="body2">
+                                        Selected: {imageFile.name}
+                                    </Typography>
+                                    <Button
+                                        size="small"
+                                        onClick={handleUnselectFile}
+                                        sx={{ mt: 1 }}
+                                    >
+                                        Remove
+                                    </Button>
+                                </Box>
+                            )}
+                            {uploadError && (
+                                <Typography
+                                    variant="body2"
+                                    color="error"
+                                    sx={{ mt: 2 }}
+                                >
+                                    {uploadError}
                                 </Typography>
-                            </Box>
-                        )}
-                    </>
-                }
-                titleColor="primary.main"
-            />
-            <ReusableModal
-                open={isDeleteModalOpen}
-                onClose={handleCloseDeleteModal}
-                title="Delete Image"
-                description="Are you sure you want to delete this image? This action is irreversible."
-                cancelText="Cancel"
-                confirmText="Delete"
-                onConfirm={handleConfirmDelete}
-                isConfirmDisabled={deletingImageId === imageToDelete?.id}
-                confirmColor="error.main"
-                titleColor="error.main"
-            />
+                            )}
+                        </Box>
+                    }
+                />
+
+                {/* Delete Confirmation Modal */}
+                <ReusableModal
+                    open={isDeleteModalOpen}
+                    onClose={handleCloseDeleteModal}
+                    title="Delete Image"
+                    confirmColor="error"
+                    onConfirm={handleConfirmDelete}
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                    cancelColor="secondary"
+                    titleColor="error.main"
+                    isConfirmDisabled={deletingImageId !== null}
+                    children={
+                        <Box sx={{ p: 2 }}>
+                            <Typography>
+                                Are you sure you want to delete this image? This
+                                action cannot be undone.
+                            </Typography>
+                        </Box>
+                    }
+                />
+            </ErrorBoundary>
         </Container>
     );
 }

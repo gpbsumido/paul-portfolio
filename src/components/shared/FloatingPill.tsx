@@ -9,16 +9,12 @@ import {
     Avatar,
 } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 
-export default function FloatingPill({
-    redirectUrl,
-    hide = false,
-}: {
-    redirectUrl?: string;
-    hide?: boolean;
-}) {
+export default function FloatingPill({ hide = false }: { hide?: boolean }) {
     const theme = useTheme();
+    const router = useRouter();
     const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
         useAuth0();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -134,14 +130,22 @@ export default function FloatingPill({
                                     borderColor: "rgba(255, 255, 255, 0.9)",
                                 },
                             }}
-                            onClick={() =>
+                            onClick={() => {
+                                const currentPath = window.location.pathname;
+                                console.log(
+                                    "Logout clicked, storing path:",
+                                    currentPath
+                                );
+                                localStorage.setItem(
+                                    "logoutRedirectPath",
+                                    currentPath
+                                );
                                 logout({
                                     logoutParams: {
-                                        returnTo:
-                                            redirectUrl || window.location.href, // Return to the provided redirect URL or current location
+                                        returnTo: `${window.location.origin}/login`,
                                     },
-                                })
-                            }
+                                });
+                            }}
                         >
                             Logout
                         </Button>
@@ -163,16 +167,19 @@ export default function FloatingPill({
                         },
                         margin: "0 auto",
                     }}
-                    onClick={() =>
+                    onClick={() => {
+                        const currentPath = window.location.pathname;
+                        console.log(
+                            "Login clicked, storing path:",
+                            currentPath
+                        );
+                        localStorage.setItem("loginRedirectPath", currentPath);
                         loginWithRedirect({
                             authorizationParams: {
                                 scope: "openid profile email offline_access",
                             },
-                            appState: {
-                                returnTo: redirectUrl || window.location.href,
-                            },
-                        })
-                    }
+                        });
+                    }}
                 >
                     Log In
                 </Button>
