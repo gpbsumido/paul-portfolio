@@ -241,7 +241,10 @@ export default function Gallery(): React.ReactElement | null {
 
         if (typeof window !== "undefined") {
             window.addEventListener("resize", handleResize);
-            return () => window.removeEventListener("resize", handleResize);
+            return () => {
+                window.removeEventListener("resize", handleResize);
+                clearTimeout(timeout);
+            };
         }
     }, [updateWidth]);
 
@@ -335,6 +338,12 @@ export default function Gallery(): React.ReactElement | null {
             threshold: 0.1,
         };
 
+        // Clean up any existing observer before creating a new one
+        if (observer.current) {
+            observer.current.disconnect();
+            observer.current = null;
+        }
+
         observer.current = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting && hasMore && !isFetching) {
                 setPage((prev) => prev + 1);
@@ -346,9 +355,26 @@ export default function Gallery(): React.ReactElement | null {
         return () => {
             if (observer.current) {
                 observer.current.disconnect();
+                observer.current = null;
             }
         };
     }, [hasMore, isFetching]);
+
+    // Additional cleanup effect for component unmount
+    useEffect(() => {
+        return () => {
+            if (observer.current) {
+                observer.current.disconnect();
+                observer.current = null;
+            }
+            
+            // Clear image cache to free memory
+            imageCache.current = {};
+            
+            // Reset refs
+            lastFetchedPage.current = 0;
+        };
+    }, []);
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => {
