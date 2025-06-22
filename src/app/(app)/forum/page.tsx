@@ -340,7 +340,7 @@ export default function ForumPage() {
                                     {t("pages.forum.newPostContent")}
                                 </Typography>
                                 <Editor
-                                    apiKey="your-tinymce-api-key"
+                                    apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                                     onInit={(evt: any, editor: any) =>
                                         (editorRef.current = editor)
                                     }
