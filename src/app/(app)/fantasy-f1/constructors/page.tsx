@@ -20,12 +20,16 @@ import {
     Card,
     CardContent,
     CardHeader,
+    useTheme,
+    alpha,
 } from "@mui/material";
 import F1DropdownNav from "@/components/features/fantasy/F1DropdownNav";
 import { HomeButton } from "@/components/common/HomeButton";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import Link from "next/link";
 import DropdownComponent from "@/components/shared/DropdownComponent";
+import { useLanguage } from "@/contexts/LanguageContext";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 interface Constructor {
     constructorId: string;
@@ -133,123 +137,125 @@ const ConstructorStandingsPage = () => {
                     overflow: "hidden",
                 }}
             >
-                <Card elevation={3} sx={{ mb: 3 }}>
-                    <CardHeader
-                        title={`F1 Constructor Standings ${season ? `(${season})` : ""}`}
-                        sx={{
-                            textAlign: "center",
-                            "& .MuiCardHeader-title": {
-                                fontSize: "1.5rem",
-                                fontWeight: "bold",
-                            },
-                        }}
-                    />
-                    <CardContent
-                        sx={{ display: "flex", justifyContent: "center" }}
-                    >
-                        <DropdownComponent
-                            title="Year"
-                            items={availableYears.map((yr) => ({
-                                key: yr,
-                                label: yr,
-                                value: yr,
-                            }))}
-                            currentSelected={season}
-                            onChange={(value) => setSeason(value as string)}
-                            titleLocation="left"
-                            minWidth={"8em"}
+                <ErrorBoundary>
+                    <Card elevation={3} sx={{ mb: 3 }}>
+                        <CardHeader
+                            title={`F1 Constructor Standings ${season ? `(${season})` : ""}`}
+                            sx={{
+                                textAlign: "center",
+                                "& .MuiCardHeader-title": {
+                                    fontSize: "1.5rem",
+                                    fontWeight: "bold",
+                                },
+                            }}
                         />
-                    </CardContent>
-                </Card>
-                <TableContainer component={Paper} elevation={3}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>
-                                    <Typography
-                                        variant="subtitle1"
-                                        fontWeight="bold"
-                                    >
-                                        Position
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography
-                                        variant="subtitle1"
-                                        fontWeight="bold"
-                                    >
-                                        Constructor
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography
-                                        variant="subtitle1"
-                                        fontWeight="bold"
-                                    >
-                                        Nationality
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography
-                                        variant="subtitle1"
-                                        fontWeight="bold"
-                                    >
-                                        Points
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography
-                                        variant="subtitle1"
-                                        fontWeight="bold"
-                                    >
-                                        Wins
-                                    </Typography>
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {loading
-                                ? Array.from({ length: 10 }).map((_, index) => (
-                                      <TableRow key={index}>
-                                          <TableCell>
-                                              <Skeleton variant="text" />
-                                          </TableCell>
-                                          <TableCell>
-                                              <Skeleton variant="text" />
-                                          </TableCell>
-                                          <TableCell>
-                                              <Skeleton variant="text" />
-                                          </TableCell>
-                                          <TableCell>
-                                              <Skeleton variant="text" />
-                                          </TableCell>
-                                          <TableCell>
-                                              <Skeleton variant="text" />
-                                          </TableCell>
-                                      </TableRow>
-                                  ))
-                                : constructors.map((constructor) => (
-                                      <TableRow key={constructor.constructorId}>
-                                          <TableCell>
-                                              {constructor.position}
-                                          </TableCell>
-                                          <TableCell>
-                                              {constructor.name}
-                                          </TableCell>
-                                          <TableCell>
-                                              {constructor.nationality}
-                                          </TableCell>
-                                          <TableCell>
-                                              {constructor.points}
-                                          </TableCell>
-                                          <TableCell>
-                                              {constructor.wins}
-                                          </TableCell>
-                                      </TableRow>
-                                  ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                        <CardContent
+                            sx={{ display: "flex", justifyContent: "center" }}
+                        >
+                            <DropdownComponent
+                                title="Year"
+                                items={availableYears.map((yr) => ({
+                                    key: yr,
+                                    label: yr,
+                                    value: yr,
+                                }))}
+                                currentSelected={season}
+                                onChange={(value) => setSeason(value as string)}
+                                titleLocation="left"
+                                minWidth={"8em"}
+                            />
+                        </CardContent>
+                    </Card>
+                    <TableContainer component={Paper} elevation={3}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight="bold"
+                                        >
+                                            Position
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight="bold"
+                                        >
+                                            Constructor
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight="bold"
+                                        >
+                                            Nationality
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight="bold"
+                                        >
+                                            Points
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight="bold"
+                                        >
+                                            Wins
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {loading
+                                    ? Array.from({ length: 10 }).map((_, index) => (
+                                          <TableRow key={index}>
+                                              <TableCell>
+                                                  <Skeleton variant="text" />
+                                              </TableCell>
+                                              <TableCell>
+                                                  <Skeleton variant="text" />
+                                              </TableCell>
+                                              <TableCell>
+                                                  <Skeleton variant="text" />
+                                              </TableCell>
+                                              <TableCell>
+                                                  <Skeleton variant="text" />
+                                              </TableCell>
+                                              <TableCell>
+                                                  <Skeleton variant="text" />
+                                              </TableCell>
+                                          </TableRow>
+                                      ))
+                                    : constructors.map((constructor) => (
+                                          <TableRow key={constructor.constructorId}>
+                                              <TableCell>
+                                                  {constructor.position}
+                                              </TableCell>
+                                              <TableCell>
+                                                  {constructor.name}
+                                              </TableCell>
+                                              <TableCell>
+                                                  {constructor.nationality}
+                                              </TableCell>
+                                              <TableCell>
+                                                  {constructor.points}
+                                              </TableCell>
+                                              <TableCell>
+                                                  {constructor.wins}
+                                              </TableCell>
+                                          </TableRow>
+                                      ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </ErrorBoundary>
             </Container>
         </Box>
     );

@@ -1,8 +1,22 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Typography, Box, Container } from "@mui/material";
-import PostCard from "@/components/features/social-media/PostCard";
+import {
+    Box,
+    Container,
+    Typography,
+    Card,
+    CardContent,
+    Grid,
+    useTheme,
+    alpha,
+} from "@mui/material";
+import { HomeButton } from "@/components/common/HomeButton";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { PostCard } from "@/components/features/social-media/PostCard";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 interface Post {
     id: number;
@@ -79,22 +93,45 @@ const SocialMediaPage = () => {
 
     return (
         <Container maxWidth="md">
-            <Typography variant="h4" align="center" gutterBottom>
-                Social Media Timeline
-            </Typography>
-            <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 2 }}>
-                {posts.map((post) => (
-                    <PostCard
-                        key={post.id}
-                        user={post.user}
-                        content={post.content}
-                        timestamp={post.timestamp}
-                        link={post.link} // Pass link if PostCard supports it
-                        thumbnail={post.thumbnail} // Pass thumbnail if PostCard supports it
-                        type={post.type} // Pass the type property
-                    />
-                ))}
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    left: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <HomeButton component={Link} href="/" />
             </Box>
+            <Box
+                sx={{
+                    position: "fixed",
+                    top: { xs: "8px", sm: "16px" },
+                    right: { xs: "8px", sm: "16px" },
+                    zIndex: 9999,
+                }}
+            >
+                <LanguageSwitcher />
+            </Box>
+
+            <ErrorBoundary>
+                <Typography variant="h4" align="center" gutterBottom>
+                    Social Media Timeline
+                </Typography>
+                <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 2 }}>
+                    {posts.map((post) => (
+                        <PostCard
+                            key={post.id}
+                            user={post.user}
+                            content={post.content}
+                            timestamp={post.timestamp}
+                            link={post.link} // Pass link if PostCard supports it
+                            thumbnail={post.thumbnail} // Pass thumbnail if PostCard supports it
+                            type={post.type} // Pass the type property
+                        />
+                    ))}
+                </Box>
+            </ErrorBoundary>
         </Container>
     );
 };

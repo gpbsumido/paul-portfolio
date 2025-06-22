@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import dynamic from "next/dynamic";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 const MapContent = dynamic(
     () => import("./MapContent").then((mod) => mod.default),
@@ -95,7 +96,9 @@ export default function MapWrapper() {
                 mt: 2,
             }}
         >
-            <MapContent location={location} />
+            <ErrorBoundary>
+                <MapContent location={location} />
+            </ErrorBoundary>
         </Box>
     );
 }

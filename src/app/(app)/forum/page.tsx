@@ -13,6 +13,7 @@ import {
     Fab,
     Divider,
     Avatar,
+    Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -29,6 +30,8 @@ import parse from "html-react-parser";
 import FloatingPill from "@/components/shared/FloatingPill";
 import { useAuth0 } from "@auth0/auth0-react";
 import ReusableModal from "@/components/common/ReusableModal";
+import { Editor } from "@tinymce/tinymce-react";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 
 interface PostForum {
     id: number;
@@ -156,233 +159,225 @@ export default function ForumPage() {
                 <LanguageSwitcher />
             </Box>
 
-            {/* Page Title */}
-            <Box
-                sx={{
-                    mb: 5,
-                    textAlign: "center",
-                    background: (theme) =>
-                        `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                }}
-            >
-                <Typography
-                    variant="h3"
-                    component="h1"
-                    gutterBottom
-                    sx={{ fontWeight: 700 }}
+            <ErrorBoundary>
+                {/* Page Title */}
+                <Box
+                    sx={{
+                        mb: 5,
+                        textAlign: "center",
+                        background: (theme) =>
+                            `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                    }}
                 >
-                    {t("pages.forum.title")}
-                </Typography>
-                <Typography
-                    variant="subtitle1"
-                    sx={{ color: "text.secondary" }}
-                >
-                    {t("pages.forum.subtitle")}
-                </Typography>
-            </Box>
+                    <Typography
+                        variant="h3"
+                        component="h1"
+                        gutterBottom
+                        sx={{ fontWeight: 700 }}
+                    >
+                        {t("pages.forum.title")}
+                    </Typography>
+                    <Typography
+                        variant="subtitle1"
+                        sx={{ color: "text.secondary" }}
+                    >
+                        {t("pages.forum.subtitle")}
+                    </Typography>
+                </Box>
 
-            {/* Posts Section */}
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 3,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === "dark" ? "grey.900" : "grey.100",
-                    p: 3,
-                    borderRadius: 2,
-                    boxShadow: (theme) => theme.shadows[3],
-                }}
-            >
-                {loading ? (
-                    <Box
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        minHeight="400px"
-                    >
-                        <CircularProgress />
-                    </Box>
-                ) : error ? (
-                    <Box
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        minHeight="400px"
-                    >
-                        <Typography color="error">{error}</Typography>
-                    </Box>
-                ) : (
-                    posts.map((post) => (
-                        <Paper
-                            key={post.id}
-                            elevation={3}
-                            sx={{
-                                p: 3,
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: 2,
-                                borderRadius: 2,
-                                transition: "transform 0.2s",
-                                "&:hover": {
-                                    transform: "translateY(-4px)",
-                                    boxShadow: (theme) => theme.shadows[6],
-                                },
-                            }}
+                {/* Posts Section */}
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 3,
+                        backgroundColor: (theme) =>
+                            theme.palette.mode === "dark" ? "grey.900" : "grey.100",
+                        p: 3,
+                        borderRadius: 2,
+                        boxShadow: (theme) => theme.shadows[3],
+                    }}
+                >
+                    {loading ? (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            minHeight="400px"
                         >
-                            <Box
+                            <CircularProgress />
+                        </Box>
+                    ) : error ? (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            minHeight="400px"
+                        >
+                            <Typography color="error">{error}</Typography>
+                        </Box>
+                    ) : (
+                        posts.map((post) => (
+                            <Paper
+                                key={post.id}
+                                elevation={3}
                                 sx={{
+                                    p: 3,
                                     display: "flex",
-                                    alignItems: "center",
+                                    flexDirection: "column",
                                     gap: 2,
+                                    borderRadius: 2,
+                                    transition: "transform 0.2s",
+                                    "&:hover": {
+                                        transform: "translateY(-4px)",
+                                        boxShadow: (theme) => theme.shadows[6],
+                                    },
                                 }}
                             >
-                                <Avatar
+                                <Box
                                     sx={{
-                                        bgcolor: (theme) =>
-                                            theme.palette.primary.main,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 2,
                                     }}
                                 >
-                                    {post.username.charAt(0).toUpperCase()}
-                                </Avatar>
-                                <Typography variant="h6" component="h2">
-                                    {post.title}
+                                    <Avatar
+                                        sx={{
+                                            bgcolor: (theme) =>
+                                                theme.palette.primary.main,
+                                        }}
+                                    >
+                                        {post.username.charAt(0).toUpperCase()}
+                                    </Avatar>
+                                    <Typography variant="h6" component="h2">
+                                        {post.title}
+                                    </Typography>
+                                </Box>
+                                <Divider />
+                                <Box
+                                    sx={{
+                                        color: "text.secondary",
+                                        "& p": { mb: 1 },
+                                        "& h1, & h2, & h3": { mt: 2, mb: 1 },
+                                    }}
+                                >
+                                    {parse(DOMPurify.sanitize(post.text))}
+                                </Box>
+                                <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{ alignSelf: "flex-end" }}
+                                >
+                                    {t("pages.forum.postedBy")}: {post.username}
                                 </Typography>
+                            </Paper>
+                        ))
+                    )}
+                </Box>
+
+                {/* Floating Action Button */}
+                <Fab
+                    color="primary"
+                    aria-label="add"
+                    onClick={handleOpenModal}
+                    sx={{
+                        position: "fixed",
+                        bottom: { xs: "16px", sm: "32px" },
+                        right: { xs: "16px", sm: "32px" },
+                        display: isModalOpen ? "none" : "flex",
+                    }}
+                >
+                    <AddIcon />
+                </Fab>
+
+                {/* Create Post Modal */}
+                <ReusableModal
+                    open={isModalOpen}
+                    onClose={handleCloseModal}
+                    title={t("pages.forum.createPost")}
+                    confirmColor="primary"
+                    onConfirm={handleSubmit}
+                    confirmText={t("pages.forum.createPost")}
+                    cancelText={t("pages.forum.cancel")}
+                    cancelColor="secondary"
+                    titleColor="primary.main"
+                    isConfirmDisabled={
+                        !newPostTitle ||
+                        !editor?.getHTML() ||
+                        isHtmlEmpty() ||
+                        isSubmitting
+                    }
+                    children={
+                        <>
+                            <Box>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ mb: 1, color: "text.secondary" }}
+                                >
+                                    {t("pages.forum.newPostTitle")}
+                                </Typography>
+                                <TextField
+                                    name="title"
+                                    value={newPostTitle}
+                                    onChange={(e) =>
+                                        setNewPostTitle(e.target.value)
+                                    }
+                                    fullWidth
+                                    variant="outlined"
+                                />
                             </Box>
-                            <Divider />
-                            <Box
-                                sx={{
-                                    color: "text.secondary",
-                                    "& p": { mb: 1 },
-                                    "& h1, & h2, & h3": { mt: 2, mb: 1 },
-                                }}
-                            >
-                                {parse(DOMPurify.sanitize(post.text))}
+                            <Box sx={{ mt: 3 }}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ mb: 1, color: "text.secondary" }}
+                                >
+                                    {t("pages.forum.newPostContent")}
+                                </Typography>
+                                <Editor
+                                    apiKey="your-tinymce-api-key"
+                                    onInit={(evt, editor) =>
+                                        (editorRef.current = editor)
+                                    }
+                                    initialValue=""
+                                    init={{
+                                        height: 300,
+                                        menubar: false,
+                                        plugins: [
+                                            "advlist",
+                                            "autolink",
+                                            "lists",
+                                            "link",
+                                            "image",
+                                            "charmap",
+                                            "preview",
+                                            "anchor",
+                                            "searchreplace",
+                                            "visualblocks",
+                                            "code",
+                                            "fullscreen",
+                                            "insertdatetime",
+                                            "media",
+                                            "table",
+                                            "code",
+                                            "help",
+                                            "wordcount",
+                                        ],
+                                        toolbar:
+                                            "undo redo | blocks | " +
+                                            "bold italic forecolor | alignleft aligncenter " +
+                                            "alignright alignjustify | bullist numlist outdent indent | " +
+                                            "removeformat | help",
+                                        content_style:
+                                            "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                                    }}
+                                />
                             </Box>
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{ alignSelf: "flex-end" }}
-                            >
-                                {t("pages.forum.postedBy")}: {post.username}
-                            </Typography>
-                        </Paper>
-                    ))
-                )}
-            </Box>
-
-            {/* Floating Action Button */}
-            <Fab
-                color="primary"
-                aria-label="add"
-                onClick={handleOpenModal}
-                sx={{
-                    position: "fixed",
-                    bottom: { xs: "16px", sm: "32px" },
-                    right: { xs: "16px", sm: "32px" },
-                    display: isModalOpen ? "none" : "flex",
-                }}
-            >
-                <AddIcon />
-            </Fab>
-
-            {/* Create Post Modal */}
-            <ReusableModal
-                open={isModalOpen}
-                onClose={handleCloseModal}
-                title={t("pages.forum.createPost")}
-                confirmColor="primary"
-                onConfirm={handleSubmit}
-                confirmText={t("pages.forum.createPost")}
-                cancelText={t("pages.forum.cancel")}
-                cancelColor="secondary"
-                titleColor="primary.main"
-                isConfirmDisabled={
-                    !newPostTitle ||
-                    !editor?.getHTML() ||
-                    isHtmlEmpty() ||
-                    isSubmitting
-                }
-                children={
-                    <>
-                        <Box>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, color: "text.secondary" }}
-                            >
-                                {t("pages.forum.newPostTitle")}
-                            </Typography>
-                            <TextField
-                                name="title"
-                                value={newPostTitle}
-                                onChange={(e) =>
-                                    setNewPostTitle(e.target.value)
-                                }
-                                fullWidth
-                                variant="outlined"
-                            />
-                        </Box>
-
-                        <Box>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, color: "text.secondary" }}
-                            >
-                                {t("pages.forum.newPostContent")}
-                            </Typography>
-                            <Box
-                                sx={{
-                                    border: "1px solid",
-                                    borderColor: "grey.400",
-                                    borderRadius: 1,
-                                    p: 2,
-                                    minHeight: "150px",
-                                    maxHeight: "300px",
-                                    overflowY: "auto",
-                                }}
-                            >
-                                <EditorContent editor={editor} />
-                            </Box>
-                        </Box>
-
-                        <Box>
-                            <Typography
-                                variant="body2"
-                                sx={{ mb: 1, color: "text.secondary" }}
-                            >
-                                {t("pages.forum.username")}
-                            </Typography>
-                            <TextField
-                                name="username"
-                                value={
-                                    isAuthenticated && user?.name
-                                        ? user.name
-                                        : "Anonymous"
-                                }
-                                onChange={(e) =>
-                                    setNewPostUsername(e.target.value)
-                                }
-                                fullWidth
-                                variant="outlined"
-                                disabled={true}
-                                sx={{
-                                    "& .MuiInputBase-root.Mui-disabled": {
-                                        cursor: "not-allowed",
-                                    },
-                                    "& .MuiInputBase-root.Mui-disabled input": {
-                                        cursor: "not-allowed",
-                                    },
-                                    "& .MuiOutlinedInput-notchedOutline": {
-                                        borderColor: "#ccc",
-                                    },
-                                }}
-                            />
-                        </Box>
-                    </>
-                }
-            />
+                        </>
+                    }
+                />
+            </ErrorBoundary>
         </Container>
     );
 }
