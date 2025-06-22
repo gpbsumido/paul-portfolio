@@ -357,6 +357,7 @@ export default function Gallery(): React.ReactElement | null {
         setDescription("");
         setImageFile(null);
         setUploading(false);
+        setUploadError(null);
         // Close modal last
         setIsModalOpen(false);
     };
