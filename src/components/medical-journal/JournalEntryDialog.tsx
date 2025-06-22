@@ -86,7 +86,8 @@ export default function JournalEntryDialog({
     const isSpeechRecognitionSupported = useCallback(() => {
         return (
             typeof window !== "undefined" &&
-            ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+            ("SpeechRecognition" in window ||
+                "webkitSpeechRecognition" in window)
         );
     }, []);
 
@@ -105,7 +106,7 @@ export default function JournalEntryDialog({
 
             recognitionRef.current = new (window.SpeechRecognition ||
                 window.webkitSpeechRecognition)();
-            
+
             recognitionRef.current.lang = "en-US";
             recognitionRef.current.interimResults = true;
             recognitionRef.current.continuous = true;
@@ -163,7 +164,10 @@ export default function JournalEntryDialog({
                     try {
                         recognitionRef.current?.start();
                     } catch (error) {
-                        console.error("Failed to restart speech recognition:", error);
+                        console.error(
+                            "Failed to restart speech recognition:",
+                            error
+                        );
                         setIsListening(false);
                         setListeningStates({});
                         setListeningField(null);
@@ -181,12 +185,20 @@ export default function JournalEntryDialog({
             setSpeechError("Failed to initialize speech recognition");
             return false;
         }
-    }, [isSpeechRecognitionSupported, listeningField, currentEntry, onInputChange, isListening]);
+    }, [
+        isSpeechRecognitionSupported,
+        listeningField,
+        currentEntry,
+        onInputChange,
+        isListening,
+    ]);
 
     // Check microphone permissions
     useEffect(() => {
         if (!isSpeechRecognitionSupported()) {
-            setSpeechError("Speech Recognition API not supported in this browser");
+            setSpeechError(
+                "Speech Recognition API not supported in this browser"
+            );
             return;
         }
 
@@ -195,11 +207,16 @@ export default function JournalEntryDialog({
                 .query({ name: "microphone" as PermissionName })
                 .then((permissionStatus) => {
                     if (permissionStatus.state === "denied") {
-                        setSpeechError("Microphone access is denied. Please enable it in your browser settings.");
+                        setSpeechError(
+                            "Microphone access is denied. Please enable it in your browser settings."
+                        );
                     }
                 })
                 .catch((error) => {
-                    console.error("Error checking microphone permissions:", error);
+                    console.error(
+                        "Error checking microphone permissions:",
+                        error
+                    );
                 });
         }
     }, [isSpeechRecognitionSupported]);
@@ -257,24 +274,27 @@ export default function JournalEntryDialog({
         setIsListening(false);
     }, []);
 
-    const handleVoiceInputToggle = useCallback((field: string) => {
-        if (listeningStates[field]) {
-            stopListening();
-            setListeningStates((prev) => ({ ...prev, [field]: false }));
-            setTranscript("");
-            setListeningField(null);
-        } else {
-            // Stop any current listening
-            stopListening();
-            setListeningStates({});
-            setListeningField(null);
-            
-            // Start listening for the new field
-            setListeningStates((prev) => ({ ...prev, [field]: true }));
-            setListeningField(field);
-            startListening();
-        }
-    }, [listeningStates, stopListening, startListening]);
+    const handleVoiceInputToggle = useCallback(
+        (field: string) => {
+            if (listeningStates[field]) {
+                stopListening();
+                setListeningStates((prev) => ({ ...prev, [field]: false }));
+                setTranscript("");
+                setListeningField(null);
+            } else {
+                // Stop any current listening
+                stopListening();
+                setListeningStates({});
+                setListeningField(null);
+
+                // Start listening for the new field
+                setListeningStates((prev) => ({ ...prev, [field]: true }));
+                setListeningField(field);
+                startListening();
+            }
+        },
+        [listeningStates, stopListening, startListening]
+    );
 
     const summarizeWithOpenAI = async (
         text: string | null | undefined,
@@ -362,17 +382,17 @@ export default function JournalEntryDialog({
                         : t("medicalJournal.addNewEntryTitle")}
                 </Typography>
             </DialogTitle>
-            
+
             {speechError && (
-                <Alert 
-                    severity="error" 
+                <Alert
+                    severity="error"
                     sx={{ mx: 3, mb: 2 }}
                     onClose={() => setSpeechError(null)}
                 >
                     {speechError}
                 </Alert>
             )}
-            
+
             <DialogContent sx={{ pt: 3 }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>

@@ -118,7 +118,12 @@ const SocialMediaPage = () => {
                 <Typography variant="h4" align="center" gutterBottom>
                     Social Media Timeline
                 </Typography>
-                <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 2 }}>
+                <Box
+                    display="flex"
+                    flexDirection="column"
+                    gap={2}
+                    sx={{ pb: 2 }}
+                >
                     {posts.map((post) => (
                         <PostCard
                             key={post.id}

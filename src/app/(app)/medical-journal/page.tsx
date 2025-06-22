@@ -329,23 +329,23 @@ export default function MedicalJournalPage() {
 
     async function accessErrorHandler(error: any) {
         console.error("Access error:", error);
-        
+
         try {
             // Safely get the current URL, handling SSR cases
             let redirectUrl: string;
-            
+
             if (typeof window !== "undefined" && window.location) {
                 redirectUrl = window.location.href;
             } else {
                 // Fallback for SSR or when window.location is not available
-                redirectUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+                redirectUrl = process.env.NEXT_PUBLIC_VERCEL_URL
                     ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/medical-journal`
                     : "http://localhost:3009/medical-journal";
             }
-            
+
             // Log the error for debugging
             console.error("Redirecting to:", redirectUrl);
-            
+
             // Perform logout with proper error handling
             await logout({
                 logoutParams: {
@@ -356,11 +356,12 @@ export default function MedicalJournalPage() {
                 // If logout fails, we can't do much more, but at least log it
                 // The user will need to manually logout or refresh the page
             });
-            
         } catch (handlerError) {
             console.error("Error in accessErrorHandler:", handlerError);
             // If everything fails, set an error message for the user
-            setErrorMessage("Authentication error. Please try logging out and logging back in.");
+            setErrorMessage(
+                "Authentication error. Please try logging out and logging back in."
+            );
         }
     }
 
@@ -1065,7 +1066,13 @@ export default function MedicalJournalPage() {
                     >
                         {t("medicalJournal.title")}
                     </Typography>
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            mt: 3,
+                        }}
+                    >
                         <Tabs
                             value={activeTab}
                             onChange={handleTabChange}
@@ -1136,7 +1143,10 @@ export default function MedicalJournalPage() {
                 </Box>
                 <Fade in={activeTab === 0}>
                     <Box
-                        sx={{ display: activeTab === 0 ? "block" : "none", mb: 4 }}
+                        sx={{
+                            display: activeTab === 0 ? "block" : "none",
+                            mb: 4,
+                        }}
                     >
                         {/* Learning Objectives Section */}
                         <Grid container spacing={3}>
@@ -1236,8 +1246,10 @@ export default function MedicalJournalPage() {
                                                             key={objIndex}
                                                             sx={{
                                                                 mb: 1.5,
-                                                                color: theme.palette
-                                                                    .text.secondary,
+                                                                color: theme
+                                                                    .palette
+                                                                    .text
+                                                                    .secondary,
                                                                 fontSize:
                                                                     "0.875rem",
                                                                 ...(objective.startsWith(
@@ -1266,7 +1278,8 @@ export default function MedicalJournalPage() {
                                                                           mt: 2,
                                                                       }
                                                                     : {}),
-                                                                ...(objective === ""
+                                                                ...(objective ===
+                                                                ""
                                                                     ? {
                                                                           mb: 0.5,
                                                                       }
@@ -1321,7 +1334,9 @@ export default function MedicalJournalPage() {
                                         whiteSpace: "nowrap",
                                     }}
                                 >
-                                    {t("medicalJournal.clinicalEncountersTitle")}
+                                    {t(
+                                        "medicalJournal.clinicalEncountersTitle"
+                                    )}
                                 </Typography>
 
                                 <Box
@@ -1353,7 +1368,9 @@ export default function MedicalJournalPage() {
                                 >
                                     <IconButton
                                         color="primary"
-                                        onClick={() => setIsEditDialogOpen(true)}
+                                        onClick={() =>
+                                            setIsEditDialogOpen(true)
+                                        }
                                         sx={{
                                             borderRadius: 2,
                                             flexShrink: 0,
@@ -1411,7 +1428,8 @@ export default function MedicalJournalPage() {
                                             sx: {
                                                 borderRadius: 2,
                                                 backgroundColor: alpha(
-                                                    theme.palette.background.paper,
+                                                    theme.palette.background
+                                                        .paper,
                                                     0.8
                                                 ),
                                                 "&:hover": {
@@ -1445,7 +1463,9 @@ export default function MedicalJournalPage() {
                                             },
                                         }}
                                     >
-                                        {isSearching ? "Searching..." : "Search"}
+                                        {isSearching
+                                            ? "Searching..."
+                                            : "Search"}
                                     </Button>
                                 </Box>
                                 <Box
@@ -1492,7 +1512,9 @@ export default function MedicalJournalPage() {
                                                     cursor: "pointer",
                                                     whiteSpace: "nowrap",
                                                 }} // Reduced width
-                                                onClick={() => handleSort("date")}
+                                                onClick={() =>
+                                                    handleSort("date")
+                                                }
                                             >
                                                 {t("medicalJournal.dateColumn")}{" "}
                                                 {sortField === "date" &&
@@ -1509,7 +1531,9 @@ export default function MedicalJournalPage() {
                                                     handleSort("rotation")
                                                 }
                                             >
-                                                {t("medicalJournal.rotationColumn")}{" "}
+                                                {t(
+                                                    "medicalJournal.rotationColumn"
+                                                )}{" "}
                                                 {sortField === "rotation" &&
                                                     (sortOrder === "asc"
                                                         ? "↑"
@@ -1527,7 +1551,8 @@ export default function MedicalJournalPage() {
                                                 {t(
                                                     "medicalJournal.patientSettingColumn"
                                                 )}{" "}
-                                                {sortField === "patientSetting" &&
+                                                {sortField ===
+                                                    "patientSetting" &&
                                                     (sortOrder === "asc"
                                                         ? "↑"
                                                         : "↓")}
@@ -1558,7 +1583,9 @@ export default function MedicalJournalPage() {
                                                     handleSort("hospital")
                                                 }
                                             >
-                                                {t("medicalJournal.hospitalColumn")}{" "}
+                                                {t(
+                                                    "medicalJournal.hospitalColumn"
+                                                )}{" "}
                                                 {sortField === "hospital" &&
                                                     (sortOrder === "asc"
                                                         ? "↑"
@@ -1569,9 +1596,13 @@ export default function MedicalJournalPage() {
                                                     cursor: "pointer",
                                                     whiteSpace: "nowrap",
                                                 }} // Reduced width
-                                                onClick={() => handleSort("doctor")}
+                                                onClick={() =>
+                                                    handleSort("doctor")
+                                                }
                                             >
-                                                {t("medicalJournal.doctorColumn")}{" "}
+                                                {t(
+                                                    "medicalJournal.doctorColumn"
+                                                )}{" "}
                                                 {sortField === "doctor" &&
                                                     (sortOrder === "asc"
                                                         ? "↑"
@@ -1598,7 +1629,9 @@ export default function MedicalJournalPage() {
                                                 align="right"
                                                 sx={{ whiteSpace: "nowrap" }}
                                             >
-                                                {t("medicalJournal.actionsColumn")}
+                                                {t(
+                                                    "medicalJournal.actionsColumn"
+                                                )}
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -1610,17 +1643,21 @@ export default function MedicalJournalPage() {
                                                     sx={{
                                                         borderBottom: `1px solid ${theme.palette.divider}`,
                                                         "&:hover": {
-                                                            backgroundColor: alpha(
-                                                                theme.palette
-                                                                    .primary.main,
-                                                                0.04
-                                                            ),
+                                                            backgroundColor:
+                                                                alpha(
+                                                                    theme
+                                                                        .palette
+                                                                        .primary
+                                                                        .main,
+                                                                    0.04
+                                                                ),
                                                         },
                                                     }}
                                                 >
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         {new Date(
@@ -1629,11 +1666,14 @@ export default function MedicalJournalPage() {
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         <Chip
-                                                            label={entry.rotation}
+                                                            label={
+                                                                entry.rotation
+                                                            }
                                                             size="small"
                                                             sx={{
                                                                 backgroundColor:
@@ -1644,21 +1684,25 @@ export default function MedicalJournalPage() {
                                                                             .main,
                                                                         0.1
                                                                     ),
-                                                                color: theme.palette
-                                                                    .primary.main,
+                                                                color: theme
+                                                                    .palette
+                                                                    .primary
+                                                                    .main,
                                                                 fontWeight: 500,
                                                             }}
                                                         />
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         <Box
                                                             sx={{
                                                                 maxWidth: 200,
-                                                                overflow: "hidden",
+                                                                overflow:
+                                                                    "hidden",
                                                                 textOverflow:
                                                                     "ellipsis",
                                                                 display:
@@ -1674,13 +1718,15 @@ export default function MedicalJournalPage() {
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         <Box
                                                             sx={{
                                                                 maxWidth: 200,
-                                                                overflow: "hidden",
+                                                                overflow:
+                                                                    "hidden",
                                                                 textOverflow:
                                                                     "ellipsis",
                                                                 display:
@@ -1696,21 +1742,25 @@ export default function MedicalJournalPage() {
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
-                                                        {entry.hospital || "N/A"}
+                                                        {entry.hospital ||
+                                                            "N/A"}
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         {entry.doctor || "N/A"}
                                                     </TableCell>
                                                     <TableCell
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         <Box
@@ -1718,14 +1768,17 @@ export default function MedicalJournalPage() {
                                                                 display: "flex",
                                                                 flexDirection:
                                                                     "column",
-                                                                flexWrap: "wrap",
+                                                                flexWrap:
+                                                                    "wrap",
                                                                 gap: 0.5,
                                                             }}
                                                         >
                                                             {entry.canmedsRoles
                                                                 ?.length > 0
                                                                 ? entry.canmedsRoles.map(
-                                                                      (role) => (
+                                                                      (
+                                                                          role
+                                                                      ) => (
                                                                           <Chip
                                                                               key={
                                                                                   role
@@ -1749,14 +1802,15 @@ export default function MedicalJournalPage() {
                                                                               }}
                                                                           />
                                                                       )
-                                                                    )
-                                                                  : "N/A"}
+                                                                  )
+                                                                : "N/A"}
                                                         </Box>
                                                     </TableCell>
                                                     <TableCell
                                                         align="right"
                                                         sx={{
-                                                            verticalAlign: "middle",
+                                                            verticalAlign:
+                                                                "middle",
                                                         }}
                                                     >
                                                         <Box
@@ -1786,16 +1840,17 @@ export default function MedicalJournalPage() {
                                                                             .palette
                                                                             .primary
                                                                             .main,
-                                                                        "&:hover": {
-                                                                            backgroundColor:
-                                                                                alpha(
-                                                                                    theme
-                                                                                        .palette
-                                                                                        .primary
-                                                                                        .main,
-                                                                                    0.1
-                                                                                ),
-                                                                        },
+                                                                        "&:hover":
+                                                                            {
+                                                                                backgroundColor:
+                                                                                    alpha(
+                                                                                        theme
+                                                                                            .palette
+                                                                                            .primary
+                                                                                            .main,
+                                                                                        0.1
+                                                                                    ),
+                                                                            },
                                                                     }}
                                                                 >
                                                                     <EditIcon />
@@ -1818,16 +1873,17 @@ export default function MedicalJournalPage() {
                                                                             .palette
                                                                             .error
                                                                             .main,
-                                                                        "&:hover": {
-                                                                            backgroundColor:
-                                                                                alpha(
-                                                                                    theme
-                                                                                        .palette
-                                                                                        .error
-                                                                                        .main,
-                                                                                    0.1
-                                                                                ),
-                                                                        },
+                                                                        "&:hover":
+                                                                            {
+                                                                                backgroundColor:
+                                                                                    alpha(
+                                                                                        theme
+                                                                                            .palette
+                                                                                            .error
+                                                                                            .main,
+                                                                                        0.1
+                                                                                    ),
+                                                                            },
                                                                     }}
                                                                 >
                                                                     <DeleteIcon />
@@ -1877,7 +1933,8 @@ export default function MedicalJournalPage() {
                                                                 }}
                                                             >
                                                                 <strong>
-                                                                    Patient Setting:
+                                                                    Patient
+                                                                    Setting:
                                                                 </strong>{" "}
                                                                 {entry.patientSetting ||
                                                                     "N/A"}
@@ -1929,7 +1986,8 @@ export default function MedicalJournalPage() {
                                                                 }}
                                                             >
                                                                 <strong>
-                                                                    CanMEDS Roles:
+                                                                    CanMEDS
+                                                                    Roles:
                                                                 </strong>{" "}
                                                                 {entry.canmedsRoles?.join(
                                                                     ", "
@@ -1958,7 +2016,8 @@ export default function MedicalJournalPage() {
                                                                 }}
                                                             >
                                                                 <strong>
-                                                                    What I Did Well:
+                                                                    What I Did
+                                                                    Well:
                                                                 </strong>{" "}
                                                                 {entry.whatIDidWell ||
                                                                     "N/A"}
@@ -1991,10 +2050,14 @@ export default function MedicalJournalPage() {
                                                                     </strong>{" "}
                                                                     {entry.feedback
                                                                         .map(
-                                                                            (f) =>
+                                                                            (
+                                                                                f
+                                                                            ) =>
                                                                                 f.text
                                                                         )
-                                                                        .join(", ")}
+                                                                        .join(
+                                                                            ", "
+                                                                        )}
                                                                 </Typography>
                                                             )}
                                                         </TableCell>
@@ -2122,8 +2185,10 @@ export default function MedicalJournalPage() {
                                                     <InputAdornment position="start">
                                                         <SearchIcon
                                                             sx={{
-                                                                color: theme.palette
-                                                                    .primary.main,
+                                                                color: theme
+                                                                    .palette
+                                                                    .primary
+                                                                    .main,
                                                             }}
                                                         />
                                                     </InputAdornment>
@@ -2137,14 +2202,16 @@ export default function MedicalJournalPage() {
                                                     ),
                                                     "&:hover": {
                                                         backgroundColor: alpha(
-                                                            theme.palette.background
+                                                            theme.palette
+                                                                .background
                                                                 .paper,
                                                             0.9
                                                         ),
                                                     },
                                                     "&.Mui-focused": {
                                                         backgroundColor:
-                                                            theme.palette.background
+                                                            theme.palette
+                                                                .background
                                                                 .paper,
                                                     },
                                                 },
@@ -2227,11 +2294,14 @@ export default function MedicalJournalPage() {
                                                     whiteSpace: "nowrap",
                                                 }}
                                                 onClick={() =>
-                                                    handleFeedbackSort("rotation")
+                                                    handleFeedbackSort(
+                                                        "rotation"
+                                                    )
                                                 }
                                             >
                                                 Rotation{" "}
-                                                {feedbackSortField === "rotation" &&
+                                                {feedbackSortField ===
+                                                    "rotation" &&
                                                     (feedbackSortOrder === "asc"
                                                         ? "↑"
                                                         : "↓")}
@@ -2249,7 +2319,9 @@ export default function MedicalJournalPage() {
                                     <TableBody>
                                         {filteredAndSortedFeedbacks.map(
                                             (feedback) => (
-                                                <React.Fragment key={feedback.id}>
+                                                <React.Fragment
+                                                    key={feedback.id}
+                                                >
                                                     <TableRow
                                                         hover
                                                         sx={{
@@ -2268,7 +2340,8 @@ export default function MedicalJournalPage() {
                                                         <TableCell className="feedback-text-cell">
                                                             <Box
                                                                 sx={{
-                                                                    display: "flex",
+                                                                    display:
+                                                                        "flex",
                                                                     alignItems:
                                                                         "center",
                                                                     gap: 1,
@@ -2290,7 +2363,9 @@ export default function MedicalJournalPage() {
                                                                         flex: 1,
                                                                     }}
                                                                 >
-                                                                    {feedback.text}
+                                                                    {
+                                                                        feedback.text
+                                                                    }
                                                                 </Typography>
                                                                 {needsTruncation[
                                                                     feedback.id
@@ -2335,13 +2410,16 @@ export default function MedicalJournalPage() {
                                                                         "ellipsis",
                                                                 }}
                                                             >
-                                                                {feedback.rotation}
+                                                                {
+                                                                    feedback.rotation
+                                                                }
                                                             </Typography>
                                                         </TableCell>
                                                         <TableCell>
                                                             <Box
                                                                 sx={{
-                                                                    display: "flex",
+                                                                    display:
+                                                                        "flex",
                                                                     gap: 1,
                                                                     alignItems:
                                                                         "center",
@@ -2670,7 +2748,8 @@ export default function MedicalJournalPage() {
                                         Math.max(
                                             1,
                                             Math.ceil(
-                                                feedbackTotalCount / feedbackLimit
+                                                feedbackTotalCount /
+                                                    feedbackLimit
                                             )
                                         )
                                     )}

@@ -194,7 +194,9 @@ export default function ForumPage() {
                         flexDirection: "column",
                         gap: 3,
                         backgroundColor: (theme) =>
-                            theme.palette.mode === "dark" ? "grey.900" : "grey.100",
+                            theme.palette.mode === "dark"
+                                ? "grey.900"
+                                : "grey.100",
                         p: 3,
                         borderRadius: 2,
                         boxShadow: (theme) => theme.shadows[3],

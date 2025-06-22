@@ -214,27 +214,31 @@ const ConstructorStandingsPage = () => {
                             </TableHead>
                             <TableBody>
                                 {loading
-                                    ? Array.from({ length: 10 }).map((_, index) => (
-                                          <TableRow key={index}>
-                                              <TableCell>
-                                                  <Skeleton variant="text" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton variant="text" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton variant="text" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton variant="text" />
-                                              </TableCell>
-                                              <TableCell>
-                                                  <Skeleton variant="text" />
-                                              </TableCell>
-                                          </TableRow>
-                                      ))
+                                    ? Array.from({ length: 10 }).map(
+                                          (_, index) => (
+                                              <TableRow key={index}>
+                                                  <TableCell>
+                                                      <Skeleton variant="text" />
+                                                  </TableCell>
+                                                  <TableCell>
+                                                      <Skeleton variant="text" />
+                                                  </TableCell>
+                                                  <TableCell>
+                                                      <Skeleton variant="text" />
+                                                  </TableCell>
+                                                  <TableCell>
+                                                      <Skeleton variant="text" />
+                                                  </TableCell>
+                                                  <TableCell>
+                                                      <Skeleton variant="text" />
+                                                  </TableCell>
+                                              </TableRow>
+                                          )
+                                      )
                                     : constructors.map((constructor) => (
-                                          <TableRow key={constructor.constructorId}>
+                                          <TableRow
+                                              key={constructor.constructorId}
+                                          >
                                               <TableCell>
                                                   {constructor.position}
                                               </TableCell>
